@@ -18,9 +18,10 @@ INC_DIR += ./include ./src/engine/$(ENGINE)
 BUILD_DIR ?= ./build
 
 ifdef SHARE
-SO = -so
-SO_CFLAGS = -fPIC -D_SHARE=1
-SO_LDLAGS = -shared -fPIC
+SO = -so#-fPIC:Position Independent Code"的标志。这意味着生成的代码可以在任何地址运行，这是创建共享库所必需的
+SO_CFLAGS = -fPIC #Shared Object Compilation Flags 用于编译共享对象的编译标志
+-D_SHARE=1#-D是定义宏的标志。这里，它定义了一个名为_SHARE的宏，并为其赋值1
+SO_LDLAGS = -shared -fPIC#LDLAGS:这是"Shared Object Linker Flags"的缩写，意思是用于链接共享对象的链接标志
 else
 LD_LIBS = -lSDL2 -lreadline -ldl
 endif
@@ -60,12 +61,15 @@ include Makefile.git
 .DEFAULT_GOAL = app
 
 # Compilation flags
-CC = gcc
-LD = gcc
-INCLUDES  = $(addprefix -I, $(INC_DIR))
+CC = gcc#CC是一个常见的Makefile变量，它表示C编译器
+LD = gcc#LD是一个常见的Makefile变量，它表示链接器
+INCLUDES  = $(addprefix -I, $(INC_DIR))#INCLUDES变量包含了一些-I选项，这些选项指定了编译器在查找头文件时应该搜索的目录
 CFLAGS   += -O2 -MMD -Wall -Werror -ggdb3 $(INCLUDES) \
             -D__ENGINE_$(ENGINE)__ \
             -D__ISA__=$(ISA) -D__ISA_$(ISA)__ -D_ISA_H_=\"isa/$(ISA).h\"
+#CFLAGS += -O2 -MMD -Wall -Werror -ggdb3 $(INCLUDES) -D__ISA__=$(ISA) -fomit-frame-pointer：
+#这行代码向CFLAGS变量添加了一些编译选项。CFLAGS是一个常见的Makefile变量，它表示C编译器的选项。这些选项包括优化级别-O2，生成依赖文件-MMD，开启所有
+#警告-Wall，将警告视为错误-Werror，生成用于gdb调试的信息-ggdb3，添加包含目录$(INCLUDES)，定义宏__ISA__的值为$(ISA)，以及省略帧指针-fomit-frame-pointer。
 
 # Files to be compiled
 SRCS = $(shell find src/ -name "*.c" | grep -v "isa\|engine")
