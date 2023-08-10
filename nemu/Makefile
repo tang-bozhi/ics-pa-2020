@@ -60,7 +60,7 @@ include Makefile.git
 
 .DEFAULT_GOAL = app
 
-# Compilation flags
+# Compilation flags 
 CC = gcc#CC是一个常见的Makefile变量，它表示C编译器
 LD = gcc#LD是一个常见的Makefile变量，它表示链接器
 INCLUDES  = $(addprefix -I, $(INC_DIR))#INCLUDES变量包含了一些-I选项，这些选项指定了编译器在查找头文件时应该搜索的目录
