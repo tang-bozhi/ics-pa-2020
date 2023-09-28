@@ -64,7 +64,7 @@ include Makefile.git
 CC = gcc#CC是一个常见的Makefile变量，它表示C编译器
 LD = gcc#LD是一个常见的Makefile变量，它表示链接器
 INCLUDES  = $(addprefix -I, $(INC_DIR))#INCLUDES变量包含了一些-I选项，这些选项指定了编译器在查找头文件时应该搜索的目录
-CFLAGS   += -O2 -MMD -Wall -Werror -ggdb3 $(INCLUDES) \
+CFLAGS   += -O0 -MMD -Wall -Werror -ggdb3 $(INCLUDES) \
             -D__ENGINE_$(ENGINE)__ \
             -D__ISA__=$(ISA) -D__ISA_$(ISA)__ -D_ISA_H_=\"isa/$(ISA).h\"
 #CFLAGS += -O2 -MMD -Wall -Werror -ggdb3 $(INCLUDES) -D__ISA__=$(ISA) -fomit-frame-pointer：
@@ -115,7 +115,7 @@ run: run-env
 
 gdb: run-env
 	$(call git_commit, "gdb")
-	gdb -s $(BINARY) --args $(NEMU_EXEC)
+	gdb -q -s $(BINARY) --args $(NEMU_EXEC)
 
 $(DIFF_REF_SO):
 	$(MAKE) -C $(DIFF_REF_PATH) $(MKFLAGS)
