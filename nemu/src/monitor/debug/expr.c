@@ -34,7 +34,7 @@ static struct rule {
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]) )
 
-static regex_t re[NR_REGEX] = {};
+static regex_t re[NR_REGEX] = {};//这是一个计算机可以更高效匹配的内部格式，不能在regex之外用这个，应该用rules作为正则模式
 
 /* Rules are used for many times.
  * Therefore we compile them only once before any usage.
@@ -58,8 +58,8 @@ typedef struct token {
   char str[32];
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {};
-static int nr_token __attribute__((used))  = 0;
+static Token tokens[32] __attribute__((used)) = {};//用于存放识别过了的字符串
+static int nr_token __attribute__((used))  = 0;//识别过了的字符串的数量
 
 static bool make_token(char *e) {
   int position = 0;
@@ -72,25 +72,33 @@ static bool make_token(char *e) {
     /* Try all rules one by one. */
     for (i = 0; i < NR_REGEX; i ++) {
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {
-        char *substr_start = e + position;
-        int substr_len = pmatch.rm_eo;
+        char *substr_start = e + position;//当前循环中被判定字符的指针
+        int substr_len = pmatch.rm_eo;//当前循环中被判定字符的长度
 
         Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
             i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
-        position += substr_len;
+        position += substr_len;//挪动e中指针，针对最外层while循环做改变
 
         /* TODO: Now a new token is recognized with rules[i]. Add codes
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
-
-        if(){
+        //检查数组tokens是否已满
+        if(nr_token >= sizeof(tokens)/sizeof(Token)){
          printf("token array is full, cannot insert more\n");
          return false;
         }
-
         
+        if(rules[i].token_type != TK_NOTYPE){//抛掉空格
+         
+         tokens[nr_token].type = rules[i].token_type;//设置token类型
+         // 将匹配的子字符串复制到token的str字段中
+         int length_to_copy = substr_len < sizeof(tokens[nr_token].str) ? substr_len : sizeof(tokens[nr_token].str) - 1;
+         strncpy(tokens[nr_token]->str,substr_start,length_to_copy);
+         tokens[nr_token].str[length_to_copy] = '\0';
+        }
+        nr_token++;
 
         switch (rules[i].token_type) {
          //case TK_NUM:
