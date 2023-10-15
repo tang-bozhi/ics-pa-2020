@@ -98,14 +98,13 @@ static bool make_token(char *e) {
          strncpy(tokens[nr_token]->str,substr_start,length_to_copy);
          tokens[nr_token].str[length_to_copy] = '\0';
         }
-        nr_token++;
 
         switch (rules[i].token_type) {
          //case TK_NUM:
            
           default: TODO();
         }
-
+        nr_token++;
         break;
       }
     }
