@@ -8,19 +8,12 @@
 enum {
   TK_NOTYPE = 256, '+', '-', TK_MUL, '/',TK_EQ, TK_LPAR,\
   TK_RPAR, TK_NUM,
-  /* TODO: Add more token types */
-  
 };
 
 static struct rule {
   char *regex;
   int token_type;
 } rules[] = {
-
-  /* TODO: Add more rules.
-   * Pay attention to the precedence level of different rules.
-   */
-
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
   {"-", '-'},           // minus
@@ -80,10 +73,6 @@ static bool make_token(char *e) {
 
         position += substr_len;//挪动e中指针，针对最外层while循环做改变
 
-        /* TODO: Now a new token is recognized with rules[i]. Add codes
-         * to record the token in the array `tokens'. For certain types
-         * of tokens, some extra actions should be performed.
-         */
         //检查数组tokens是否已满
         if(nr_token >= sizeof(tokens)/sizeof(Token)){
          printf("token array is full, cannot insert more\n");
@@ -95,15 +84,10 @@ static bool make_token(char *e) {
          tokens[nr_token].type = rules[i].token_type;//设置token类型
          // 将匹配的子字符串复制到token的str字段中
          int length_to_copy = substr_len < sizeof(tokens[nr_token].str) ? substr_len : sizeof(tokens[nr_token].str) - 1;
-         strncpy(tokens[nr_token]->str,substr_start,length_to_copy);
+         strncpy(tokens[nr_token].str,substr_start,length_to_copy);
          tokens[nr_token].str[length_to_copy] = '\0';
         }
 
-        switch (rules[i].token_type) {
-         //case TK_NUM:
-           
-          default: TODO();
-        }
         nr_token++;
         break;
       }
@@ -118,15 +102,47 @@ static bool make_token(char *e) {
   return true;
 }
 
+int check_parentheses(int p,int q){
+  int count = 0;
+  for(int i = p,i<q,i++){
+   if(tokens[i].type == TK_LPAR){
+      count++;
+   }
+   else if(tokens[i].type == TK_RPAR){
+      count--;
+   }
 
+   return count == 0;
+  }
+
+} 
+
+eval(p, q) {
+  if (p > q) {
+    /* Bad expression */
+  }
+  else if (p == q) {
+    /* Single token.
+     * For now this token should be a number.
+     * Return the value of the number.
+     */
+  }
+  else if (check_parentheses(p, q) == true) {
+    /* The expression is surrounded by a matched pair of parentheses.
+     * If that is the case, just throw away the parentheses.
+     */
+    return eval(p + 1, q - 1);
+  }
+  else {
+    /* We should do more things here. */
+  }
+}
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
     return 0;
   }
-
-  /* TODO: Insert codes to evaluate the expression. */
-  TODO();
+  return eval(0,nr_token-1);
 
   return 0;
 }
