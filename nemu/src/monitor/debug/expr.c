@@ -102,31 +102,15 @@ static bool make_token(char *e) {
   return true;
 }
 
-int check_parentheses(int p, int q) {
-    int count = 0;
+int check_parentheses(int p,int q){
+   if(!(tokens[p].type==TK_LPAR&&tokens[q-1].type==TK_RPAR)){
+      return 0;
+   }
 
-    // 检查整个表达式是否被一对匹配的括号包围
-    if (tokens[p].type != TK_LPAR || tokens[q - 1].type != TK_RPAR) {
-        return 0;
-    }
-
-    for (int i = p; i < q; i++) {
-        if (tokens[i].type == TK_LPAR) {
-            count++;
-        } else if (tokens[i].type == TK_RPAR) {
-            count--;
-        }
-
-        // 如果在遍历过程中右括号数量超过左括号，直接返回false
-        if (count < 0) {
-            return 0;
-        }
-    }
-
-    // 最终，只有当左括号和右括号数量相等时才返回true
-    return count == 0;
+   for(int i=0;i<nr_token;i++){
+      if(tokens[i]==)
+   }
 }
-
 
 eval(p, q) {
   if (p > q) {
