@@ -126,7 +126,10 @@ int check_parentheses( int p, int q ) {
       else if (tokens[i].type == TK_RPAR) {
          count--;
       }
-
+      if (count == 0 && i != p) {
+         (4 + 3)* (2 - 1)// false, the leftmost '(' and the rightmost ')' are not matched
+            return 0;
+      }
       if (count < 0) {
          return 0;
       }
@@ -158,7 +161,6 @@ eval( p, q ) {
       return eval( p + 1, q - 1 );
    }
    else {
-      //op = the position of 主运算符 in the token expression;
       int op = -1;//principal operator
       for (int i = p; i < q; i++) {
          if (tokens[p].type == '+' || \
