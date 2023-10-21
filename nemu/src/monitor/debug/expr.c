@@ -117,9 +117,9 @@ int check_parentheses(int p, int q) {
    if (!(tokens[p].type == TK_LPAR && tokens[q - 1].type == TK_RPAR)) {
       return 0;
    }
-
+   int count = 0;
    for (int i = 0; i < nr_token; i++) {
-      int count = 0;
+
       if (tokens[i].type == TK_LPAR) {
          count++;
       }
