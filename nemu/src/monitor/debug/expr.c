@@ -115,7 +115,7 @@ static bool make_token(char* e) {
 
 int check_parentheses(int p, int q) {
    if (!(tokens[p].type == TK_LPAR && tokens[q - 1].type == TK_RPAR)) {
-      return 0;
+      return -1;
    }
    int count = 0;
    for (int i = 0; i < nr_token; i++) {
@@ -127,17 +127,36 @@ int check_parentheses(int p, int q) {
          count--;
       }
       if (count == 0 && i != p) {
-         (4 + 3)* (2 - 1)// false, the leftmost '(' and the rightmost ')' are not matched
-            return 0;
+         //(4 + 3)* (2 - 1) false, the leftmost '(' and the rightmost ')' are not matched
+         return 0;
       }
       if (count < 0) {
-         return 0;
+         return -1;
       }
    }
    return (count == 0);
 }
 
-eval(p, q) {
+int find_main_op(int p, int q) {
+   int count = 0;
+   int op = -1;
+   for (int i = q; i >= p; i++) {
+      if (tokens[i].type == TK_LPAR)count++;
+      if (tokens[i].type == TK_RPAR)count--;
+
+      if (count == 0) {
+         if (tokens[i].type == '+' || tokens[i].type) {
+            return i;
+         }
+         if (tokens[i].type == '*' || tokens[i].type) {
+            op = i;
+         }
+      }
+   }
+   return op;
+}
+
+int eval(int p, int q) {
    if (p > q) {
       /* Bad expression */
       printf("Bad expression from %d to %d.\n", p, q);
@@ -161,12 +180,12 @@ eval(p, q) {
       return eval(p + 1, q - 1);
    }
    else {
-      int op = -1;//principal operator
+      int op = find_main_op(p, q);//principal operator
       for (int i = p; i < q; i++) {
-         if (tokens[p].type == '+' || \
-            tokens[p].type == '-' || \
-            tokens[p].type == '*' || \
-            tokens[p].type == '/') {
+         if (tokens[i].type == '+' || \
+            tokens[i].type == '-' || \
+            tokens[i].type == '*' || \
+            tokens[i].type == '/') {
             op = tokens[p].type;
             break;
          }
