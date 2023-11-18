@@ -96,6 +96,7 @@ static bool make_token(char* e) {
 
                tokens[nr_token].type = rules[i].token_type; // 设置token类型
                // 将匹配的子字符串复制到token的str字段中
+               //
                int length_to_copy = substr_len < sizeof(tokens[nr_token].str) ? substr_len : sizeof(tokens[nr_token].str) - 1;
                strncpy(tokens[nr_token].str, substr_start, length_to_copy);
                tokens[nr_token].str[length_to_copy] = '\0';
