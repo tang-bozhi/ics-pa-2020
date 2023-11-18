@@ -66,12 +66,12 @@ static Token tokens[32] __attribute__((used)) = {}; // 用于存放识别过了�
 static int nr_token __attribute__((used)) = 0;      // 识别过了的字符串的数量
 
 static bool make_token(char* e) {
-   int position = 0;
+   int position = 0;//字符串当前处理位置
    int i;
-   regmatch_t pmatch;
+   regmatch_t pmatch;//匹配结果
 
    nr_token = 0;
-
+   //e是输入的被判定字符串
    while (e[position] != '\0') {
       /* Try all rules one by one. */
       for (i = 0; i < NR_REGEX; i++) {
@@ -82,7 +82,8 @@ static bool make_token(char* e) {
             Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
                i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
-            position += substr_len; // 挪动e中指针，针对最外层while循环做改变
+            // 挪动e中指针，针对最外层while循环做改变
+            position += substr_len;
 
             // 检查数组tokens是否已满
             if (nr_token >= sizeof(tokens) / sizeof(Token)) {
@@ -90,7 +91,8 @@ static bool make_token(char* e) {
                return false;
             }
 
-            if (rules[i].token_type != TK_NOTYPE) { // 抛掉空格
+            // 抛掉空格
+            if (rules[i].token_type != TK_NOTYPE) {
 
                tokens[nr_token].type = rules[i].token_type; // 设置token类型
                // 将匹配的子字符串复制到token的str字段中
@@ -137,6 +139,7 @@ int check_parentheses(int p, int q) {
    return (count == 0);
 }
 
+//
 int find_main_op(int p, int q) {
    int count = 0;
    int op = -1;
@@ -145,10 +148,10 @@ int find_main_op(int p, int q) {
       if (tokens[i].type == TK_RPAR)count--;
 
       if (count == 0) {
-         if (tokens[i].type == '+' || tokens[i].type) {
+         if (tokens[i].type == '+' || tokens[i].type == '-') {
             return i;
          }
-         if (tokens[i].type == '*' || tokens[i].type) {
+         if (tokens[i].type == '*' || tokens[i].type == '\\') {
             op = i;
          }
       }
@@ -156,6 +159,8 @@ int find_main_op(int p, int q) {
    return op;
 }
 
+//这个函数是通过教案指导的分治法也就是那嵌套的几行exp<>写出来的
+//evaluate
 int eval(int p, int q) {
    if (p > q) {
       /* Bad expression */
@@ -207,6 +212,7 @@ int eval(int p, int q) {
    }
 }
 
+//express
 word_t expr(char* e, bool* success) {
    if (!make_token(e)) {
       *success = false;
