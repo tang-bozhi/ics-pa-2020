@@ -24,12 +24,6 @@ int choose(int n) {
    return rand() % n;
 }
 
-// void insert_rand_space() {
-//    if (choose(2) && strlen(buf) + 2 < sizeof(buf)) {
-//       strcat(buf, " ");
-//    }
-// }
-
 void gen_num() {//直接copy的
    // 确保 buf 中有足够的空间
    if (strlen(buf) + 100 < sizeof(buf)) {
@@ -69,6 +63,7 @@ void init_regex() {
    assert(ret == 0);  // 确保正则表达式编译成功
 }
 
+
 void adding_rand_op() {
    int offset = 0;
    char ops[] = "+-*/";
@@ -80,6 +75,24 @@ void adding_rand_op() {
    }
 }
 
+//这是一个对buf的调整,随机插入空格,满足对exp.c的调试需求,空格的插入放在code_format运行之后,不然对code_format运行有影响
+void insert_rand_space(char* temp_buf) {
+   memset(temp_buf, 0, sizeof(temp_buf)); // 初始化临时缓冲区
+
+   int j = 0; // 临时缓冲区的索引
+   for (int i = 0; buf[i] != '\0'; ++i) {
+      temp_buf[j++] = buf[i]; // 将原始字符复制到临时缓冲区
+
+      // 以一定概率插入空格，例如 50% 的概率
+      if (choose(2)) {
+         temp_buf[j++] = ' '; // 在字符后插入一个空格
+      }
+   }
+
+   strcpy(buf, temp_buf); // 将修改后的表达式复制回原始缓冲区
+}
+
+//下方是限制最小最大递归深度相关
 static int deepth = 0;//如果放到函数内部,这个一定要静态
 static int max_deep = 200;
 static int min_deep = 20;
@@ -151,7 +164,7 @@ int main(int argc, char* argv[]) {
 
       adding_rand_op();
 
-      sprintf(code_buf, code_format, buf);
+      sprintf(code_buf, code_format, buf);//Operational Objectives;格式化字符串;符合格式化的内容
 
       FILE* fp = fopen("/tmp/.code.c", "w");
       assert(fp != NULL);
@@ -168,7 +181,9 @@ int main(int argc, char* argv[]) {
       fscanf(fp, "%d", &result);
       pclose(fp);
 
-      printf("%u %s\n", result, buf);
+      char temp_buf[sizeof(buf)]; // 创建一个临时缓冲区
+      insert_rand_space(temp_buf);//为什么放在这里:函数注释
+      printf("%u %s\n", result, temp_buf);
    }
    regfree(&regex);
    //sleep(1);
