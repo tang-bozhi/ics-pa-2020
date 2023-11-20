@@ -11,6 +11,7 @@ enum
    TK_NOTYPE = 256,
    '+',
    '-',
+   TK_NEG,  //负数 与'-'减法区别
    '*',
    '/',
    TK_EQ,
@@ -26,8 +27,9 @@ static struct rule
 } rules[] = {
     {" +", TK_NOTYPE}, // spaces
     {"\\+", '+'},      // plus
+    {"-", TK_NEG},     // negtive sign
     {"-", '-'},        // minus
-    {"\\*", '*'},   // multiplication
+    {"\\*", '*'},      // multiplication
     {"/", '/'},        // division
     {"==", TK_EQ},     // equal
     {"\\(", TK_LPAR},  // left parenthesis
@@ -37,7 +39,7 @@ static struct rule
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]))
 
-static regex_t re[NR_REGEX] = {}; // 这是一个计算机可以更高效匹配的内部格式，不能在regex之外用这个，应该用rules作为正则模式
+static regex_t re[NR_REGEX] = {}; // regex.h 这是一个计算机可以更高效匹配的内部格式，不能在regex之外用这个，应该用rules作为正则模式
 
 /* Rules are used for many times.
  * Therefore we compile them only once before any usage.
@@ -45,7 +47,7 @@ static regex_t re[NR_REGEX] = {}; // 这是一个计算机可以更高效匹配�
 void init_regex() {
    int i;
    char error_msg[128];
-   int reti;
+   int reti;//return value of regex compile
 
    for (i = 0; i < NR_REGEX; i++) {
       reti = regcomp(&re[i], rules[i].regex, REG_EXTENDED);
@@ -65,6 +67,9 @@ typedef struct token
 static Token tokens[32] __attribute__((used)) = {}; // 用于存放识别过了的字符串
 static int nr_token __attribute__((used)) = 0;      // 识别过了的字符串的数量
 
+// Converts an expression string into tokens based on the defined regex rules.
+// @param e: String expression to tokenize
+// @return: Returns true if tokenization is successful, false otherwise
 static bool make_token(char* e) {
    int position = 0;//字符串当前处理位置
    int i;
@@ -91,12 +96,17 @@ static bool make_token(char* e) {
                return false;
             }
 
-            // 抛掉空格
-            if (rules[i].token_type != TK_NOTYPE) {
+            //判断是减号还是负号
+            if (rules[i].token_type == '-') {//对:  文件开头-,(-,=-  三种情况做判定
+               if (nr_token == 0 || tokens[nr_token - 1].type == TK_LPAR || tokens[nr_token - 1].type == TK_EQ) {
+                  tokens[nr_token].type = TK_NEG;
+               }
+            }
 
+            if (rules[i].token_type != TK_NOTYPE) {// 抛掉空格
                tokens[nr_token].type = rules[i].token_type; // 设置token类型
-               // 将匹配的子字符串复制到token的str字段中
-               //
+               // 下方三行  将匹配的子字符串复制到token的str字段中
+
                int length_to_copy = substr_len < sizeof(tokens[nr_token].str) ? substr_len : sizeof(tokens[nr_token].str) - 1;
                strncpy(tokens[nr_token].str, substr_start, length_to_copy);
                tokens[nr_token].str[length_to_copy] = '\0';
@@ -116,6 +126,7 @@ static bool make_token(char* e) {
    return true;
 }
 
+//检查括号是否符合语法
 int check_parentheses(int p, int q) {
    if (!(tokens[p].type == TK_LPAR && tokens[q - 1].type == TK_RPAR)) {
       return -1;
@@ -140,7 +151,7 @@ int check_parentheses(int p, int q) {
    return (count == 0);
 }
 
-//
+//find main operator
 int find_main_op(int p, int q) {
    int count = 0;
    int op = -1;
@@ -160,8 +171,8 @@ int find_main_op(int p, int q) {
    return op;
 }
 
-//这个函数是通过教案指导的分治法也就是那嵌套的几行exp<>写出来的
 //evaluate
+//这个函数是通过教案指导的分治法也就是那嵌套的几行exp<>写出来的
 int eval(int p, int q) {
    if (p > q) {
       /* Bad expression */
@@ -191,7 +202,8 @@ int eval(int p, int q) {
          if (tokens[i].type == '+' || \
             tokens[i].type == '-' || \
             tokens[i].type == '*' || \
-            tokens[i].type == '/') {
+            tokens[i].type == '/' || \
+            tokens[i].type == TK_NEG) {
             op = tokens[p].type;
             break;
          }
@@ -199,9 +211,10 @@ int eval(int p, int q) {
       val1 = eval(p, op - 1);
       val2 = eval(op + 1, q);
 
-      switch (op_type) {
+      switch (op) {
       case '+': return val1 + val2;
       case '-': return val1 - val2;
+      case TK_NEG: return -eval(p + 1, q);
       case '*': return val1 * val2;
       case '/': if (val2 != 0) { return val1 / val2; }
               else {
