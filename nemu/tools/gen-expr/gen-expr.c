@@ -1,4 +1,4 @@
-//pa1-5表达式求值-如何测试你的代码-暂时认为完成
+//pa1-5表达式求值-如何测试你的代码-完成
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
