@@ -44,7 +44,7 @@ static regex_t re[NR_REGEX] = {}; // regex.h 这是一个计算机可以更高�
 /* Rules are used for many times.
  * Therefore we compile them only once before any usage.
  */
-void init_regex() {
+void init_regex_add_op() {
    int i;
    char error_msg[128];
    int reti;//return value of regex compile

@@ -12,9 +12,16 @@
 static char buf[65536] = {};
 static char code_buf[65536 + 128] = {}; // a little larger than `buf`
 static char* code_format =
+"#include <signal.h>\n"
 "#include <stdio.h>\n"
+"#include <stdlib.h>\n"
+"void handle_sigfpe(int sig) {\n"
+"    printf(\"Caught division by zero!\\n\");\n"
+"    exit(EXIT_FAILURE);\n"
+"}\n"
 "int main() {\n "
-"  unsigned result = %s;\n "
+"  signal(SIGFPE, handle_sigfpe);\n"
+"  int result = %s;\n "
 "  printf(\"%%u\", result);\n "
 "  return 0;\n "
 "}";
@@ -34,7 +41,7 @@ void gen_num() {//直接copy的
       sprintf(num_str, "%d", first_digit);
 
       // 生成随机长度的数字（例如，可以生成 1 到 2 位的数字）
-      int num_length = choose(2) + 1;
+      int num_length = choose(1) + 1;
       for (int i = 1; i < num_length; ++i) {
          int digit = choose(10);  // 生成 0 到 9 之间的数字
          sprintf(num_str + strlen(num_str), "%d", digit);
@@ -53,21 +60,27 @@ void gen_rand_op() {
    }
 }
 
+void gen_rand_op_without_div() {
+   char ops[] = "+-*";
+   if (strlen(buf) + 100 < sizeof(buf)) {
+      buf[strlen(buf)] = ops[choose(3)];
+   }
+}
+
 //下方使用正则表达式过滤"[0-9]+\\("情况
 static regex_t regex;
 static int ret;
 static regmatch_t matchs[2];//保存匹配结果 
 
-void init_regex() {
-   ret = regcomp(&regex, "([0-9]+ *)+\\(|\\)([0-9]+ *)+", REG_EXTENDED);
+void init_regex_add_op() {
+   ret = regcomp(&regex, "[0-9]+\\(|\\)[0-9]+", REG_EXTENDED);
    assert(ret == 0);  // 确保正则表达式编译成功
 }
-
-
+//使用正则表达式判别"[0-9]+\\(|\\)[0-9]+"情况并插入运算符
 void adding_rand_op() {
    int offset = 0;
    char ops[] = "+-*/";
-   init_regex();
+   init_regex_add_op();
    while (!regexec(&regex, buf + offset, 1, matchs, 0)) {
       memmove(buf + offset + matchs[0].rm_eo, buf + offset + matchs[0].rm_eo, sizeof(buf) - offset - matchs[0].rm_eo);
       buf[offset + matchs[0].rm_eo] = ops[choose(4)];
@@ -75,7 +88,7 @@ void adding_rand_op() {
    }
 }
 
-//这是一个对buf的调整,随机插入空格,满足对exp.c的调试需求,空格的插入放在code_format运行之后,不然对code_format运行有影响
+//这是一个对buf的调整,随机插入空格,满足对exp.c的调试需求,空格的插入放在code_format运行之后,不然对code_format中result =的运行有影响
 void insert_rand_space(char* temp_buf) {
    memset(temp_buf, 0, sizeof(temp_buf)); // 初始化临时缓冲区
 
@@ -105,31 +118,35 @@ void conti_gen_if_shallow() {
       return;
    }
 }
-#define break_if_too_deep \
-if (deepth >= max_deep) {\
-   return;\
+void break_if_too_deep() {
+   if (deepth >= max_deep) {
+      if (strlen(buf) > 0 && strchr("+-*/", buf[strlen(buf) - 1]) != NULL) {
+         gen_num(); // 如果表达式以运算符结尾，添加一个数字
+      }
+      return;
+   }
 }
 
 void gen_rand_expr() {
-   switch (choose(3)) {
+   int choice;
+   int last_choice;
+   do {
+      choice = choose(3);
+   } while (choice == last_choice);
+
+   last_choice = choice;
+   switch (choice) {
    case 0:
-      break_if_too_deep;
       deepth++;
       gen_num();
       break;
    case 1:
-      break_if_too_deep;
       deepth++;
-      // 确保左括号前有运算符
-      if (strlen(buf) > 0 && strchr("+-*/", buf[strlen(buf) - 1]) == NULL && buf[strlen(buf) - 1] != '(') {//buf[strlen(buf) - 1]是对最末尾字符做检测,buf[strlen(buf)]则是'\0' 
-         gen_rand_op();
-      }
       strcat(buf, "(");
       gen_rand_expr();
       strcat(buf, ")");
       break;
    default:
-      break_if_too_deep;
       deepth++;
       gen_rand_expr();
       gen_rand_op();
@@ -142,11 +159,12 @@ void gen_rand_expr() {
          sprintf(buf + strlen(buf), "%d", divisor);
       }
       else {
+         // Only generate a new expression if the last character is not an operator
          gen_rand_expr();
       }
       break;
    }
-   conti_gen_if_shallow();
+   //conti_gen_if_shallow();
 }
 
 int main(int argc, char* argv[]) {
