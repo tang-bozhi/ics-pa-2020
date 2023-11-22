@@ -115,36 +115,35 @@ void gen_rand_expr();//提前声明
 void conti_gen_if_shallow() {
    if (deepth <= min_deep) {
       gen_rand_expr();
-      return;
    }
 }
-void break_if_too_deep() {
+void return_if_too_deep() {
    if (deepth >= max_deep) {
-      if (strlen(buf) > 0 && strchr("+-*/", buf[strlen(buf) - 1]) != NULL) {
-         gen_num(); // 如果表达式以运算符结尾，添加一个数字
-      }
       return;
    }
 }
 
 void gen_rand_expr() {
+   //这里是防止连续重复调用一种case
    int choice;
    int last_choice;
    do {
       choice = choose(3);
    } while (choice == last_choice);
-
    last_choice = choice;
+
    switch (choice) {
    case 0:
       deepth++;
       gen_num();
+      //return_if_too_deep();
       break;
    case 1:
       deepth++;
       strcat(buf, "(");
       gen_rand_expr();
       strcat(buf, ")");
+      //return_if_too_deep();
       break;
    default:
       deepth++;
@@ -162,6 +161,7 @@ void gen_rand_expr() {
          // Only generate a new expression if the last character is not an operator
          gen_rand_expr();
       }
+      //return_if_too_deep();
       break;
    }
    //conti_gen_if_shallow();
