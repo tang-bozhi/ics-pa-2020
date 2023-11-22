@@ -12,18 +12,11 @@
 static char buf[65536] = {};
 static char code_buf[65536 + 128] = {}; // a little larger than `buf`
 static char* code_format =
-"#include <signal.h>\n"
 "#include <stdio.h>\n"
-"#include <stdlib.h>\n"
-"void handle_sigfpe(int sig) {\n"
-"    printf(\"Caught division by zero!\\n\");\n"
-"    exit(EXIT_FAILURE);\n"
-"}\n"
-"int main() {\n "
-"  signal(SIGFPE, handle_sigfpe);\n"
-"  int result = %s;\n "
-"  printf(\"%%u\", result);\n "
-"  return 0;\n "
+"int main() { \n"
+"  int result = %s; \n"
+"  printf(\"%%d\", result); \n"
+"  return 0; \n"
 "}";
 
 //generate a number less than n
