@@ -15,7 +15,7 @@ static char* code_format =
 "#include <stdio.h>\n"
 "int main() { \n"
 "  int result = %s; \n"
-"  printf(\"%%d\", result); \n"
+"  printf(\"%%d\\n\", result); \n"
 "  return 0; \n"
 "}";
 
@@ -50,13 +50,6 @@ void gen_rand_op() {
    char ops[] = "+-*/";
    if (strlen(buf) + 100 < sizeof(buf)) {
       buf[strlen(buf)] = ops[choose(4)];
-   }
-}
-
-void gen_rand_op_without_div() {
-   char ops[] = "+-*";
-   if (strlen(buf) + 100 < sizeof(buf)) {
-      buf[strlen(buf)] = ops[choose(3)];
    }
 }
 
@@ -98,24 +91,6 @@ void insert_rand_space(char* temp_buf) {
    strcpy(buf, temp_buf); // 将修改后的表达式复制回原始缓冲区
 }
 
-//下方是限制最小最大递归深度相关
-static int deepth = 0;//如果放到函数内部,这个一定要静态
-static int max_deep = 200;
-static int min_deep = 20;
-
-void gen_rand_expr();//提前声明
-
-void conti_gen_if_shallow() {
-   if (deepth <= min_deep) {
-      gen_rand_expr();
-   }
-}
-void return_if_too_deep() {
-   if (deepth >= max_deep) {
-      return;
-   }
-}
-
 void gen_rand_expr() {
    //这里是防止连续重复调用一种case
    int choice;
@@ -129,14 +104,12 @@ void gen_rand_expr() {
    case 0:
       deepth++;
       gen_num();
-      //return_if_too_deep();
       break;
    case 1:
       deepth++;
       strcat(buf, "(");
       gen_rand_expr();
       strcat(buf, ")");
-      //return_if_too_deep();
       break;
    default:
       deepth++;
@@ -154,10 +127,8 @@ void gen_rand_expr() {
          // Only generate a new expression if the last character is not an operator
          gen_rand_expr();
       }
-      //return_if_too_deep();
       break;
    }
-   //conti_gen_if_shallow();
 }
 
 int main(int argc, char* argv[]) {
@@ -194,7 +165,7 @@ int main(int argc, char* argv[]) {
 
       char temp_buf[sizeof(buf)]; // 创建一个临时缓冲区
       insert_rand_space(temp_buf);//为什么放在这里:函数注释
-      printf("%u %s\n", result, temp_buf);
+      printf("%d %s\n", result, temp_buf);
    }
    regfree(&regex);
    //sleep(1);
