@@ -91,6 +91,9 @@ void insert_rand_space(char* temp_buf) {
    strcpy(buf, temp_buf); // 将修改后的表达式复制回原始缓冲区
 }
 
+//下方是限制最小最大递归深度相关
+static int deepth = 0;//如果放到函数内部,这个一定要静态
+
 void gen_rand_expr() {
    //这里是防止连续重复调用一种case
    int choice;
@@ -168,6 +171,5 @@ int main(int argc, char* argv[]) {
       printf("%d %s\n", result, temp_buf);
    }
    regfree(&regex);
-   //sleep(1);
    return 0;
 }
