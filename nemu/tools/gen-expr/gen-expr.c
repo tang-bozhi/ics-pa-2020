@@ -59,13 +59,13 @@ static int ret;
 static regmatch_t matchs[2];//保存匹配结果 
 
 void init_regex_add_op() {
-   ret = regcomp(&regex, "[0-9]+\\(|\\)[0-9]+", REG_EXTENDED);
+   ret = regcomp(&regex, "[0-9]+\\(|\\)[0-9]+|\\)\\(", REG_EXTENDED);
    assert(ret == 0);  // 确保正则表达式编译成功
 }
 //使用正则表达式判别"[0-9]+\\(|\\)[0-9]+"情况并插入运算符
 void adding_rand_op() {
    int offset = 0;
-   char ops[] = "+-*/";
+   char ops[] = "+-*";
    init_regex_add_op();
    while (!regexec(&regex, buf + offset, 1, matchs, 0)) {
       memmove(buf + offset + matchs[0].rm_eo, buf + offset + matchs[0].rm_eo, sizeof(buf) - offset - matchs[0].rm_eo);
@@ -92,9 +92,11 @@ void insert_rand_space(char* temp_buf) {
 }
 
 //下方是限制最小最大递归深度相关
-static int deepth = 0;//如果放到函数内部,这个一定要静态
+static int depth = 0;//如果定义放到函数内部,这个一定要静态
+#define MAX_DEPTH 10
 
 void gen_rand_expr() {
+
    //这里是防止连续重复调用一种case
    int choice;
    int last_choice;
@@ -105,17 +107,14 @@ void gen_rand_expr() {
 
    switch (choice) {
    case 0:
-      deepth++;
       gen_num();
       break;
    case 1:
-      deepth++;
       strcat(buf, "(");
       gen_rand_expr();
       strcat(buf, ")");
       break;
    default:
-      deepth++;
       gen_rand_expr();
       gen_rand_op();
       // if we are generating a division operation, make sure the divisor is not zero.
@@ -167,7 +166,7 @@ int main(int argc, char* argv[]) {
       pclose(fp);
 
       char temp_buf[sizeof(buf)]; // 创建一个临时缓冲区
-      insert_rand_space(temp_buf);//为什么放在这里:函数注释
+      //insert_rand_space(temp_buf);//为什么放在这里:函数注释
       printf("%d %s\n", result, temp_buf);
    }
    regfree(&regex);
