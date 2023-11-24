@@ -91,19 +91,32 @@ void insert_rand_space(char* temp_buf) {
    strcpy(buf, temp_buf); // 将修改后的表达式复制回原始缓冲区
 }
 
-//下方是限制最小最大递归深度相关
+//下方是限制最小最大递归深度相关,注意是限制的递归深度,没有对式子长度做直接的限制
 static int depth = 0;//如果定义放到函数内部,这个一定要静态
-#define MAX_DEPTH 10
+#define MAX_DEPTH 6
+#define MIN_DEPTH 5
+
+int parenthesis;
 
 void gen_rand_expr() {
+   if (depth >= MAX_DEPTH) {
+      gen_num(); // 如果达到最大深度，只生成一个数字
+      return;
+   }
 
-   //这里是防止连续重复调用一种case
    int choice;
-   int last_choice;
-   do {
-      choice = choose(3);
-   } while (choice == last_choice);
-   last_choice = choice;
+   if (depth < MIN_DEPTH) {
+      // 在没有达到最小深度之前，避免选择只生成数字的选项
+      choice = choose(2) + 1;  // 只选择 1 或 2
+   }
+   else {
+      // 当达到或超过最小深度时，可以自由选择任何选项
+      static int last_choice;
+      do {
+         choice = choose(3);
+      } while (choice == last_choice);
+      last_choice = choice;
+   }
 
    switch (choice) {
    case 0:
@@ -111,11 +124,17 @@ void gen_rand_expr() {
       break;
    case 1:
       strcat(buf, "(");
+      parenthesis++;
+      depth++;
       gen_rand_expr();
+      depth--;
+      parenthesis--;
       strcat(buf, ")");
       break;
    default:
+      depth++;
       gen_rand_expr();
+      depth--;
       gen_rand_op();
       // if we are generating a division operation, make sure the divisor is not zero.
       if (buf[strlen(buf) - 1] == '/') {
@@ -127,7 +146,9 @@ void gen_rand_expr() {
       }
       else {
          // Only generate a new expression if the last character is not an operator
+         depth++;
          gen_rand_expr();
+         depth--;
       }
       break;
    }
@@ -146,7 +167,7 @@ int main(int argc, char* argv[]) {
 
       gen_rand_expr();
 
-      adding_rand_op();
+      //adding_rand_op();
 
       sprintf(code_buf, code_format, buf);//Operational Objectives;格式化字符串;符合格式化的内容
 
@@ -166,8 +187,8 @@ int main(int argc, char* argv[]) {
       pclose(fp);
 
       char temp_buf[sizeof(buf)]; // 创建一个临时缓冲区
-      //insert_rand_space(temp_buf);//为什么放在这里:函数注释
-      printf("%d %s\n", result, temp_buf);
+      insert_rand_space(temp_buf);//为什么放在这里:函数注释
+      printf("%d %s\n", result, buf);
    }
    regfree(&regex);
    return 0;
