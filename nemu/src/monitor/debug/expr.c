@@ -6,19 +6,19 @@
 #include <regex.h>
 #include <stdlib.h>
 
-enum
-{
+enum {
    TK_NOTYPE = 256,
-   '+',
-   '-',
-   TK_NEG,  //负数 与'-'减法区别
-   '*',
-   '/',
-   TK_EQ,
-   TK_LPAR,
-   TK_RPAR,
-   TK_NUM,
+   TK_PLUS = '+',  // 加号
+   TK_MINUS = '-', // 减号
+   TK_NEG,         // 负数 与'-'减法区别
+   TK_STAR = '*',  // 乘号
+   TK_SLASH = '/', // 除号
+   TK_EQ,          // 等号
+   TK_LPAR,        // 左括号
+   TK_RPAR,        // 右括号
+   TK_NUM          // 数字
 };
+
 
 static struct rule
 {
@@ -64,7 +64,7 @@ typedef struct token
    char str[32];
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {}; // 用于存放识别过了的字符串
+static Token tokens[1000] __attribute__((used)) = {}; // 用于存放识别过了的字符串
 static int nr_token __attribute__((used)) = 0;      // 识别过了的字符串的数量
 
 // Converts an expression string into tokens based on the defined regex rules.
@@ -187,7 +187,7 @@ int eval(int p, int q) {
       if (tokens[p].type == TK_NUM) {
          return (atoi(tokens[p].str));
       }
-      printf("Unkown type %s.\n", tokens[p].type);
+      printf("Unkown type %d.\n", tokens[p].type);
       return -1;
    }
    else if (check_parentheses(p, q) == true) {
@@ -208,8 +208,8 @@ int eval(int p, int q) {
             break;
          }
       }
-      val1 = eval(p, op - 1);
-      val2 = eval(op + 1, q);
+      int val1 = eval(p, op - 1);
+      int val2 = eval(op + 1, q);
 
       switch (op) {
       case '+': return val1 + val2;

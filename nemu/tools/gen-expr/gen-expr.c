@@ -76,20 +76,22 @@ void adding_rand_op() {
 
 //这是一个对buf的调整,随机插入空格,满足对exp.c的调试需求,空格的插入放在code_format运行之后,不然对code_format中result =的运行有影响
 void insert_rand_space(char* temp_buf) {
-   memset(temp_buf, 0, sizeof(temp_buf)); // 初始化临时缓冲区
+   memset(temp_buf, 0, sizeof(buf)); // 使用 sizeof(buf) 来清空整个缓冲区
 
    int j = 0; // 临时缓冲区的索引
    for (int i = 0; buf[i] != '\0'; ++i) {
       temp_buf[j++] = buf[i]; // 将原始字符复制到临时缓冲区
 
-      // 以一定概率插入空格，例如 50% 的概率
+      // 以一定概率插入空格
       if (choose(2)) {
          temp_buf[j++] = ' '; // 在字符后插入一个空格
       }
    }
 
+   temp_buf[j] = '\0'; // 确保临时缓冲区以 null 字符结尾
    strcpy(buf, temp_buf); // 将修改后的表达式复制回原始缓冲区
 }
+
 
 //下方是限制最小最大递归深度相关,注意是限制的递归深度,没有对式子长度做直接的限制
 static int depth = 0;//如果定义放到函数内部,这个一定要静态
@@ -167,7 +169,7 @@ int main(int argc, char* argv[]) {
 
       gen_rand_expr();
 
-      //adding_rand_op();
+      adding_rand_op();
 
       sprintf(code_buf, code_format, buf);//Operational Objectives;格式化字符串;符合格式化的内容
 
@@ -179,7 +181,7 @@ int main(int argc, char* argv[]) {
       int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
       if (ret != 0) continue;
 
-      fp = popen("/tmp/.expr", "r");
+      fp = popen("nemu/tools/gen-expr/input", "r");
       assert(fp != NULL);
 
       int result;
