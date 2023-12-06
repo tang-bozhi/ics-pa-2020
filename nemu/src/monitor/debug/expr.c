@@ -26,7 +26,7 @@ static struct rule
    int token_type;
 } rules[] = {
     {" +", TK_NOTYPE}, // spaces
-    {"\\+", '+'},      // plus
+    {"\\+", TK_PLUS},          // plus
     {"-", TK_NEG},     // negtive sign
     {"-", '-'},        // minus
     {"\\*", '*'},      // multiplication
@@ -205,7 +205,7 @@ int eval(int p, int q) {
    else {
       int op = find_main_op(p, q);//principal operator
       for (int i = p; i < q; i++) {
-         if (tokens[i].type == '+' || \
+         if (tokens[i].type || \
             tokens[i].type == '-' || \
             tokens[i].type == '*' || \
             tokens[i].type == '/' || \
