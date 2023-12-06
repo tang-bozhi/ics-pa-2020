@@ -84,6 +84,9 @@ static bool make_token(char* e) {
             char* substr_start = e + position; // 当前循环中被判定字符的指针
             int substr_len = pmatch.rm_eo;     // 当前循环中被判定字符的长度
 
+            int if_true_1 = 0;//检查if是否执行了内部代码
+            int if_true_2 = 0;
+
             Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
                i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
@@ -100,6 +103,7 @@ static bool make_token(char* e) {
             if (rules[i].token_type == '-') {//对:  文件开头-,(-,=-  三种情况做判定
                if (nr_token == 0 || tokens[nr_token - 1].type == TK_LPAR || tokens[nr_token - 1].type == TK_EQ) {
                   tokens[nr_token].type = TK_NEG;
+                  if_true_1++;
                }
             }
 
@@ -110,9 +114,11 @@ static bool make_token(char* e) {
                int length_to_copy = substr_len < sizeof(tokens[nr_token].str) ? substr_len : sizeof(tokens[nr_token].str) - 1;
                strncpy(tokens[nr_token].str, substr_start, length_to_copy);
                tokens[nr_token].str[length_to_copy] = '\0';
+               if_true_2++;
             }
-
-            nr_token++;
+            if (if_true_1 || if_true_2) {
+               nr_token++;//如果识别到了token type,则nr_token++
+            }
             break;
          }
       }
@@ -156,8 +162,8 @@ int find_main_op(int p, int q) {
    int count = 0;
    int op = -1;
    for (int i = q; i >= p; i++) {
-      if (tokens[i].type == TK_LPAR)count++;
-      if (tokens[i].type == TK_RPAR)count--;
+      if (tokens[i].type == TK_LPAR) count++;
+      if (tokens[i].type == TK_RPAR) count--;
 
       if (count == 0) {
          if (tokens[i].type == '+' || tokens[i].type == '-') {

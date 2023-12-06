@@ -190,7 +190,7 @@ int main(int argc, char* argv[]) {
 
       char temp_buf[sizeof(buf)]; // 创建一个临时缓冲区
       insert_rand_space(temp_buf);//为什么放在这里:函数注释
-      printf("%d %s\n", result, buf);
+      printf("%d %s", result, buf);
    }
    regfree(&regex);
    return 0;
