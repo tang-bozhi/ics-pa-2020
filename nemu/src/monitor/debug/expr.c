@@ -7,16 +7,16 @@
 #include <stdlib.h>
 
 enum {
-   TK_NOTYPE = 256,
-   TK_PLUS = '+',  // 加号
-   TK_MINUS = '-', // 减号
-   TK_NEG,         // 负数 与'-'减法区别
-   TK_STAR = '*',  // 乘号
-   TK_SLASH = '/', // 除号
+   TK_NOTYPE = 256,// 空格
+   TK_NEG,         // 负数 与TK_MINUS减法区别
    TK_EQ,          // 等号
    TK_LPAR,        // 左括号
    TK_RPAR,        // 右括号
-   TK_NUM          // 数字
+   TK_NUM,          // 数字
+   TK_PLUS = '+',        // 加号
+   TK_MINUS = '-',       // 减号
+   TK_STAR = '*',        // 乘号
+   TK_SLASH = '/',       // 除号
 };
 
 
@@ -28,9 +28,9 @@ static struct rule
     {" +", TK_NOTYPE}, // spaces
     {"\\+", TK_PLUS},          // plus
     {"-", TK_NEG},     // negtive sign
-    {"-", '-'},        // minus
-    {"\\*", '*'},      // multiplication
-    {"/", '/'},        // division
+    {"-", TK_MINUS},        // minus
+    {"\\*", TK_STAR},      // multiplication
+    {"/", TK_SLASH},        // division
     {"==", TK_EQ},     // equal
     {"\\(", TK_LPAR},  // left parenthesis
     {"\\)", TK_RPAR},  // right parenthesis
@@ -100,7 +100,7 @@ static bool make_token(char* e) {
             }
 
             //判断是减号还是负号
-            if (rules[i].token_type == '-') {//对:  文件开头-,(-,=-  三种情况做判定
+            if (rules[i].token_type == TK_MINUS) {//对:  文件开头-,(-,=-  三种情况做判定
                if (nr_token == 0 || tokens[nr_token - 1].type == TK_LPAR || tokens[nr_token - 1].type == TK_EQ) {
                   tokens[nr_token].type = TK_NEG;
                   if_true_1++;
@@ -162,17 +162,25 @@ int find_main_op(int p, int q) {
    int count = 0;
    int op = -1;
    for (int i = q; i >= p; i++) {
+      if (tokens[i].type == TK_NOTYPE) {
+         continue;
+      }
+
       if (tokens[i].type == TK_LPAR) count++;
       if (tokens[i].type == TK_RPAR) count--;
 
       if (count == 0) {
-         if (tokens[i].type == '+' || tokens[i].type == '-') {
+         if (tokens[i].type == TK_PLUS || tokens[i].type == TK_MINUS) {
             return i;
          }
-         if (tokens[i].type == '*' || tokens[i].type == '\\') {
+         if (tokens[i].type == TK_STAR || tokens[i].type == TK_SLASH) {
             op = i;
          }
       }
+      printf("%d\n", i);
+      printf("%d\n", p);
+      printf("%d\n", q);
+      printf("%d\n", nr_token);
    }
    return op;
 }
@@ -204,29 +212,39 @@ int eval(int p, int q) {
    }
    else {
       int op = find_main_op(p, q);//principal operator
+      if (op == -1) {
+         printf("No main operator found from %d to %d.\n", p, q);
+         return -1;
+      }
       for (int i = p; i < q; i++) {
-         if (tokens[i].type || \
-            tokens[i].type == '-' || \
-            tokens[i].type == '*' || \
-            tokens[i].type == '/' || \
+         if (tokens[i].type == TK_PLUS || \
+            tokens[i].type == TK_MINUS || \
+            tokens[i].type == TK_STAR || \
+            tokens[i].type == TK_SLASH || \
             tokens[i].type == TK_NEG) {
             op = tokens[p].type;
             break;
          }
       }
-      int val1 = eval(p, op - 1);
-      int val2 = eval(op + 1, q);
+      int val1, val2;
+      if (op != p) { // 确保左侧表达式存在
+         val1 = eval(p, op - 1);
+      }
+      if (op != q) { // 确保右侧表达式存在
+         val2 = eval(op + 1, q);
+      }
 
       switch (op) {
-      case '+': return val1 + val2;
-      case '-': return val1 - val2;
+      case TK_PLUS: return val1 + val2;
+      case TK_MINUS: return val1 - val2;
       case TK_NEG: return -eval(p + 1, q);
-      case '*': return val1 * val2;
-      case '/': if (val2 != 0) { return val1 / val2; }
-              else {
-         printf("Division by zero.\n");
-         return -1;
-      }
+      case TK_STAR: return val1 * val2;
+      case TK_SLASH:
+         if (val2 != 0) { return val1 / val2; }
+         else {
+            printf("Division by zero.\n");
+            return -1;
+         }
       default: assert(0);
       }
    }
