@@ -7,16 +7,16 @@
 #include <stdlib.h>
 
 enum {
-   TK_NOTYPE = 256,// 空格
-   TK_NEG,         // 负数 与TK_MINUS减法区别
-   TK_EQ,          // 等号
-   TK_LPAR,        // 左括号
-   TK_RPAR,        // 右括号
-   TK_NUM,          // 数字
-   TK_PLUS = '+',        // 加号
-   TK_MINUS = '-',       // 减号
-   TK_STAR = '*',        // 乘号
-   TK_SLASH = '/',       // 除号
+   TK_NOTYPE = 256,// 空格 256
+   TK_NEG,         // 负数 与TK_MINUS减法区别 257
+   TK_EQ,          // 等号 258
+   TK_LPAR,        // 左括号 259
+   TK_RPAR,        // 右括号 260
+   TK_NUM,          // 数字 261
+   TK_PLUS,        // 加号262
+   TK_MINUS,       // 减号263
+   TK_STAR,        // 乘号264
+   TK_SLASH,       // 除号265
 };
 
 
@@ -132,9 +132,9 @@ static bool make_token(char* e) {
    return true;
 }
 
-//检查括号是否符合语法
+//检查括号是否有且正确
 int check_parentheses(int p, int q) {
-   if (!(tokens[p].type == TK_LPAR && tokens[q - 1].type == TK_RPAR)) {
+   if (!(tokens[p].type == TK_LPAR && tokens[q].type == TK_RPAR)) {
       return -1;
    }
    int count = 0;
@@ -161,7 +161,10 @@ int check_parentheses(int p, int q) {
 int find_main_op(int p, int q) {
    int count = 0;
    int op = -1;
-   for (int i = q; i >= p; i++) {
+   int i = 0;
+   printf("find_main_op called with p = %d, q = %d\n", p, q);
+   for (i = p; i <= q; i++) {
+      printf("In loop, i = %d\n", i);
       if (tokens[i].type == TK_NOTYPE) {
          continue;
       }
@@ -177,10 +180,6 @@ int find_main_op(int p, int q) {
             op = i;
          }
       }
-      printf("%d\n", i);
-      printf("%d\n", p);
-      printf("%d\n", q);
-      printf("%d\n", nr_token);
    }
    return op;
 }
