@@ -13,10 +13,10 @@ enum {
    TK_LPAR,        // 左括号 259
    TK_RPAR,        // 右括号 260
    TK_NUM,          // 数字 261
-   TK_PLUS,        // 加号262
-   TK_MINUS,       // 减号263
-   TK_STAR,        // 乘号264
-   TK_SLASH,       // 除号265
+   TK_PLUS = '+',        // 加号
+   TK_MINUS = '-',       // 减号
+   TK_STAR = '*',        // 乘号
+   TK_SLASH = '/',       // 除号
 };
 
 
@@ -138,7 +138,7 @@ int check_parentheses(int p, int q) {
       return -1;
    }
    int count = 0;
-   for (int i = 0; i < nr_token; i++) {
+   for (int i = p; i <= q; i++) {
 
       if (tokens[i].type == TK_LPAR) {
          count++;
@@ -146,7 +146,7 @@ int check_parentheses(int p, int q) {
       else if (tokens[i].type == TK_RPAR) {
          count--;
       }
-      if (count == 0 && i != p) {
+      if (count == 0 && i != q) {
          //(4 + 3)* (2 - 1) false, the leftmost '(' and the rightmost ')' are not matched
          return 0;
       }
@@ -160,28 +160,31 @@ int check_parentheses(int p, int q) {
 //find main operator
 int find_main_op(int p, int q) {
    int count = 0;
-   int op = -1;
-   int i = 0;
+   int main_op = -1;
    printf("find_main_op called with p = %d, q = %d\n", p, q);
-   for (i = p; i <= q; i++) {
+   for (int i = p; i <= q; i++) {
       printf("In loop, i = %d\n", i);
       if (tokens[i].type == TK_NOTYPE) {
          continue;
       }
 
-      if (tokens[i].type == TK_LPAR) count++;
-      if (tokens[i].type == TK_RPAR) count--;
+      if (tokens[i].type == TK_LPAR) {
+         count++;
+      }
+      if (tokens[i].type == TK_RPAR) {
+         count--;
+      }
 
       if (count == 0) {
-         if (tokens[i].type == TK_PLUS || tokens[i].type == TK_MINUS) {
-            return i;
+         if (tokens[i + 1].type == TK_PLUS || tokens[i + 1].type == TK_MINUS) {
+            return i + 1;
          }
-         if (tokens[i].type == TK_STAR || tokens[i].type == TK_SLASH) {
-            op = i;
+         if (tokens[i + 1].type == TK_STAR || tokens[i + 1].type == TK_SLASH) {
+            main_op = i + 1;
          }
       }
    }
-   return op;
+   return main_op;
 }
 
 //evaluate
@@ -212,17 +215,12 @@ int eval(int p, int q) {
    else {
       int op = find_main_op(p, q);//principal operator
       if (op == -1) {
-         printf("No main operator found from %d to %d.\n", p, q);
-         return -1;
-      }
-      for (int i = p; i < q; i++) {
-         if (tokens[i].type == TK_PLUS || \
-            tokens[i].type == TK_MINUS || \
-            tokens[i].type == TK_STAR || \
-            tokens[i].type == TK_SLASH || \
-            tokens[i].type == TK_NEG) {
-            op = tokens[p].type;
-            break;
+         if (check_parentheses(p, q) != true) {
+            printf("No main operator found from %d to %d.\n", p, q);
+            return -1;
+         }
+         else {
+            return eval(p, q);
          }
       }
       int val1, val2;
@@ -234,10 +232,10 @@ int eval(int p, int q) {
       }
 
       switch (op) {
-      case TK_PLUS: return val1 + val2;
+      case TK_PLUS:  return val1 + val2;
       case TK_MINUS: return val1 - val2;
-      case TK_NEG: return -eval(p + 1, q);
-      case TK_STAR: return val1 * val2;
+      case TK_NEG:   return -eval(p + 1, q);
+      case TK_STAR:  return val1 * val2;
       case TK_SLASH:
          if (val2 != 0) { return val1 / val2; }
          else {
