@@ -252,7 +252,8 @@ word_t expr(char* e, bool* success) {
       *success = false;
       return 0;
    }
-   return eval(0, nr_token - 1);
 
-   return 1;
+   *success = true; // Set success to true as make_token succeeded
+   return eval(0, nr_token - 1);
 }
+
