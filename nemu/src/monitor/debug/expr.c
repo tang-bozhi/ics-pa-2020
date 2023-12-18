@@ -8,15 +8,15 @@
 
 enum {
    TK_NOTYPE = 256,// 空格 256
-   TK_NEG,         // 负数 与TK_MINUS减法区别 257
-   TK_EQ,          // 等号 258
-   TK_LPAR,        // 左括号 259
-   TK_RPAR,        // 右括号 260
-   TK_NUM,          // 数字 261
    TK_PLUS = '+',        // 加号
    TK_MINUS = '-',       // 减号
    TK_STAR = '*',        // 乘号
    TK_SLASH = '/',       // 除号
+   TK_NEG = 257,         // 负数 与TK_MINUS减法区别 257
+   TK_EQ,          // 等号 258
+   TK_LPAR,        // 左括号 259
+   TK_RPAR,        // 右括号 260
+   TK_NUM,          // 数字 261
 };
 
 
@@ -27,8 +27,8 @@ static struct rule
 } rules[] = {
     {" +", TK_NOTYPE}, // spaces
     {"\\+", TK_PLUS},          // plus
-    {"-", TK_NEG},     // negtive sign
     {"-", TK_MINUS},        // minus
+    {"-", TK_NEG},     // negtive sign
     {"\\*", TK_STAR},      // multiplication
     {"/", TK_SLASH},        // division
     {"==", TK_EQ},     // equal
@@ -128,7 +128,6 @@ static bool make_token(char* e) {
          return false;
       }
    }
-
    return true;
 }
 
@@ -139,7 +138,6 @@ int check_parentheses(int p, int q) {
    }
    int count = 0;
    for (int i = p; i <= q; i++) {
-
       if (tokens[i].type == TK_LPAR) {
          count++;
       }
@@ -148,7 +146,7 @@ int check_parentheses(int p, int q) {
       }
       if (count == 0 && i != q) {
          //(4 + 3)* (2 - 1) false, the leftmost '(' and the rightmost ')' are not matched
-         return 0;
+         return i + 1;
       }
       if (count < 0) {
          return -1;
@@ -206,7 +204,7 @@ int eval(int p, int q) {
       printf("Unkown type %d.\n", tokens[p].type);
       return -1;
    }
-   else if (check_parentheses(p, q) == true) {
+   else if (check_parentheses(p, q) == 1) {
       /* The expression is surrounded by a matched pair of parentheses.
        * If that is the case, just throw away the parentheses.
        */
@@ -214,13 +212,14 @@ int eval(int p, int q) {
    }
    else {
       int op = find_main_op(p, q);//principal operator
+      int check_par_result = check_parentheses(p, q);
       if (op == -1) {
-         if (check_parentheses(p, q) != true) {
+         if (check_par_result == -1) {
             printf("No main operator found from %d to %d.\n", p, q);
             return -1;
          }
-         else {
-            return eval(p, q);
+         else if (check_par_result > 1) {
+            op = check_par_result;
          }
       }
       int val1, val2;
@@ -231,7 +230,7 @@ int eval(int p, int q) {
          val2 = eval(op + 1, q);
       }
 
-      switch (op) {
+      switch (tokens[op].type) {
       case TK_PLUS:  return val1 + val2;
       case TK_MINUS: return val1 - val2;
       case TK_NEG:   return -eval(p + 1, q);
@@ -255,5 +254,5 @@ word_t expr(char* e, bool* success) {
    }
    return eval(0, nr_token - 1);
 
-   return 0;
+   return 1;
 }
