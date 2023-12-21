@@ -159,10 +159,13 @@ void gen_rand_expr() {
 int main(int argc, char* argv[]) {
    int seed = time(0);
    srand(seed);
-   int loop = 1;
+   int loop = 100;
    if (argc > 1) {
       sscanf(argv[1], "%d", &loop);
    }
+   // 重定向 stdout 到一个文件
+   freopen("input", "w", stdout);
+
    int i;
    for (i = 0; i < loop; i++) {
       memset(buf, 0, sizeof(buf));
@@ -181,7 +184,7 @@ int main(int argc, char* argv[]) {
       int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
       if (ret != 0) continue;
 
-      fp = popen("nemu/tools/gen-expr/input", "r");
+      fp = popen("/tmp/.expr", "r");
       assert(fp != NULL);
 
       int result;
@@ -189,9 +192,11 @@ int main(int argc, char* argv[]) {
       pclose(fp);
 
       char temp_buf[sizeof(buf)]; // 创建一个临时缓冲区
-      insert_rand_space(temp_buf);//为什么放在这里:函数注释
-      printf("%d %s", result, buf);
+      insert_rand_space(temp_buf);//为什么放在这里:该函数注释
+      printf("%d %s\n", result, buf);
    }
    regfree(&regex);
+   // 关闭文件，恢复标准输出
+   fclose(stdout);
    return 0;
 }
