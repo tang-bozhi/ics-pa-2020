@@ -174,11 +174,11 @@ int find_main_op(int p, int q) {
       }
 
       if (count == 0) {
-         if (tokens[i + 1].type == TK_PLUS || tokens[i + 1].type == TK_MINUS) {
-            return i + 1;
+         if (tokens[i].type == TK_PLUS || tokens[i].type == TK_MINUS) {
+            return i;
          }
-         if (tokens[i + 1].type == TK_STAR || tokens[i + 1].type == TK_SLASH) {
-            main_op = i + 1;
+         if (tokens[i].type == TK_STAR || tokens[i].type == TK_SLASH) {
+            main_op = i;
          }
       }
    }
