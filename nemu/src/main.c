@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 
 void init_monitor(int, char* []);
 void engine_start();
@@ -37,6 +38,7 @@ int main(int argc, char* argv[]) {
          if (!success || result != expected) {
             printf("Test failed: %s = %d, expected %d\n", expression, result, expected);
             // 可以添加错误处理
+            assert(0);
          }
       }
       else {

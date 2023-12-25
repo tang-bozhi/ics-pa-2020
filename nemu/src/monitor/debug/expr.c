@@ -1,3 +1,4 @@
+//通过gen-expr.c测试
 #include <isa.h>
 #include <stdio.h>
 /* We use the POSIX regex functions to process regular expressions.
@@ -133,9 +134,6 @@ static bool make_token(char* e) {
 
 //检查括号是否有且正确
 int check_parentheses(int p, int q) {
-   if (!(tokens[p].type == TK_LPAR && tokens[q].type == TK_RPAR)) {
-      return -1;
-   }
    int count = 0;
    for (int i = p; i <= q; i++) {
       if (tokens[i].type == TK_LPAR) {
@@ -144,7 +142,7 @@ int check_parentheses(int p, int q) {
       else if (tokens[i].type == TK_RPAR) {
          count--;
       }
-      if (count == 0 && i != q) {
+      if (count == 0 && i != q && i != p) {
          //(4 + 3)* (2 - 1) false, the leftmost '(' and the rightmost ')' are not matched
          return i + 1;
       }
@@ -159,9 +157,9 @@ int check_parentheses(int p, int q) {
 int find_main_op(int p, int q) {
    int count = 0;
    int main_op = -1;
+   int last_found_mul_div = -1;//用来将*或/限制在右端第一个
    printf("find_main_op called with p = %d, q = %d\n", p, q);
-   for (int i = p; i <= q; i++) {
-      printf("In loop, i = %d\n", i);
+   for (int i = q; i != p; i--) {
       if (tokens[i].type == TK_NOTYPE) {
          continue;
       }
@@ -177,20 +175,29 @@ int find_main_op(int p, int q) {
          if (tokens[i].type == TK_PLUS || tokens[i].type == TK_MINUS) {
             return i;
          }
-         if (tokens[i].type == TK_STAR || tokens[i].type == TK_SLASH) {
+         if ((tokens[i].type == TK_STAR || tokens[i].type == TK_SLASH) && last_found_mul_div == -1) {
+            last_found_mul_div = i;
             main_op = i;
          }
       }
+   }
+   if (last_found_mul_div != -1) {
+      return last_found_mul_div;
    }
    return main_op;
 }
 
 //evaluate
 //这个函数是通过教案指导的分治法也就是那嵌套的几行exp<>写出来的
+static int recursion_depth = 0; // static variable to keep track of recursion depth
 int eval(int p, int q) {
+   recursion_depth++; // Increase depth each time eval is called
+   printf("进入递归层数: %d\n", recursion_depth); // Print current recursion level
    if (p > q) {
       /* Bad expression */
       printf("Bad expression from %d to %d.\n", p, q);
+      recursion_depth--; // Decrease depth before returning
+      printf("p > q: 退出递归: %d\n", recursion_depth + 1); // Print the recursion level before decrement
       return -1;
    }
    else if (p == q) {
@@ -199,6 +206,9 @@ int eval(int p, int q) {
        * Return the value of the number.
        */
       if (tokens[p].type == TK_NUM) {
+         printf("num=%s\n", tokens[p].str);
+         recursion_depth--; // Decrease depth before returning
+         printf("p == q: 退出递归: %d\n", recursion_depth + 1);
          return (atoi(tokens[p].str));
       }
       printf("Unkown type %d.\n", tokens[p].type);
@@ -208,28 +218,40 @@ int eval(int p, int q) {
       /* The expression is surrounded by a matched pair of parentheses.
        * If that is the case, just throw away the parentheses.
        */
-      return eval(p + 1, q - 1);
+      printf("去除两端括号\n");
+      int result = eval(p + 1, q - 1);
+      recursion_depth--; // Decrease depth before returning
+      printf("check_par: 退出递归: %d\n", recursion_depth + 1);
+      return result;
    }
    else {
       int op = find_main_op(p, q);//principal operator
-      int check_par_result = check_parentheses(p, q);
+      printf("main_op = %d\n", op);
       if (op == -1) {
+         int check_par_result = check_parentheses(p, q);
          if (check_par_result == -1) {
             printf("No main operator found from %d to %d.\n", p, q);
             return -1;
          }
          else if (check_par_result > 1) {
+            printf("括号不在两极\n");
             op = check_par_result;
          }
       }
-      int val1, val2;
+      int val1 = 0, val2 = 0;
       if (op != p) { // 确保左侧表达式存在
+         printf("在递归层数:%d, 计算 val1\n", recursion_depth);
          val1 = eval(p, op - 1);
+         printf("在递归层数:%d, val1: %d\n", recursion_depth, val1); // Print val1 after it's computed
       }
       if (op != q) { // 确保右侧表达式存在
+         printf("在递归层数:%d, 计算 val2\n", recursion_depth);
          val2 = eval(op + 1, q);
+         printf("在递归层数:%d, val2: %d\n", recursion_depth, val1); // Print val1 after it's computed
       }
 
+      recursion_depth--; // Decrease depth before returning
+      printf("val: 退出递归: %d\n", recursion_depth + 1);
       switch (tokens[op].type) {
       case TK_PLUS:  return val1 + val2;
       case TK_MINUS: return val1 - val2;
