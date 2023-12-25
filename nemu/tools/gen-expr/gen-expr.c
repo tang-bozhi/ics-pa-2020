@@ -159,7 +159,7 @@ void gen_rand_expr() {
 int main(int argc, char* argv[]) {
    int seed = time(0);
    srand(seed);
-   int loop = 100;
+   int loop = 10000;
    if (argc > 1) {
       sscanf(argv[1], "%d", &loop);
    }
