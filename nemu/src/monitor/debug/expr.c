@@ -189,31 +189,29 @@ int find_main_op(int p, int q) {
 
 //evaluate
 //这个函数是通过教案指导的分治法也就是那嵌套的几行exp<>写出来的
-static int recursion_depth = 0; // static variable to keep track of recursion depth
 int eval(int p, int q) {
-   recursion_depth++; // Increase depth each time eval is called   if (p > q) {
-   /* Bad expression */
-   printf("Bad expression from %d to %d.\n", p, q);
-   recursion_depth--; // Decrease depth before returning
-   return -1;
-}
+   if (p > q) {
+      /* Bad expression */
+      printf("Bad expression from %d to %d.\n", p, q);
+      return -1;
+   }
    else if (p == q) {
       /* Single token.
        * For now this token should be a number.
        * Return the value of the number.
        */
-       if (tokens[p].type == TK_NUM) {
-          return (atoi(tokens[p].str));
-       }
-       printf("Unkown type %d.\n", tokens[p].type);
-       return -1;
+      if (tokens[p].type == TK_NUM) {
+         return (atoi(tokens[p].str));
+      }
+      printf("Unkown type %d.\n", tokens[p].type);
+      return -1;
    }
    else if (check_parentheses(p, q) == 1) {
       /* The expression is surrounded by a matched pair of parentheses.
        * If that is the case, just throw away the parentheses.
        */
-       int result = eval(p + 1, q - 1);
-       return result;
+      int result = eval(p + 1, q - 1);
+      return result;
    }
    else {
       int op = find_main_op(p, q);//principal operator
@@ -235,7 +233,6 @@ int eval(int p, int q) {
          val2 = eval(op + 1, q);
       }
 
-      recursion_depth--; // Decrease depth before returning
       switch (tokens[op].type) {
       case TK_PLUS:  return val1 + val2;
       case TK_MINUS: return val1 - val2;
