@@ -9,10 +9,10 @@
 
 enum {
    TK_NOTYPE = 256,// 空格 256
-   TK_PLUS = '+',        // 加号
-   TK_MINUS = '-',       // 减号
-   TK_STAR = '*',        // 乘号
-   TK_SLASH = '/',       // 除号
+   TK_PLUS = '+',        // 加号 43
+   TK_MINUS = '-',       // 减号 45
+   TK_STAR = '*',        // 乘号 42
+   TK_SLASH = '/',       // 除号 47
    TK_NEG = 257,         // 负数 与TK_MINUS减法区别 257
    TK_EQ,          // 等号 258
    TK_LPAR,        // 左括号 259
