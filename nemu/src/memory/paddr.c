@@ -4,65 +4,65 @@
 #include <device/map.h>
 #include <stdlib.h>
 #include <time.h>
-
+// NEMU默认为客户计算机提供128MB的物理内存(见nemu/src/memory/paddr.c中定义的pmem) 
 static uint8_t pmem[PMEM_SIZE] PG_ALIGN = {};
 
 void* guest_to_host(paddr_t addr) { return &pmem[addr]; }
-paddr_t host_to_guest(void *addr) { return (void *)pmem - addr; }
+paddr_t host_to_guest(void* addr) { return (void*)pmem - addr; }
 
 IOMap* fetch_mmio_map(paddr_t addr);
 
 void init_mem() {
 #ifndef DIFF_TEST
-  srand(time(0));
-  uint32_t *p = (uint32_t *)pmem;
-  int i;
-  for (i = 0; i < PMEM_SIZE / sizeof(p[0]); i ++) {
-    p[i] = rand();
-  }
+   srand(time(0));
+   uint32_t* p = (uint32_t*)pmem;
+   int i;
+   for (i = 0; i < PMEM_SIZE / sizeof(p[0]); i++) {
+      p[i] = rand();
+   }
 #endif
 }
 
 static inline bool in_pmem(paddr_t addr) {
-  return (PMEM_BASE <= addr) && (addr <= PMEM_BASE + PMEM_SIZE - 1);
+   return (PMEM_BASE <= addr) && (addr <= PMEM_BASE + PMEM_SIZE - 1);
 }
 
 static inline word_t pmem_read(paddr_t addr, int len) {
-  void *p = &pmem[addr - PMEM_BASE];
-  switch (len) {
-    case 1: return *(uint8_t  *)p;
-    case 2: return *(uint16_t *)p;
-    case 4: return *(uint32_t *)p;
+   void* p = &pmem[addr - PMEM_BASE];
+   switch (len) {
+   case 1: return *(uint8_t*)p;
+   case 2: return *(uint16_t*)p;
+   case 4: return *(uint32_t*)p;
 #ifdef ISA64
-    case 8: return *(uint64_t *)p;
+   case 8: return *(uint64_t*)p;
 #endif
-    default: assert(0);
-  }
+   default: assert(0);
+   }
 }
 
 static inline void pmem_write(paddr_t addr, word_t data, int len) {
-  void *p = &pmem[addr - PMEM_BASE];
-  switch (len) {
-    case 1: *(uint8_t  *)p = data; return;
-    case 2: *(uint16_t *)p = data; return;
-    case 4: *(uint32_t *)p = data; return;
+   void* p = &pmem[addr - PMEM_BASE];
+   switch (len) {
+   case 1: *(uint8_t*)p = data; return;
+   case 2: *(uint16_t*)p = data; return;
+   case 4: *(uint32_t*)p = data; return;
 #ifdef ISA64
-    case 8: *(uint64_t *)p = data; return;
+   case 8: *(uint64_t*)p = data; return;
 #endif
-    default: assert(0);
-  }
+   default: assert(0);
+   }
 }
 
 /* Memory accessing interfaces */
 
 inline word_t paddr_read(paddr_t addr, int len) {
-  if (in_pmem(addr)) return pmem_read(addr, len);
-  else return map_read(addr, len, fetch_mmio_map(addr));
+   if (in_pmem(addr)) return pmem_read(addr, len);
+   else return map_read(addr, len, fetch_mmio_map(addr));
 }
 
 inline void paddr_write(paddr_t addr, word_t data, int len) {
-  if (in_pmem(addr)) pmem_write(addr, data, len);
-  else map_write(addr, data, len, fetch_mmio_map(addr));
+   if (in_pmem(addr)) pmem_write(addr, data, len);
+   else map_write(addr, data, len, fetch_mmio_map(addr));
 }
 
 word_t vaddr_mmu_read(vaddr_t addr, int len, int type);

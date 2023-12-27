@@ -9,15 +9,16 @@
 
 enum {
    TK_NOTYPE = 256,// 空格 256
-   TK_PLUS = '+',        // 加号 43
-   TK_MINUS = '-',       // 减号 45
-   TK_STAR = '*',        // 乘号 42
-   TK_SLASH = '/',       // 除号 47
-   TK_NEG = 257,         // 负数 与TK_MINUS减法区别 257
+   TK_PLUS = '+',  // 加号 43
+   TK_MINUS = '-', // 减号 45
+   TK_STAR = '*',  // 乘号 42
+   TK_SLASH = '/', // 除号 47
+   TK_NEG = 257,   // 负数 与TK_MINUS减法区别 257
    TK_EQ,          // 等号 258
    TK_LPAR,        // 左括号 259
    TK_RPAR,        // 右括号 260
-   TK_NUM,          // 数字 261
+   TK_NUM,         // 数字 261
+   TK_DEREF = 262, //指针解引用262 
 };
 
 
@@ -27,12 +28,15 @@ static struct rule
    int token_type;
 } rules[] = {
     {" +", TK_NOTYPE}, // spaces
-    {"\\+", TK_PLUS},          // plus
-    {"-", TK_MINUS},        // minus
+    {"\\+", TK_PLUS},  // plus
+    {"-", TK_MINUS},   // minus
     {"-", TK_NEG},     // negtive sign
-    {"\\*", TK_STAR},      // multiplication
-    {"/", TK_SLASH},        // division
-    {"==", TK_EQ},     // equal
+    {"\\*", TK_STAR},  // multiplication
+    {"\\*",TK_DEREF},  //pointer dereference未实现
+    {"/", TK_SLASH},   // division
+    {"==", TK_EQ},     // equal未实现
+    {"!=",TK_NEQ},     //not equal未实现
+    {"&&",TK_AND},     //and未实现
     {"\\(", TK_LPAR},  // left parenthesis
     {"\\)", TK_RPAR},  // right parenthesis
     {"[0-9]+", TK_NUM} // numbers (at least one digit)
@@ -85,8 +89,7 @@ static bool make_token(char* e) {
             char* substr_start = e + position; // 当前循环中被判定字符的指针
             int substr_len = pmatch.rm_eo;     // 当前循环中被判定字符的长度
 
-            int if_true_1 = 0;//检查if是否执行了内部代码
-            int if_true_2 = 0;
+            int if_true = 0;//检查if是否执行了内部代码
 
             Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
                i, rules[i].regex, position, substr_len, substr_len, substr_start);
@@ -104,7 +107,15 @@ static bool make_token(char* e) {
             if (rules[i].token_type == TK_MINUS) {//对:  文件开头-,(-,=-  三种情况做判定
                if (nr_token == 0 || tokens[nr_token - 1].type == TK_LPAR || tokens[nr_token - 1].type == TK_EQ) {
                   tokens[nr_token].type = TK_NEG;
-                  if_true_1++;
+                  if_true++;
+               }
+            }
+
+            //判断DEREFerence
+            if (rules[i].token_type == TK_STAR) {
+               if (i == 0 || tokens[nr_token - 1].type == TK_PLUS || tokens[nr_token - 1].type == TK_MINUS || tokens[nr_token - 1].type == TK_STAR || tokens[nr_token - 1].type == TK_SLASH || tokens[nr_token - 1].type == TK_LPAR) {
+                  tokens[nr_token].type = TK_DEREF;
+                  if_true++;
                }
             }
 
@@ -115,9 +126,9 @@ static bool make_token(char* e) {
                int length_to_copy = substr_len < sizeof(tokens[nr_token].str) ? substr_len : sizeof(tokens[nr_token].str) - 1;
                strncpy(tokens[nr_token].str, substr_start, length_to_copy);
                tokens[nr_token].str[length_to_copy] = '\0';
-               if_true_2++;
+               if_true++;
             }
-            if (if_true_1 || if_true_2) {
+            if (if_true) {
                nr_token++;//如果识别到了token type,则nr_token++
             }
             break;
@@ -158,7 +169,6 @@ int find_main_op(int p, int q) {
    int count = 0;
    int main_op = -1;
    int last_found_mul_div = -1;//用来将*或/限制在右端第一个
-   printf("find_main_op called with p = %d, q = %d\n", p, q);
    for (int i = q; i != p; i--) {
       if (tokens[i].type == TK_NOTYPE) {
          continue;
