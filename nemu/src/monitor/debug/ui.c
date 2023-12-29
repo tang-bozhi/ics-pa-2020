@@ -28,7 +28,7 @@ static char* rl_gets() {
 }
 
 static int cmd_c(char* args) {
-   cpu_exec(-1);
+   cpu_exec(-1);//uint64_t: -1   由于uint64_t是无符号的，当传入-1时，它会被转换为uint64_t能表示的最大值，即2^64 - 1。在实践中，这通常意味着"运行直到遇到停止条件"，而不是真的执行2^64 - 1条指令
    return 0;
 }
 
