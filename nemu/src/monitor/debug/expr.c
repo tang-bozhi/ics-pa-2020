@@ -34,9 +34,9 @@ static struct rule
     {"\\*", TK_STAR},  // multiplication
     {"\\*",TK_DEREF},  //pointer dereference未实现
     {"/", TK_SLASH},   // division
-    {"==", TK_EQ},     // equal未实现
-    {"!=",TK_NEQ},     //not equal未实现
-    {"&&",TK_AND},     //and未实现
+    //{"==", TK_EQ},     // equal未实现
+    //{"!=",TK_NEQ},     //not equal未实现
+    //{"&&",TK_AND},     //and未实现
     {"\\(", TK_LPAR},  // left parenthesis
     {"\\)", TK_RPAR},  // right parenthesis
     {"[0-9]+", TK_NUM} // numbers (at least one digit)
