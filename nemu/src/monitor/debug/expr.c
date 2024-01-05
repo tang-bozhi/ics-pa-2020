@@ -120,7 +120,7 @@ static bool make_token(char* e) {
             }
             //写入token
             if (rules[i].token_type != TK_NOTYPE) {// 抛掉空格
-               if (!if_true) {
+               if (!if_true) { //token类型只设置一次
                   tokens[nr_token].type = rules[i].token_type; // 设置token类型
                }
                // 下方三行  将匹配的子字符串复制到token的str字段中
@@ -158,15 +158,18 @@ int check_parentheses(int p, int q) {
          exist++;
          count--;
       }
-      if (count == 0 && i != q && i != p && exist) {
+      if (count == 0 && i != q && i != p && exist) {//情况:最外层不由括号包裹,返回主op
          //(4 + 3)* (2 - 1)such
          return i + 1;
       }
-      if (count < 0) {
+      if (count < 0) {//情况:错误,返回-1
          return -1;
       }
    }
-   return (count == 0);
+   if (!(count == 0 && exist)) {//情况:没有括号,返回0
+      return 0;
+   }
+   return count == 0 && exist;//检查括号是否正确且有
 }
 
 //find main operator
@@ -228,6 +231,9 @@ int eval(int p, int q) {
       int result = eval(p + 1, q - 1);
       return result;
    }
+   else if (tokens[op].type == TK_NEG) {
+      return -eval(p + 1, q);
+   }
    else {
       int op = find_main_op(p, q);//principal operator
       if (op == -1) {
@@ -251,7 +257,6 @@ int eval(int p, int q) {
       switch (tokens[op].type) {
       case TK_PLUS:  return val1 + val2;
       case TK_MINUS: return val1 - val2;
-      case TK_NEG:   return -eval(p + 1, q);
       case TK_STAR:  return val1 * val2;
       case TK_SLASH:
          if (val2 != 0) { return val1 / val2; }
