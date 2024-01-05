@@ -6,6 +6,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+void isa_reg_display(void);
 void cpu_exec(uint64_t);
 int is_batch_mode();
 
@@ -37,9 +38,11 @@ static int cmd_q(char* args) {
    return -1;
 }
 
+static int cmd_help(char* args);
+
 static int cmd_si(char* args);
 
-static int cmd_help(char* args);
+static int cmd_info(char* args);
 
 static struct {
    char* name;
@@ -82,14 +85,27 @@ static int cmd_help(char* args) {
 
 static int cmd_si(char* args) {
    int step = 1;
-   if (args != NULL) {
-      step = strtol(args, NULL, 10);
+   char* arg = strtok(NULL, " ");
+
+   if (arg != NULL) {
+      step = strtol(arg, NULL, 10);
       if (step < 1) {
          printf("Number of steps should be a positive integer\n");
          return -1;//表示出错
       }
    }
    cpu_exec(step);
+   return 0;
+}
+
+static int cmd_info(char* args) {//info w监视点在之后pa实现
+   if (args == NULL) {
+      printf("Need more parameters.\n");
+      return 0;
+   }
+   else if (*args == 'r') {
+      isa_reg_display();
+   }
    return 0;
 }
 

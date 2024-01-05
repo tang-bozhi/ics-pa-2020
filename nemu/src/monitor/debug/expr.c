@@ -111,16 +111,18 @@ static bool make_token(char* e) {
                }
             }
 
-            //判断DEREFerence
+            //判断DEREFerence引用
             if (rules[i].token_type == TK_STAR) {
                if (i == 0 || tokens[nr_token - 1].type == TK_PLUS || tokens[nr_token - 1].type == TK_MINUS || tokens[nr_token - 1].type == TK_STAR || tokens[nr_token - 1].type == TK_SLASH || tokens[nr_token - 1].type == TK_LPAR) {
                   tokens[nr_token].type = TK_DEREF;
                   if_true++;
                }
             }
-
+            //写入token
             if (rules[i].token_type != TK_NOTYPE) {// 抛掉空格
-               tokens[nr_token].type = rules[i].token_type; // 设置token类型
+               if (!if_true) {
+                  tokens[nr_token].type = rules[i].token_type; // 设置token类型
+               }
                // 下方三行  将匹配的子字符串复制到token的str字段中
 
                int length_to_copy = substr_len < sizeof(tokens[nr_token].str) ? substr_len : sizeof(tokens[nr_token].str) - 1;
@@ -146,15 +148,18 @@ static bool make_token(char* e) {
 //检查括号是否有且正确
 int check_parentheses(int p, int q) {
    int count = 0;
+   int exist = 0;
    for (int i = p; i <= q; i++) {
       if (tokens[i].type == TK_LPAR) {
+         exist++;
          count++;
       }
       else if (tokens[i].type == TK_RPAR) {
+         exist++;
          count--;
       }
-      if (count == 0 && i != q && i != p) {
-         //(4 + 3)* (2 - 1) false, the leftmost '(' and the rightmost ')' are not matched
+      if (count == 0 && i != q && i != p && exist) {
+         //(4 + 3)* (2 - 1)such
          return i + 1;
       }
       if (count < 0) {
