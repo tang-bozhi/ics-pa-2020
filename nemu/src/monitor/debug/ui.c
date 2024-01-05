@@ -98,7 +98,7 @@ static int cmd_si(char* args) {
    return 0;
 }
 
-static int cmd_info(char* args) {//info w监视点在之后pa实现
+static int cmd_info(char* args) {//info w监视点在之后pa实现到watchpoint.c中
    if (args == NULL) {
       printf("Need more parameters.\n");
       return 0;
