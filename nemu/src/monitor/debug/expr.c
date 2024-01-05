@@ -231,7 +231,7 @@ int eval(int p, int q) {
       int result = eval(p + 1, q - 1);
       return result;
    }
-   else if (tokens[op].type == TK_NEG) {
+   else if (tokens[p].type == TK_NEG) {
       return -eval(p + 1, q);
    }
    else {
