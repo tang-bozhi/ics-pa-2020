@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <memory/paddr.h>
 
 void isa_reg_display(void);
 void cpu_exec(uint64_t);
@@ -44,6 +45,8 @@ static int cmd_si(char* args);
 
 static int cmd_info(char* args);
 
+static int cmd_x(char* args);
+
 static struct {
    char* name;
    char* description;
@@ -54,7 +57,11 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   { "si", "Step through program by N instructions", cmd_si },
   { "info", "Print program status", cmd_info },
-  /* TODO: Add more commands */
+  { "x","Find the value of the expression EXPR, \
+  use the result as the starting memory address,\
+   and output N consecutive 4-byte outputs in hexadecimal.",\
+   cmd_x}
+   /* TODO: Add more commands */
 
 };
 
@@ -108,6 +115,37 @@ static int cmd_info(char* args) {//info w监视点在之后pa实现到watchpoint
    }
    return 0;
 }
+
+static int cmd_x(char* args) {
+   int n = 1;
+   char* arg = strtok(args, " "); // 使用 args 获取第一个参数
+
+   if (arg == NULL) {
+      // 没有参数，错误退出
+      printf("Missing address.\n");
+      return -1;
+   }
+
+   char* next_arg = strtok(NULL, " "); // 尝试获取第二个参数
+
+   if (next_arg != NULL) {
+      // 如果存在第二个参数，则第一个参数是n，第二个参数是地址
+      n = strtol(arg, NULL, 10); // 将第一个参数转换为整数n
+      arg = next_arg; // 将第二个参数作为地址
+   }
+   // 此时arg包含地址
+   paddr_t scanned_address;//
+   if (sscanf(arg, "%x", &scanned_address) != 1) {
+      printf("地址转换失败，错误退出\n");// 地址转换失败，错误退出
+      return -1;
+   }
+
+   for (int i = 0; i < n; i++) {
+      printf("%u\n", paddr_read(scanned_address + i, 4)); // 调用 paddr_read 函数
+   }
+   return 0; // 函数应该返回一个值，这里返回 0 表示成功
+}
+
 
 void ui_mainloop() {
    if (is_batch_mode()) {
