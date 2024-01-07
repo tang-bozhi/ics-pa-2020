@@ -140,6 +140,15 @@ static int cmd_x(char* args) {
       return -1;
    }
 
+   if (scanned_address < PMEM_BASE + PMEM_SIZE - 1) {
+      ;
+   }
+
+   if (scanned_address >= PMEM_BASE) {
+      void* guest_address = guest_to_host(scanned_address);
+      scanned_address = guest_address;
+   }
+
    for (int i = 0; i < n; i++) {
       printf("%u\n", paddr_read(scanned_address + i, 4)); // 调用 paddr_read 函数
    }

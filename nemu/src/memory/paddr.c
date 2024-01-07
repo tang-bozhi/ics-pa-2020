@@ -5,10 +5,10 @@
 #include <stdlib.h>
 #include <time.h> 
 // NEMU默认为客户计算机提供128MB的物理内存(见nemu/src/memory/paddr.c中定义的pmem) 
-static uint8_t pmem[PMEM_SIZE] PG_ALIGN = {};
+static uint8_t pmem[PMEM_SIZE] PG_ALIGN = {};//这个数组是物理地址,比如0x80100000被映射到pmem[0x100000]
 
-void* guest_to_host(paddr_t addr) { return &pmem[addr]; }
-paddr_t host_to_guest(void* addr) { return (void*)pmem - addr; }
+void* guest_to_host(paddr_t addr) { return &pmem[addr]; }//host是物理地址
+paddr_t host_to_guest(void* addr) { return (void*)pmem - addr; }//guest是虚拟机地址
 
 IOMap* fetch_mmio_map(paddr_t addr);
 
