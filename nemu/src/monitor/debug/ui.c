@@ -143,13 +143,13 @@ static int cmd_x(char* args) {
 
    if ((PMEM_BASE <= scanned_address) && (scanned_address <= PMEM_BASE + PMEM_SIZE - 1)) {
       for (int i = 0; i < n; i++) {
-         printf("%u\n", vaddr_read(scanned_address + 4 * i, 4)); //这里vaddr_read(vaddr_t addr, int len)中的vaddr_t addr输入为虚拟地址
+         printf("%u\n", vaddr_read(scanned_address + 4 * i, 4)); //这里vaddr_read和paddr_read的输入都是基于虚拟地址PMEM_BASE的 
       }
-   }//得到virtual地址,riscv32_PMEM_BASE 0x80000000
-
-   if (scanned_address <= PMEM_BASE) {
+   }
+   else if (0 < scanned_address && scanned_address < PMEM_SIZE) {
+      scanned_address += PMEM_BASE;
       for (int i = 0; i < n; i++) {
-         printf("%u\n", paddr_read(scanned_address + 4 * i, 4)); //这里vaddr_read(vaddr_t addr, int len)中的vaddr_t addr输入为虚拟地址
+         printf("%u\n", vaddr_read(scanned_address + 4 * i, 4)); //注意后面的这个len可能需要调整:1 2 4 
       }
    }
 

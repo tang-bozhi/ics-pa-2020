@@ -25,7 +25,7 @@ void init_mem() {
 
 static inline bool in_pmem(paddr_t addr) {
    return (PMEM_BASE <= addr) && (addr <= PMEM_BASE + PMEM_SIZE - 1);
-}//riscv32的:riscv32_IMAGE_START 0x100000 riscv32_PMEM_BASE 0x80000000
+}
 
 static inline word_t pmem_read(paddr_t addr, int len) {
    void* p = &pmem[addr - PMEM_BASE];
