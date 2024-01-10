@@ -162,8 +162,9 @@ int check_parentheses(int p, int q) {
          exist++;
          count--;
       }
-      if (count == 0 && i != q && i != p && exist) {//情况:最外层不由括号包裹,返回主op
+      if (count == 0 && i != q && i != p && exist) {//情况:最外层不由括号包裹,返回主op && 别动这行的4个条件
          //(4 + 3)* (2 - 1)such
+         //与*()这种冲突
          return i + 1;
       }
       if (count < 0) {//情况:错误,返回-1
@@ -173,7 +174,7 @@ int check_parentheses(int p, int q) {
    if (!(count == 0 && exist)) {//情况:没有括号,返回0
       return 0;
    }
-   return count == 0 && exist;//检查括号是否正确且有
+   return count == 0 && exist;//检查括号是否正确且有 :与*()冲突
 }
 
 //find main operator
@@ -243,13 +244,6 @@ int eval(int p, int q) {
       printf("Unkown type %d.\n", tokens[p].type);
       return -1;
    }
-   else if (check_parentheses(p, q) == 1) {
-      /* The expression is surrounded by a matched pair of parentheses.
-       * If that is the case, just throw away the parentheses.
-       */
-      int result = eval(p + 1, q - 1);
-      return result;
-   }
    else if (tokens[p].type == TK_NEG) {//判断负号
       return -eval(p + 1, q);
    }
@@ -266,7 +260,7 @@ int eval(int p, int q) {
          }
          return vaddr_read(addr, 4);
       }
-      else {
+      else {//这个else还不能删掉,会报control reaches end of non-void function,要确保在所有可能的执行路径上 eval 函数都有一个返回值
          printf("Dereference error at %d.\n", p);
          return -1;
       }
@@ -274,6 +268,13 @@ int eval(int p, int q) {
    else if (tokens[p].type == TK_HEX) {
       // strtol函数可以处理以"0x"或"0X"开头的十六进制字符串
       return strtol(tokens[p].str, NULL, 0);
+   }
+   else if (check_parentheses(p, q) == 1) {
+      /* The expression is surrounded by a matched pair of parentheses.
+       * If that is the case, just throw away the parentheses.
+       */
+      int result = eval(p + 1, q - 1);
+      return result;
    }
    else {
       int op = find_main_op(p, q);//principal operator
