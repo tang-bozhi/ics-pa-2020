@@ -6,6 +6,8 @@
  */
 #include <regex.h>
 #include <stdlib.h>
+#include <memory/paddr.h>
+#include <memory/vaddr.h>
 
 enum {
    TK_NOTYPE = 256,// 空格 256
@@ -18,7 +20,8 @@ enum {
    TK_LPAR,        // 左括号 259
    TK_RPAR,        // 右括号 260
    TK_NUM,         // 数字 261
-   TK_DEREF = 262, //指针解引用262 
+   TK_DEREF,       //指针解引用262 
+
 };
 
 
@@ -34,7 +37,7 @@ static struct rule
     {"\\*", TK_STAR},  // multiplication
     {"\\*",TK_DEREF},  //pointer dereference未实现
     {"/", TK_SLASH},   // division
-    //{"==", TK_EQ},     // equal未实现
+    //{"==", TK_EQ},     //equal
     //{"!=",TK_NEQ},     //not equal未实现
     //{"&&",TK_AND},     //and未实现
     {"\\(", TK_LPAR},  // left parenthesis
@@ -112,7 +115,7 @@ static bool make_token(char* e) {
             }
 
             //判断DEREFerence引用
-            if (rules[i].token_type == TK_STAR) {
+            if (rules[i].token_type == TK_STAR) {//对:  tokens开头*,+*,-*,**,/*,(*做判定
                if (i == 0 || tokens[nr_token - 1].type == TK_PLUS || tokens[nr_token - 1].type == TK_MINUS || tokens[nr_token - 1].type == TK_STAR || tokens[nr_token - 1].type == TK_SLASH || tokens[nr_token - 1].type == TK_LPAR) {
                   tokens[nr_token].type = TK_DEREF;
                   if_true++;
@@ -125,7 +128,7 @@ static bool make_token(char* e) {
                }
                // 下方三行  将匹配的子字符串复制到token的str字段中
 
-               int length_to_copy = substr_len < sizeof(tokens[nr_token].str) ? substr_len : sizeof(tokens[nr_token].str) - 1;
+               int length_to_copy = substr_len < sizeof(tokens[nr_token].str) ? substr_len : sizeof(tokens[nr_token].str) - 1;//超出sizeof(tokens[nr_token].str)截断
                strncpy(tokens[nr_token].str, substr_start, length_to_copy);
                tokens[nr_token].str[length_to_copy] = '\0';
                if_true++;
@@ -233,6 +236,9 @@ int eval(int p, int q) {
    }
    else if (tokens[p].type == TK_NEG) {
       return -eval(p + 1, q);
+   }
+   else if (tokens[p]->type == TK_DEREF) {
+      tokens[p]
    }
    else {
       int op = find_main_op(p, q);//principal operator
