@@ -250,16 +250,20 @@ int eval(int p, int q) {
       int result = eval(p + 1, q - 1);
       return result;
    }
-   else if (tokens[p].type == TK_NEG) {
+   else if (tokens[p].type == TK_NEG) {//判断负号
       return -eval(p + 1, q);
    }
-   else if (tokens[p].type == TK_DEREF) {
+   else if (tokens[p].type == TK_DEREF) {//判断解引用
       // 确保后续有一个表达式
       if (p + 1 <= q) {
          // 需要找到解引用操作符后的表达式的范围
          int next_expr_end = find_next_expr_end(p + 1, q);
          uint32_t addr = eval(p + 1, next_expr_end); // 计算地址
          // ...[地址有效性检查和读取内存的代码]...
+         if (PMEM_BASE < addr && addr <= PMEM_BASE + PMEM_SIZE - 1) {
+            printf("Invalid memory access at address 0x%08x.\n", addr);
+            return -1;
+         }
          return vaddr_read(addr, 4);
       }
       else {
