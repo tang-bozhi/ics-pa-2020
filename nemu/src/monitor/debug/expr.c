@@ -49,7 +49,7 @@ static struct rule
 
 static regex_t re[NR_REGEX] = {}; // regex.h 这是一个计算机可以更高效匹配的内部格式，不能在regex之外用这个，应该用rules作为正则模式
 
-void init_regex_add_op() {//辅助函数
+void init_regex_add_op() {//辅助函数:插入随机
    int i;
    char error_msg[128];
    int reti;//return value of regex compile
@@ -61,20 +61,6 @@ void init_regex_add_op() {//辅助函数
          panic("regex compilation failed: %s\n%s", error_msg, rules[i].regex);
       }
    }
-}
-
-int find_next_expr_end(int start, int end) {//辅助函数
-   int level = 0;
-   for (int i = start; i <= end; i++) {
-      if (tokens[i].type == TK_LPAR) level++;
-      if (tokens[i].type == TK_RPAR) level--;
-      // 如果我们在顶层找到了一个操作符，就返回它的位置
-      if (level == 0 && (tokens[i].type == TK_PLUS || tokens[i].type == TK_MINUS ||
-         tokens[i].type == TK_STAR || tokens[i].type == TK_SLASH)) {
-         return i - 1;
-      }
-   }
-   return end; // 如果没有找到其他操作符，整个范围都是表达式的一部分
 }
 
 typedef struct token
@@ -222,6 +208,21 @@ int find_main_op(int p, int q) {
    }
    return main_op;
 }
+
+int find_next_expr_end(int start, int end) {//辅助函数:判断*引用结束位置
+   int level = 0;
+   for (int i = start; i <= end; i++) {
+      if (tokens[i].type == TK_LPAR) level++;
+      if (tokens[i].type == TK_RPAR) level--;
+      // 如果我们在顶层找到了一个操作符，就返回它的位置
+      if (level == 0 && (tokens[i].type == TK_PLUS || tokens[i].type == TK_MINUS ||
+         tokens[i].type == TK_STAR || tokens[i].type == TK_SLASH)) {
+         return i - 1;
+      }
+   }
+   return end; // 如果没有找到其他操作符，整个范围都是表达式的一部分
+}
+
 
 //evaluate
 //这个函数是通过教案指导的分治法也就是那嵌套的几行exp<>写出来的
