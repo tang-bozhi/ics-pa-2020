@@ -21,7 +21,7 @@ enum {
    TK_RPAR,        // 右括号 260
    TK_NUM,         // 数字 261
    TK_DEREF,       //指针解引用262 
-
+   TK_HEX,         // 十六进制数字263
 };
 
 
@@ -42,6 +42,7 @@ static struct rule
     //{"&&",TK_AND},     //and未实现
     {"\\(", TK_LPAR},  // left parenthesis
     {"\\)", TK_RPAR},  // right parenthesis
+    {"0[xX][0-9a-fA-F]+", TK_HEX}, // 十六进制数字
     {"[0-9]+", TK_NUM} // numbers (at least one digit)
 };
 
@@ -98,9 +99,6 @@ static bool make_token(char* e) {
             Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
                i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
-            // 挪动e中指针，针对最外层while循环做改变
-            position += substr_len;
-
             // 检查数组tokens是否已满
             if (nr_token >= sizeof(tokens) / sizeof(Token)) {
                printf("token array is full, cannot insert more\n");
@@ -117,7 +115,7 @@ static bool make_token(char* e) {
 
             //判断DEREFerence引用
             if (rules[i].token_type == TK_STAR) {//对:  tokens开头*,+*,-*,**,/*,(*做判定
-               if (i == 0 || tokens[nr_token - 1].type == TK_PLUS || tokens[nr_token - 1].type == TK_MINUS || tokens[nr_token - 1].type == TK_STAR || tokens[nr_token - 1].type == TK_SLASH || tokens[nr_token - 1].type == TK_LPAR) {
+               if ((position) == 0 || tokens[nr_token - 1].type == TK_PLUS || tokens[nr_token - 1].type == TK_MINUS || tokens[nr_token - 1].type == TK_STAR || tokens[nr_token - 1].type == TK_SLASH || tokens[nr_token - 1].type == TK_LPAR) {
                   tokens[nr_token].type = TK_DEREF;
                   if_true++;
                }
@@ -137,6 +135,8 @@ static bool make_token(char* e) {
             if (if_true) {
                nr_token++;//如果识别到了token type,则nr_token++
             }
+            // 挪动e中指针，针对最外层while循环做改变
+            position += substr_len;
             break;
          }
       }
@@ -270,6 +270,10 @@ int eval(int p, int q) {
          printf("Dereference error at %d.\n", p);
          return -1;
       }
+   }
+   else if (tokens[p].type == TK_HEX) {
+      // strtol函数可以处理以"0x"或"0X"开头的十六进制字符串
+      return strtol(tokens[p].str, NULL, 0);
    }
    else {
       int op = find_main_op(p, q);//principal operator
