@@ -49,10 +49,7 @@ static struct rule
 
 static regex_t re[NR_REGEX] = {}; // regex.h 这是一个计算机可以更高效匹配的内部格式，不能在regex之外用这个，应该用rules作为正则模式
 
-/* Rules are used for many times.
- * Therefore we compile them only once before any usage.
- */
-void init_regex_add_op() {
+void init_regex_add_op() {//辅助函数
    int i;
    char error_msg[128];
    int reti;//return value of regex compile
@@ -66,6 +63,20 @@ void init_regex_add_op() {
    }
 }
 
+int find_next_expr_end(int start, int end) {//辅助函数
+   int level = 0;
+   for (int i = start; i <= end; i++) {
+      if (tokens[i].type == TK_LPAR) level++;
+      if (tokens[i].type == TK_RPAR) level--;
+      // 如果我们在顶层找到了一个操作符，就返回它的位置
+      if (level == 0 && (tokens[i].type == TK_PLUS || tokens[i].type == TK_MINUS ||
+         tokens[i].type == TK_STAR || tokens[i].type == TK_SLASH)) {
+         return i - 1;
+      }
+   }
+   return end; // 如果没有找到其他操作符，整个范围都是表达式的一部分
+}
+
 typedef struct token
 {
    int type;
@@ -75,9 +86,13 @@ typedef struct token
 static Token tokens[1000] __attribute__((used)) = {}; // 用于存放识别过了的字符串
 static int nr_token __attribute__((used)) = 0;      // 识别过了的字符串的数量
 
+
 // Converts an expression string into tokens based on the defined regex rules.
 // @param e: String expression to tokenize
 // @return: Returns true if tokenization is successful, false otherwise
+/* Rules are used for many times.
+ * Therefore we compile them only once before any usage.
+ */
 static bool make_token(char* e) {
    int position = 0;//字符串当前处理位置
    int i;
@@ -121,12 +136,12 @@ static bool make_token(char* e) {
                   if_true++;
                }
             }
-            //写入token
+            //写入token type到tokens
             if (rules[i].token_type != TK_NOTYPE) {// 抛掉空格
                if (!if_true) { //token类型只设置一次
                   tokens[nr_token].type = rules[i].token_type; // 设置token类型
                }
-               // 下方三行  将匹配的子字符串复制到token的str字段中
+               // 下方三行  将匹配的子字符串复制到tokens的str字段中
 
                int length_to_copy = substr_len < sizeof(tokens[nr_token].str) ? substr_len : sizeof(tokens[nr_token].str) - 1;//超出sizeof(tokens[nr_token].str)截断
                strncpy(tokens[nr_token].str, substr_start, length_to_copy);
@@ -237,8 +252,19 @@ int eval(int p, int q) {
    else if (tokens[p].type == TK_NEG) {
       return -eval(p + 1, q);
    }
-   else if (tokens[p]->type == TK_DEREF) {
-      tokens[p]
+   else if (tokens[p].type == TK_DEREF) {
+      // 确保后续有一个表达式
+      if (p + 1 <= q) {
+         // 需要找到解引用操作符后的表达式的范围
+         int next_expr_end = find_next_expr_end(p + 1, q);
+         uint32_t addr = eval(p + 1, next_expr_end); // 计算地址
+         // ...[地址有效性检查和读取内存的代码]...
+         return vaddr_read(addr, 4);
+      }
+      else {
+         printf("Dereference error at %d.\n", p);
+         return -1;
+      }
    }
    else {
       int op = find_main_op(p, q);//principal operator
