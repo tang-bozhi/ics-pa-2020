@@ -233,17 +233,6 @@ int eval(int p, int q) {
       printf("Bad expression from %d to %d.\n", p, q);
       return -1;
    }
-   else if (p == q) {
-      /* Single token.
-       * For now this token should be a number.
-       * Return the value of the number.
-       */
-      if (tokens[p].type == TK_NUM) {
-         return (atoi(tokens[p].str));
-      }
-      printf("Unkown type %d.\n", tokens[p].type);
-      return -1;
-   }
    else if (tokens[p].type == TK_NEG) {//判断负号
       return -eval(p + 1, q);
    }
@@ -268,6 +257,17 @@ int eval(int p, int q) {
    else if (tokens[p].type == TK_HEX) {
       // strtol函数可以处理以"0x"或"0X"开头的十六进制字符串
       return strtol(tokens[p].str, NULL, 0);
+   }
+   else if (p == q) {
+      /* Single token.
+       * For now this token should be a number.
+       * Return the value of the number.
+       */
+      if (tokens[p].type == TK_NUM) {
+         return (atoi(tokens[p].str));
+      }
+      printf("Unkown type %d.\n", tokens[p].type);
+      return -1;
    }
    else if (check_parentheses(p, q) == 1) {
       /* The expression is surrounded by a matched pair of parentheses.
