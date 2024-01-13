@@ -20,8 +20,10 @@ enum {
    TK_LPAR,        // 左括号 259
    TK_RPAR,        // 右括号 260
    TK_NUM,         // 数字 261
-   TK_DEREF,       //指针解引用262 
+   TK_DEREF,       // 指针解引用262 
    TK_HEX,         // 十六进制数字263
+   TK_NEQ,         // 不等号264
+   TK_REG,         // 寄存器
 };
 
 
@@ -35,15 +37,16 @@ static struct rule
     {"-", TK_MINUS},   // minus
     {"-", TK_NEG},     // negtive sign
     {"\\*", TK_STAR},  // multiplication
-    {"\\*",TK_DEREF},  //pointer dereference未实现
+    {"\\*",TK_DEREF},  //pointer dereference
     {"/", TK_SLASH},   // division
-    //{"==", TK_EQ},     //equal
-    //{"!=",TK_NEQ},     //not equal未实现
-    //{"&&",TK_AND},     //and未实现
+    {"==", TK_EQ},     //equal
+    {"!=",TK_NEQ},     //not equal
+    //{"&&",TK_AND},   //and未实现
     {"\\(", TK_LPAR},  // left parenthesis
     {"\\)", TK_RPAR},  // right parenthesis
-    {"0[xX][0-9a-fA-F]+", TK_HEX}, // 十六进制数字
-    {"[0-9]+", TK_NUM} // numbers (at least one digit)
+    {"0[xX][0-9a-fA-F]+", TK_HEX},  // 十六进制数字
+    {"[0-9]+", TK_NUM},// numbers (at least one digit)
+    {"\\$[a-zA-Z+]",TK_REG},  // 寄存器
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]))
@@ -179,9 +182,16 @@ int check_parentheses(int p, int q) {
 
 //find main operator
 int find_main_op(int p, int q) {
-   int count = 0;
+   int count = 0;//括号计数
    int main_op = -1;
    int last_found_mul_div = -1;//用来将*或/限制在右端第一个
+   for (int i = q; i != p; i--) {//EQ和NEQ优先级低于+-,先处理他们
+      int last_TK = -1;
+      if (last_TK != i && (tokens[i].type == TK_EQ || tokens[i].type == TK_NEQ)) {
+         last_TK = i;
+         return i;
+      }
+   }
    for (int i = q; i != p; i--) {
       if (tokens[i].type == TK_NOTYPE) {
          continue;
@@ -193,7 +203,6 @@ int find_main_op(int p, int q) {
       if (tokens[i].type == TK_RPAR) {
          count--;
       }
-
       if (count == 0) {
          if (tokens[i].type == TK_PLUS || tokens[i].type == TK_MINUS) {
             return i;
@@ -243,7 +252,7 @@ int eval(int p, int q) {
          int next_expr_end = find_next_expr_end(p + 1, q);
          uint32_t addr = eval(p + 1, next_expr_end); // 计算地址
          // ...[地址有效性检查和读取内存的代码]...
-         if (PMEM_BASE < addr && addr <= PMEM_BASE + PMEM_SIZE - 1) {
+         if (addr < PMEM_BASE && PMEM_BASE + PMEM_SIZE - 1 <= addr) {
             printf("Invalid memory access at address 0x%08x.\n", addr);
             return -1;
          }
@@ -295,8 +304,9 @@ int eval(int p, int q) {
       if (op != q) { // 确保右侧表达式存在
          val2 = eval(op + 1, q);
       }
-
       switch (tokens[op].type) {
+      case TK_EQ:    return val1 == val2;
+      case TK_NEQ:   return val1 != val2;
       case TK_PLUS:  return val1 + val2;
       case TK_MINUS: return val1 - val2;
       case TK_STAR:  return val1 * val2;
