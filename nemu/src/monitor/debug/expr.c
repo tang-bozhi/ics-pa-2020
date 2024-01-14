@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <memory/paddr.h>
 #include <memory/vaddr.h>
+#include <common.h>
 
 enum {
    TK_NOTYPE = 256,// 空格 256
@@ -46,7 +47,7 @@ static struct rule
     {"\\)", TK_RPAR},  // right parenthesis
     {"0[xX][0-9a-fA-F]+", TK_HEX},  // 十六进制数字
     {"[0-9]+", TK_NUM},// numbers (at least one digit)
-    {"\\$[a-zA-Z+]",TK_REG},  // 寄存器
+    {"\\$[\\$]*[0-9a-zA-Z]+",TK_REG},  // 寄存器
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]))
@@ -123,6 +124,13 @@ static bool make_token(char* e) {
                   if_true++;
                }
             }
+
+            //判断TK_REG寄存器
+            if (rules[i].token_type == TK_REG) {
+               tokens[nr_token].type = TK_REG;
+               if_true++;
+            }
+
             //写入token type到tokens
             if (rules[i].token_type != TK_NOTYPE) {// 抛掉空格
                if (!if_true) { //token类型只设置一次
@@ -266,6 +274,17 @@ int eval(int p, int q) {
    else if (tokens[p].type == TK_HEX) {
       // strtol函数可以处理以"0x"或"0X"开头的十六进制字符串
       return strtol(tokens[p].str, NULL, 0);
+   }
+
+   else if (tokens[p].type == TK_REG) {
+      // 调用 isa_reg_str2val 函数获取寄存器的值
+      bool success;
+      word_t reg_val = isa_reg_str2val(tokens[p].str + 1, &success); // +1 跳过 '$' 符号
+      if (!success) {
+         printf("Failed to read register: %s\n", tokens[p].str);
+         return -1;
+      }
+      return reg_val;
    }
    else if (p == q) {
       /* Single token.

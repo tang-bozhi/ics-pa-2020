@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 
          // 比较预期结果和实际结果
          if (!success || result != expected) {
-            printf("Test failed: %s = %d, expected %d\n", expression, result, expected);
+            printf("Test failed: %s = %u, expected %d\n", expression, result, expected);
             // 可以添加错误处理
             assert(0);
          }

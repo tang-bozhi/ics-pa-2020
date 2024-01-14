@@ -20,7 +20,24 @@ void isa_reg_display() {
 
 
 word_t isa_reg_str2val(const char* s, bool* success) {
-   return 0;
+   if (s == NULL || success == NULL) {
+      printf("isa_reg_str2val() failed,Illegal input parameters\n");
+      return -1;
+   }
+
+   for (int i = 0; i < 32; i++) {
+      if (strcmp(s, regs[i]) == 0) {
+         *success = true;
+         return get_reg_value(i);
+      }
+   }
+   if (strcmp(s, "pc") == 0) {
+      *success = true;
+      return get_reg_value(32); // 对应于pc的特殊索引
+   }
+
+   *success = false;
+   return -1;
 }
 
 word_t get_reg_value(int i) {
@@ -32,7 +49,8 @@ word_t get_reg_value(int i) {
       return cpu.pc; // 如果i为32，返回pc的值
    }
    else {
-      assert(0); // 非法寄存器索引
+      printf("Illegal Register Index.\n");
+      return -1; // 非法寄存器索引
    }
 }
 
