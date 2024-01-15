@@ -158,6 +158,7 @@ static bool make_token(char* e) {
 }
 
 //检查括号是否有且正确
+//@return -1:括号不匹配或者嵌套错误. 0:没有括号. 1:括号匹配且正确嵌套。
 int check_parentheses(int p, int q) {
    int count = 0;
    for (int i = p; i <= q; i++) {
@@ -168,6 +169,7 @@ int check_parentheses(int p, int q) {
          count--;
          if (count < 0) {
             // 发现更多的右括号，说明括号不匹配
+            printf("括号不匹配\n");
             return -1;
          }
       }
@@ -183,7 +185,8 @@ int check_parentheses(int p, int q) {
    return 0;
 }
 
-int handle_complex_cases(int p, int q) {
+//检测当最外层不是由一对括号包裹的情况
+int handle_complex_cases_of_parentheses(int p, int q) {
    int lpar = -1;  // 记录最外层左括号的位置
    int rpar = -1;  // 记录匹配的最外层右括号的位置
    int count = 0;  // 括号计数
@@ -211,11 +214,6 @@ int handle_complex_cases(int p, int q) {
    // 检查是否是形如 (expr1) op (expr2) 的情况
    if (lpar > p && rpar < q) {
       return rpar + 1;
-   }
-
-   // 检查是否是形如 expr op ((expr)) 的情况
-   if (lpar == p && rpar == q) {
-      return find_main_op(p, q);
    }
 
    return -1;  // 没有找到特殊情况
@@ -331,7 +329,6 @@ int eval(int p, int q) {
       printf("Unkown type %d.\n", tokens[p].type);
       return -1;
    }
-
    else if (check_parentheses(p, q) == 1) {
       /* The expression is surrounded by a matched pair of parentheses.
        * If that is the case, just throw away the parentheses.
@@ -341,15 +338,9 @@ int eval(int p, int q) {
    }
    else {
       int op = find_main_op(p, q);//principal operator
-      if (op == -1) {
-         int check_par_result = check_parentheses(p, q);
-         if (check_par_result == -1) {
-            printf("No main operator found from %d to %d.\n", p, q);
-            return -1;
-         }
-         else if (check_par_result > 1) {
-            op = check_par_result;
-         }
+      int complex_case_result = handle_complex_cases_of_parentheses(p, q);
+      if (complex_case_result != -1) {
+         op = complex_case_result;
       }
       int val1 = 0, val2 = 0;
       if (op != p) { // 确保左侧表达式存在
