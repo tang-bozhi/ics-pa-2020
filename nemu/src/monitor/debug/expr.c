@@ -10,6 +10,8 @@
 #include <memory/vaddr.h>
 #include <common.h>
 
+int find_main_op();
+
 enum {
    TK_NOTYPE = 256,// 空格 256
    TK_PLUS = '+',  // 加号 43
@@ -23,8 +25,9 @@ enum {
    TK_NUM,         // 数字 261
    TK_DEREF,       // 指针解引用262 
    TK_HEX,         // 十六进制数字263
-   TK_NEQ,         // 不等号264
-   TK_REG,         // 寄存器
+   TK_NEQ,         // 不等号264 
+   TK_REG,         // 寄存器265 
+   TK_AND,         // && 与266 
 };
 
 
@@ -36,13 +39,13 @@ static struct rule
     {" +", TK_NOTYPE}, // spaces
     {"\\+", TK_PLUS},  // plus
     {"-", TK_MINUS},   // minus
-    {"-", TK_NEG},     // negtive sign
+    {"-", TK_NEG},     // negtive sign          考虑到遍历,minus要放到negative的前面
     {"\\*", TK_STAR},  // multiplication
-    {"\\*",TK_DEREF},  //pointer dereference
+    {"\\*",TK_DEREF},  // pointer dereference   考虑到遍历,multi要放到derefer的前面
     {"/", TK_SLASH},   // division
-    {"==", TK_EQ},     //equal
-    {"!=",TK_NEQ},     //not equal
-    //{"&&",TK_AND},   //and未实现
+    {"==", TK_EQ},     // equal
+    {"!=",TK_NEQ},     // not equal
+    {"&&",TK_AND},     // and 
     {"\\(", TK_LPAR},  // left parenthesis
     {"\\)", TK_RPAR},  // right parenthesis
     {"0[xX][0-9a-fA-F]+", TK_HEX},  // 十六进制数字
@@ -125,12 +128,6 @@ static bool make_token(char* e) {
                }
             }
 
-            //判断TK_REG寄存器
-            if (rules[i].token_type == TK_REG) {
-               tokens[nr_token].type = TK_REG;
-               if_true++;
-            }
-
             //写入token type到tokens
             if (rules[i].token_type != TK_NOTYPE) {// 抛掉空格
                if (!if_true) { //token类型只设置一次
@@ -163,43 +160,73 @@ static bool make_token(char* e) {
 //检查括号是否有且正确
 int check_parentheses(int p, int q) {
    int count = 0;
-   int exist = 0;
    for (int i = p; i <= q; i++) {
       if (tokens[i].type == TK_LPAR) {
-         exist++;
          count++;
       }
       else if (tokens[i].type == TK_RPAR) {
-         exist++;
          count--;
-      }
-      if (count == 0 && i != q && i != p && exist) {//情况:最外层不由括号包裹,返回主op && 别动这行的4个条件
-         //(4 + 3)* (2 - 1)such
-         //与*()这种冲突
-         return i + 1;
-      }
-      if (count < 0) {//情况:错误,返回-1
-         return -1;
+         if (count < 0) {
+            // 发现更多的右括号，说明括号不匹配
+            return -1;
+         }
       }
    }
-   if (!(count == 0 && exist)) {//情况:没有括号,返回0
-      return 0;
+   if (count != 0) {
+      // 括号数量不匹配
+      return -1;
    }
-   return count == 0 && exist;//检查括号是否正确且有 :与*()冲突
+   // 检查是否整个表达式由一对括号包围
+   if (tokens[p].type == TK_LPAR && tokens[q].type == TK_RPAR) {
+      return 1;
+   }
+   return 0;
 }
+
+int handle_complex_cases(int p, int q) {
+   int lpar = -1;  // 记录最外层左括号的位置
+   int rpar = -1;  // 记录匹配的最外层右括号的位置
+   int count = 0;  // 括号计数
+
+   // 检测最外层的括号对
+   for (int i = p; i <= q; i++) {
+      if (tokens[i].type == TK_LPAR) {
+         if (count == 0) lpar = i;
+         count++;
+      }
+      else if (tokens[i].type == TK_RPAR) {
+         count--;
+         if (count == 0) {
+            rpar = i;
+            break;  // 找到最外层右括号，停止搜索
+         }
+      }
+   }
+
+   // 检查是否存在最外层的括号对
+   if (lpar == -1 || rpar == -1) {
+      return -1;  // 没有找到完整的最外层括号对
+   }
+
+   // 检查是否是形如 (expr1) op (expr2) 的情况
+   if (lpar > p && rpar < q) {
+      return rpar + 1;
+   }
+
+   // 检查是否是形如 expr op ((expr)) 的情况
+   if (lpar == p && rpar == q) {
+      return find_main_op(p, q);
+   }
+
+   return -1;  // 没有找到特殊情况
+}
+
 
 //find main operator
 int find_main_op(int p, int q) {
    int count = 0;//括号计数
    int main_op = -1;
    int last_found_mul_div = -1;//用来将*或/限制在右端第一个
-   for (int i = q; i != p; i--) {//EQ和NEQ优先级低于+-,先处理他们
-      int last_TK = -1;
-      if (last_TK != i && (tokens[i].type == TK_EQ || tokens[i].type == TK_NEQ)) {
-         last_TK = i;
-         return i;
-      }
-   }
    for (int i = q; i != p; i--) {
       if (tokens[i].type == TK_NOTYPE) {
          continue;
@@ -212,10 +239,16 @@ int find_main_op(int p, int q) {
          count--;
       }
       if (count == 0) {
-         if (tokens[i].type == TK_PLUS || tokens[i].type == TK_MINUS) {
+         if (tokens[i].type == TK_EQ || tokens[i].type == TK_NEQ) {
             return i;
          }
-         if ((tokens[i].type == TK_STAR || tokens[i].type == TK_SLASH) && last_found_mul_div == -1) {
+         else if (tokens[i].type == TK_AND) {
+            return i;
+         }
+         else if (tokens[i].type == TK_PLUS || tokens[i].type == TK_MINUS) {
+            return i;
+         }
+         else if ((tokens[i].type == TK_STAR || tokens[i].type == TK_SLASH) && last_found_mul_div == -1) {
             last_found_mul_div = i;
             main_op = i;
          }
@@ -286,6 +319,7 @@ int eval(int p, int q) {
       }
       return reg_val;
    }
+
    else if (p == q) {
       /* Single token.
        * For now this token should be a number.
@@ -297,6 +331,7 @@ int eval(int p, int q) {
       printf("Unkown type %d.\n", tokens[p].type);
       return -1;
    }
+
    else if (check_parentheses(p, q) == 1) {
       /* The expression is surrounded by a matched pair of parentheses.
        * If that is the case, just throw away the parentheses.
@@ -324,6 +359,7 @@ int eval(int p, int q) {
          val2 = eval(op + 1, q);
       }
       switch (tokens[op].type) {
+      case TK_AND:   return val1 && val2;
       case TK_EQ:    return val1 == val2;
       case TK_NEQ:   return val1 != val2;
       case TK_PLUS:  return val1 + val2;

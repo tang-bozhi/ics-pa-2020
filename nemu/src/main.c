@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
       // 将读取的行分解为预期结果和表达
       if (sscanf(line, "%d %[^\n]", &expected, expression) == 2) {
          bool success;  // 表达式计算成功标志
+
          int result = expr(expression, &success);  // 计算表达式的实际结果
 
          // 比较预期结果和实际结果
