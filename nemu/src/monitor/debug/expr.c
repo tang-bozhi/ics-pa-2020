@@ -1,4 +1,4 @@
-//通过gen-expr.c测试
+//扩展了表达式求值的功能并通过gen-expr.c的四则运算测试(没有扩展表达式测试样例)
 #include <isa.h>
 #include <stdio.h>
 /* We use the POSIX regex functions to process regular expressions.
