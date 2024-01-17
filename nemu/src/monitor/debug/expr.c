@@ -186,7 +186,7 @@ int check_parentheses(int p, int q) {
 }
 
 //检测当最外层不是由一对括号包裹的情况
-int handle_complex_cases_of_parentheses(int p, int q) {
+int handle_compxlex_cases_of_parentheses(int p, int q) {
    int lpar = -1;  // 记录最外层左括号的位置
    int rpar = -1;  // 记录匹配的最外层右括号的位置
    int count = 0;  // 括号计数
@@ -216,8 +216,19 @@ int handle_complex_cases_of_parentheses(int p, int q) {
       return rpar + 1;
    }
 
+   // 检查是否是形如 expr1 op (expr2) 的情况
+   if (lpar == p && rpar < q) {
+      return lpar + 1;
+   }
+
+   // 检查是否是形如 (expr1) op expr2 的情况
+   if (lpar > p && rpar == q) {
+      return rpar - 1;
+   }
+
    return -1;  // 没有找到特殊情况
 }
+
 
 
 //find main operator
@@ -276,6 +287,7 @@ int find_next_expr_end(int start, int end) {//辅助函数:判断*引用结束�
 //evaluate
 //这个函数是通过教案指导的分治法也就是那嵌套的几行exp<>写出来的
 int eval(int p, int q) {
+   int complex_case_result = handle_compxlex_cases_of_parentheses(p, q);
    if (p > q) {
       /* Bad expression */
       printf("Bad expression from %d to %d.\n", p, q);
@@ -329,7 +341,7 @@ int eval(int p, int q) {
       printf("Unkown type %d.\n", tokens[p].type);
       return -1;
    }
-   else if (check_parentheses(p, q) == 1) {
+   else if (check_parentheses(p, q) == 1 && complex_case_result == -1) {
       /* The expression is surrounded by a matched pair of parentheses.
        * If that is the case, just throw away the parentheses.
        */
@@ -338,8 +350,7 @@ int eval(int p, int q) {
    }
    else {
       int op = find_main_op(p, q);//principal operator
-      int complex_case_result = handle_complex_cases_of_parentheses(p, q);
-      if (complex_case_result != -1) {
+      if (op == -1) {
          op = complex_case_result;
       }
       int val1 = 0, val2 = 0;
