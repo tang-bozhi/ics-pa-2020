@@ -7,13 +7,14 @@ static WP wp_pool[NR_WP] = {};
 static WP* head = NULL, * free_ = NULL;
 
 static int next_wp_NO = 0; // 全局变量，用于追踪下一个监视点的序号
+
 //链表初始化
 void init_wp_pool() {
    int i;
    for (i = 0; i < NR_WP; i++) {
       wp_pool[i].NO = i;
       wp_pool[i].next = &wp_pool[i + 1];
-   }//链接链表
+   }//链接链表并对NO赋值
    wp_pool[NR_WP - 1].next = NULL;//wp_pool[31] 第32个wp 置NULL
 
    head = NULL;
@@ -22,7 +23,6 @@ void init_wp_pool() {
 
 /* TODO: Implement the functionality of watchpoint */
 
-static int next_wp_NO = 0; // 全局变量，用于追踪下一个监视点的序号
 // 返回新的监视点: wp->expr清空 wp->next清除至NULL old_value=0 new_value = 0
 WP* new_wp() {
    if (free_ == NULL) {
@@ -45,7 +45,7 @@ WP* new_wp() {
    return wp;  // 返回新的监视点
 }
 
-
+//重置监视点的部分字段,将监视点插入到空闲链表的头部 
 void free_wp(WP* wp) {
    if (wp == NULL) {
       return;  // 如果传入的监视点为空，则直接返回
