@@ -314,13 +314,10 @@ int eval(int p, int q) {
          return -1;
       }
    }
-   else if (tokens[p].type == TK_HEX) {
-      // strtol函数可以处理以"0x"或"0X"开头的十六进制字符串
+   else if (tokens[p].type == TK_HEX) {// strtol函数可以处理以"0x"或"0X"开头的十六进制字符串
       return strtol(tokens[p].str, NULL, 0);
    }
-
-   else if (tokens[p].type == TK_REG) {
-      // 调用 isa_reg_str2val 函数获取寄存器的值
+   else if (tokens[p].type == TK_REG) {// 调用 isa_reg_str2val 函数获取寄存器的值
       bool success;
       word_t reg_val = isa_reg_str2val(tokens[p].str + 1, &success); // +1 跳过 '$' 符号
       if (!success) {

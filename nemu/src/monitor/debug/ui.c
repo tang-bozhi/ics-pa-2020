@@ -7,6 +7,7 @@
 #include <readline/history.h>
 #include <memory/paddr.h>
 #include <memory/vaddr.h>
+#include <watchpoint.h>
 
 void isa_reg_display(void);
 void cpu_exec(uint64_t);
@@ -30,15 +31,9 @@ static char* rl_gets() {
    return line_read;
 }
 
-static int cmd_c(char* args) {
-   cpu_exec(-1);//uint64_t: -1   由于uint64_t是无符号的，当传入-1时，它会被转换为uint64_t能表示的最大值，即2^64 - 1。在实践中，这通常意味着"运行直到遇到停止条件"，而不是真的执行2^64 - 1条指令
-   return 0;
-}
+static int cmd_c(char* args);
 
-
-static int cmd_q(char* args) {
-   return -1;
-}
+static int cmd_q(char* args);
 
 static int cmd_help(char* args);
 
@@ -47,6 +42,8 @@ static int cmd_si(char* args);
 static int cmd_info(char* args);
 
 static int cmd_x(char* args);
+
+static int cmd_w(char* args);
 
 static struct {
    char* name;
@@ -59,12 +56,21 @@ static struct {
   { "si", "Step through program by N instructions", cmd_si },
   { "info", "Print program status", cmd_info },
   { "x","Find the value of the expression EXPR, \
-  use the result as the starting memory address,\
-   and output N consecutive 4-byte outputs in hexadecimal.",\
-   cmd_x}
-   /* TODO: Add more commands */
+use the result as the starting memory address, \
+and output N consecutive 4-byte outputs in hexadecimal.",cmd_x},
+/* TODO: Add more commands */
 
 };
+
+
+static int cmd_c(char* args) {
+   cpu_exec(-1);//uint64_t: -1   由于uint64_t是无符号的，当传入-1时，它会被转换为uint64_t能表示的最大值，即2^64 - 1。在实践中，这通常意味着"运行直到遇到停止条件"，而不是真的执行2^64 - 1条指令
+   return 0;
+}
+
+static int cmd_q(char* args) {
+   return -1;
+}
 
 #define NR_CMD (sizeof(cmd_table) / sizeof(cmd_table[0]))
 
@@ -107,13 +113,23 @@ static int cmd_si(char* args) {
 }
 
 static int cmd_info(char* args) {//info w监视点在之后pa实现到watchpoint.c中
-   if (args == NULL) {
+   char* arg = strtok(NULL, " ");
+   if (arg == NULL) {
       printf("Need more parameters.\n");
       return 0;
    }
-   else if (*args == 'r') {
+   else if (*arg == 'r') {//r:register
       isa_reg_display();
    }
+   // else if (*arg == 'w') {
+   //    char* next_arg = strtok(NULL, " ");
+   //    if (next_arg == NULL) {
+   //       printf("Need more parameters.\n");
+   //       return 0;
+   //    }
+   //    arg = next_arg; // 将第二个参数作为监视点
+
+   // }
    return 0;
 }
 
@@ -155,6 +171,7 @@ static int cmd_x(char* args) {
 
    return 0; // 函数应该返回一个值，这里返回 0 表示成功
 }
+
 
 
 void ui_mainloop() {

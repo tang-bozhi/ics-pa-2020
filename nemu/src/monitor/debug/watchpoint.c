@@ -8,7 +8,7 @@ static WP* head = NULL, * free_ = NULL;
 
 static int next_wp_NO = 0; // 全局变量，用于追踪下一个监视点的序号
 
-//链表初始化
+//wp_pool链表初始化
 void init_wp_pool() {
    int i;
    for (i = 0; i < NR_WP; i++) {
