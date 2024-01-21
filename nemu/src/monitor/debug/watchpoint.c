@@ -62,3 +62,27 @@ void free_wp(WP* wp) {
    free_ = wp;             // 更新空闲链表的头指针
 }
 
+bool delete_watchpoint(int no) {
+   WP* wp = head;
+   WP* prev = NULL;
+
+   // 遍历监视点链表
+   while (wp != NULL) {
+      if (wp->NO == no) {
+         // 找到了要删除的监视点
+         if (prev == NULL) {
+            // 要删除的监视点是链表的头部
+            head = wp->next;
+         }
+         else {
+            // 要删除的监视点在链表中间或尾部
+            prev->next = wp->next;
+         }
+         free_wp(wp);  // 释放监视点
+         return true;  // 返回删除成功的标志
+      }
+      prev = wp;
+      wp = wp->next;
+   }
+   return false;  // 没有找到指定序号的监视点
+}

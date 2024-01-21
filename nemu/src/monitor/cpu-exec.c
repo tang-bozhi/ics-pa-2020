@@ -3,6 +3,7 @@
 #include <monitor/difftest.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <watchpoint.h>
 
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
@@ -62,6 +63,24 @@ static uint64_t get_time() {
    uint32_t useconds = now.tv_usec;
    return seconds * 1000 + (useconds + 500) / 1000;
 }
+
+// 假设这个函数在每执行一条指令后调用  这是后来加入的函数
+void check_watchpoints() {
+   WP* wp = head;
+   while (wp != NULL) {
+      uint32_t old_value = wp->new_value;
+      bool success;
+      wp->new_value = expr(wp->expr, &success);
+
+      if (success && (old_value != wp->new_value)) {
+         printf("Watchpoint %d: %s\nOld value = %u\nNew value = %u\n",
+            wp->NO, wp->expr, old_value, wp->new_value);
+         nemu_state.state = NEMU_STOP;
+      }
+      wp = wp->next;
+   }
+}
+
 
 /* Simulate how the CPU works. */
 void cpu_exec(uint64_t n) {

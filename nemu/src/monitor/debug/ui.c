@@ -7,7 +7,6 @@
 #include <readline/history.h>
 #include <memory/paddr.h>
 #include <memory/vaddr.h>
-#include <watchpoint.h>
 
 void isa_reg_display(void);
 void cpu_exec(uint64_t);
@@ -30,20 +29,24 @@ static char* rl_gets() {
 
    return line_read;
 }
-
+//continue
 static int cmd_c(char* args);
-
+//quit
 static int cmd_q(char* args);
-
+//help
 static int cmd_help(char* args);
-
+//step implementation
 static int cmd_si(char* args);
-
+//Infomation -r -w
 static int cmd_info(char* args);
-
+//Scanning memory
 static int cmd_x(char* args);
-
+//Print $EXPR 
+static int cmd_p(char* args);
+//Setting up watchpoints
 static int cmd_w(char* args);
+//Deleting Watchpoints
+static int cmd_d(char* args);
 
 static struct {
    char* name;
@@ -58,7 +61,10 @@ static struct {
   { "x","Find the value of the expression EXPR, \
 use the result as the starting memory address, \
 and output N consecutive 4-byte outputs in hexadecimal.",cmd_x},
-/* TODO: Add more commands */
+  {"p","Find the value of the expression EXPR",cmd_p},
+  {"w","Setting up monitoring points",cmd_w},
+   {"d","Delete the monitoring point with serial number N",cmd_d},
+   /* TODO: Add more commands */
 
 };
 
@@ -121,15 +127,13 @@ static int cmd_info(char* args) {//info w监视点在之后pa实现到watchpoint
    else if (*arg == 'r') {//r:register
       isa_reg_display();
    }
-   // else if (*arg == 'w') {
-   //    char* next_arg = strtok(NULL, " ");
-   //    if (next_arg == NULL) {
-   //       printf("Need more parameters.\n");
-   //       return 0;
-   //    }
-   //    arg = next_arg; // 将第二个参数作为监视点
-
-   // }
+   else if (*arg == 'w') {//用于打印所有活跃监视点的信息
+      WP* wp = head;
+      while (wp != NULL) {
+         printf("Watchpoint %d: %s, value = %u\n", wp->NO, wp->expr, wp->new_value);
+         wp = wp->next;
+      }
+   }
    return 0;
 }
 
@@ -172,9 +176,64 @@ static int cmd_x(char* args) {
    return 0; // 函数应该返回一个值，这里返回 0 表示成功
 }
 
+static int cmd_p(char* args) {//求出表达式EXPR的值, EXPR支持的运算请见expr.c
+   char* arg = strtok(args, " "); // 使用 args 获取第一个参数
+   if (arg == NULL) {
+      printf("Need more parameters.\n");
+      return 0;
+   }
+   bool success = true;
+   word_t result = expr(arg, &success);
+   printf("%s = %d", arg, result);
+   return result;
+}
+
+static int cmd_w(char* args) {
+   if (args == NULL) {
+      printf("Usage: w <expr>\n");
+      return 0;
+   }
+
+   WP* wp = new_wp();
+   strncpy(wp->expr, args, 255);  // 假设表达式长度不超过255
+   wp->expr[255] = '\0';  // 确保字符串以空字符结尾
+
+   bool success;
+   wp->new_value = expr(wp->expr, &success);
+   if (!success) {
+      free_wp(wp);
+      printf("Invalid expression.\n");
+      return -1;
+   }
+
+   printf("Watchpoint %d: %s\n", wp->NO, wp->expr);
+   return 0;
+}
+
+static int cmd_d(char* args) {//实现一个命令来删除特定的监视点
+   int n;
+   if (sscanf(args, "%d", &n) != 1) {
+      printf("Usage: d <watchpoint number>\n");
+      return -1;
+   }
+
+   // 假设有一个函数可以根据序号找到并删除监视点
+   bool found = delete_watchpoint(n);
+   if (!found) {
+      printf("Watchpoint %d not found.\n", n);
+      return -1;
+   }
+
+   printf("Deleted watchpoint %d\n", n);
+   return 0;
+}
+
 
 
 void ui_mainloop() {
+
+   init_wp_pool();//wp_pool链表池初始化: watchpoint功能初始化
+
    if (is_batch_mode()) {
       cmd_c(NULL);
       return;

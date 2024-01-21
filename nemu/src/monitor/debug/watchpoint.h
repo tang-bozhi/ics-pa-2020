@@ -19,4 +19,6 @@ WP* new_wp();
 
 void free_wp(WP* wp);
 
+bool delete_watchpoint(int no);
+
 #endif
