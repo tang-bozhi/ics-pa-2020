@@ -8,6 +8,8 @@
 #include <memory/paddr.h>
 #include <memory/vaddr.h>
 
+extern WP* get_head_wp();
+
 void isa_reg_display(void);
 void cpu_exec(uint64_t);
 int is_batch_mode();
@@ -128,7 +130,7 @@ static int cmd_info(char* args) {//info w监视点在之后pa实现到watchpoint
       isa_reg_display();
    }
    else if (*arg == 'w') {//用于打印所有活跃监视点的信息
-      WP* wp = head;
+      WP* wp = get_head_wp();
       while (wp != NULL) {
          printf("Watchpoint %d: %s, value = %u\n", wp->NO, wp->expr, wp->new_value);
          wp = wp->next;
