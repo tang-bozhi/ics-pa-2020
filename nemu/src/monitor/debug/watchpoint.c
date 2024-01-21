@@ -86,3 +86,11 @@ bool delete_watchpoint(int no) {
    }
    return false;  // 没有找到指定序号的监视点
 }
+
+// 在watchpoint.c中添加
+
+// 获取监视点链表的头部指针
+WP* get_head_wp() {
+   return head;
+}
+
