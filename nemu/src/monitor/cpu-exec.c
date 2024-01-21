@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <monitor/watchpoint.h>
+#include <monitor/expr.h>
 
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
@@ -66,7 +67,7 @@ static uint64_t get_time() {
 
 // 假设这个函数在每执行一条指令后调用  这是后来加入的函数
 void check_watchpoints() {
-   WP* wp = head;
+   WP* wp = get_head_wp();
    while (wp != NULL) {
       uint32_t old_value = wp->new_value;
       bool success;
