@@ -21,4 +21,6 @@ void free_wp(WP* wp);
 
 bool delete_watchpoint(int no);
 
+WP* get_head_wp();
+
 #endif
