@@ -50,22 +50,34 @@ static int cmd_w(char* args);
 //Deleting Watchpoints
 static int cmd_d(char* args);
 
-static struct {
+//别名数组
+static char* help_aliases[] = { "h", "info", "information", NULL };
+static char* continue_aliases[] = { "cont", "run", "go", NULL };
+static char* quit_aliases[] = { "q", "exit", "close", NULL };
+static char* step_aliases[] = { "s", "stepi", "next", NULL };
+static char* info_aliases[] = { "i", "status", "stat", NULL };
+static char* scan_aliases[] = { "scan", "examine", "dump", NULL };
+static char* print_aliases[] = { "pr", "evaluate", "eval", NULL };
+static char* watch_aliases[] = { "watch", "monitor", "observe", NULL };
+static char* delete_aliases[] = { "del", "remove", "rm", NULL };
+
+static struct {//这里进行了命令的别名修改
    char* name;
+   char** aliases;  //新增别名数组
    char* description;
    int (*handler) (char*);
 } cmd_table[] = {
-  { "help", "Display informations about all supported commands", cmd_help },
-  { "c", "Continue the execution of the program", cmd_c },
-  { "q", "Exit NEMU", cmd_q },
-  { "si", "Step through program by N instructions", cmd_si },
-  { "info", "Print program status", cmd_info },
-  { "x","Find the value of the expression EXPR, \
+  { "help",help_aliases, "Display informations about all supported commands", cmd_help },
+  { "c",continue_aliases, "Continue the execution of the program", cmd_c },
+  { "q",quit_aliases, "Exit NEMU", cmd_q },
+  { "si",step_aliases, "Step through program by N instructions", cmd_si },
+  { "info",info_aliases, "Print program status", cmd_info },
+  { "x",scan_aliases,"Find the value of the expression EXPR, \
 use the result as the starting memory address, \
 and output N consecutive 4-byte outputs in hexadecimal.",cmd_x},
-  {"p","Find the value of the expression EXPR",cmd_p},
-  {"w","Setting up monitoring points",cmd_w},
-   {"d","Delete the monitoring point with serial number N",cmd_d},
+  {"p",print_aliases,"Find the value of the expression EXPR",cmd_p},
+  {"w",watch_aliases,"Setting up monitoring points",cmd_w},
+  {"d",delete_aliases,"Delete the monitoring point with serial number N",cmd_d},
    /* TODO: Add more commands */
 
 };
@@ -140,43 +152,58 @@ static int cmd_info(char* args) {//info w监视点在之后pa实现到watchpoint
 }
 
 static int cmd_x(char* args) {
-   int n = 1;
-   char* arg = strtok(args, " "); // 使用 args 获取第一个参数
+   int n = 1;  // 默认打印一个字
+   char format = 'x';  // 默认以十六进制格式打印
+   paddr_t addr;  // 用于存储解析出的地址
 
+   char* arg = strtok(args, " ");
    if (arg == NULL) {
-      // 没有参数，错误退出
+      printf("Missing number of words to print.\n");
+      return -1;
+   }
+
+   n = strtol(arg, NULL, 10);  // 解析要打印的字数
+
+   arg = strtok(NULL, " ");
+   if (arg == NULL) {
       printf("Missing address.\n");
       return -1;
    }
 
-   char* next_arg = strtok(NULL, " "); // 尝试获取第二个参数
-
-   if (next_arg != NULL) {
-      // 如果存在第二个参数，则第一个参数是n，第二个参数是地址
-      n = strtol(arg, NULL, 10); // 将第一个参数转换为整数n
-      arg = next_arg; // 将第二个参数作为地址
+   // 尝试解析格式选项（如果有的话）
+   char* format_arg = strtok(NULL, " ");
+   if (format_arg != NULL) {
+      format = format_arg[0];  // 只取第一个字符作为格式
    }
-   // 此时arg包含地址
-   paddr_t scanned_address;//
-   if (sscanf(arg, "%x", &scanned_address) != 1) {
-      printf("地址转换失败，错误退出\n");// 地址转换失败，错误退出
+
+   // 解析地址
+   if (sscanf(arg, "%x", &addr) != 1) {
+      printf("Invalid address.\n");
       return -1;
    }
 
-   if ((PMEM_BASE <= scanned_address) && (scanned_address <= PMEM_BASE + PMEM_SIZE - 1)) {
-      for (int i = 0; i < n; i++) {
-         printf("%u\n", vaddr_read(scanned_address + 4 * i, 4)); //这里vaddr_read和paddr_read的输入都是基于虚拟地址PMEM_BASE的 
-      }
-   }
-   else if (0 < scanned_address && scanned_address < PMEM_SIZE) {
-      scanned_address += PMEM_BASE;
-      for (int i = 0; i < n; i++) {
-         printf("%u\n", vaddr_read(scanned_address + 4 * i, 4)); //注意后面的这个len可能需要调整:1 2 4 
+   // 根据格式打印内存内容
+   for (int i = 0; i < n; i++) {
+      switch (format) {
+      case 'x':  // 十六进制
+         printf("0x%08x: 0x%08x\n", addr + 4 * i, vaddr_read(addr + 4 * i, 4));
+         break;
+      case 'd':  // 十进制
+         printf("0x%08x: %u\n", addr + 4 * i, vaddr_read(addr + 4 * i, 4));
+         break;
+      case 'c':  // 字符
+         printf("0x%08x: %c\n", addr + 4 * i, (char)vaddr_read(addr + 4 * i, 1));
+         break;
+         // 可以添加更多格式
+      default:
+         printf("Unknown format '%c'.\n", format);
+         return -1;
       }
    }
 
-   return 0; // 函数应该返回一个值，这里返回 0 表示成功
+   return 0;
 }
+
 
 static int cmd_p(char* args) {//求出表达式EXPR的值, EXPR支持的运算请见expr.c
    char* arg = strtok(args, " "); // 使用 args 获取第一个参数
@@ -260,14 +287,24 @@ void ui_mainloop() {
       extern void sdl_clear_event_queue();
       sdl_clear_event_queue();
 #endif
-
-      int i;
-      for (i = 0; i < NR_CMD; i++) {
+      int i = 0;//下方有适应别名数组的修改   
+      for (; i < NR_CMD; i++) {
          if (strcmp(cmd, cmd_table[i].name) == 0) {
             if (cmd_table[i].handler(args) < 0) { return; }
-            break;
+            goto found_command;
+         }
+
+         char** alias = cmd_table[i].aliases;
+         while (*alias) {
+            if (strcmp(cmd, *alias) == 0) {
+               if (cmd_table[i].handler(args) < 0) { return; }
+               goto found_command;
+            }
+            alias++;
          }
       }
+      printf("Unknown command '%s'\n", cmd);
+   found_command:;
 
       if (i == NR_CMD) { printf("Unknown command '%s'\n", cmd); }
    }
