@@ -150,24 +150,65 @@ static int cmd_info(char* args) {//info w监视点在之后pa实现到watchpoint
    }
    return 0;
 }
+// 辅助函数：映射地址到 PMEM_BASE
+int map_address_to_PMEM_BASE(char* arg, uintptr_t* out_addr) {
+   char* end;
+   uintptr_t addr = strtol(arg, &end, 0); // 将字符串转换为地址
+
+   if (*end != '\0') {
+      // 输入不是有效的数字
+      printf("Invalid address format.\n");
+      return -1;
+   }
+
+   if (addr < PMEM_BASE) {
+      // 输入的地址是虚拟地址
+      *out_addr = addr + PMEM_BASE;
+   }
+   else if (addr >= PMEM_BASE && addr < PMEM_BASE + PMEM_SIZE) {
+      // 输入的地址是物理地址
+      *out_addr = addr;
+   }
+   else {
+      printf("Address is out of range.\n");
+      return -1;
+   }
+
+   return 0; // 成功
+}
 
 static int cmd_x(char* args) {
    int n = 1;  // 默认打印一个字
    char format = 'x';  // 默认以十六进制格式打印
-   paddr_t addr;  // 用于存储解析出的地址
+   uintptr_t addr;  // 用于存储解析出的地址
 
-   char* arg = strtok(args, " ");
-   if (arg == NULL) {
-      printf("Missing number of words to print.\n");
+   // 分割参数
+   char* arg1 = strtok(NULL, " ");
+   char* arg2 = strtok(NULL, " ");
+
+   // 检查参数数量和顺序
+   if (arg1 == NULL) {
+      printf("Missing parameters.\n");
       return -1;
    }
 
-   n = strtol(arg, NULL, 10);  // 解析要打印的字数
+   // 用于存储映射后的地址
+   uintptr_t mapped_addr;
 
-   arg = strtok(NULL, " ");
-   if (arg == NULL) {
-      printf("Missing address.\n");
-      return -1;
+   if (arg2 != NULL) {
+      // 如果提供了两个参数，第一个应该是数字（打印字数）
+      n = strtol(arg1, NULL, 10);
+      if (map_address_to_PMEM_BASE(arg2, &mapped_addr) != 0) {
+         return -1; // 地址映射失败
+      }
+      addr = mapped_addr;
+   }
+   else {
+      // 只提供了一个参数，应该是地址
+      if (map_address_to_PMEM_BASE(arg1, &mapped_addr) != 0) {
+         return -1; // 地址映射失败
+      }
+      addr = mapped_addr;
    }
 
    // 尝试解析格式选项（如果有的话）
@@ -176,23 +217,17 @@ static int cmd_x(char* args) {
       format = format_arg[0];  // 只取第一个字符作为格式
    }
 
-   // 解析地址
-   if (sscanf(arg, "%x", &addr) != 1) {
-      printf("Invalid address.\n");
-      return -1;
-   }
-
    // 根据格式打印内存内容
    for (int i = 0; i < n; i++) {
       switch (format) {
       case 'x':  // 十六进制
-         printf("0x%08x: 0x%08x\n", addr + 4 * i, vaddr_read(addr + 4 * i, 4));
+         printf("0x%08x: 0x%08x\n", (unsigned int)(addr + 4 * i), vaddr_read(addr + 4 * i, 4));
          break;
       case 'd':  // 十进制
-         printf("0x%08x: %u\n", addr + 4 * i, vaddr_read(addr + 4 * i, 4));
+         printf("0x%08x: %u\n", (unsigned int)(addr + 4 * i), vaddr_read(addr + 4 * i, 4));
          break;
       case 'c':  // 字符
-         printf("0x%08x: %c\n", addr + 4 * i, (char)vaddr_read(addr + 4 * i, 1));
+         printf("0x%08x: %c\n", (unsigned int)(addr + 4 * i), (char)vaddr_read(addr + 4 * i, 1));
          break;
          // 可以添加更多格式
       default:
