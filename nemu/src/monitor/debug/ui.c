@@ -153,7 +153,7 @@ static int cmd_info(char* args) {//info w监视点在之后pa实现到watchpoint
 // 辅助函数：映射地址到 PMEM_BASE
 int map_address_to_PMEM_BASE(char* arg, uintptr_t* out_addr) {
    char* end;
-   uintptr_t addr = strtol(arg, &end, 0); // 将字符串转换为地址
+   uintptr_t addr = strtol(arg, &end, 0); // 将字符串转换为地址 strtol--base:0
 
    if (*end != '\0') {
       // 输入不是有效的数字
@@ -195,26 +195,30 @@ static int cmd_x(char* args) {
    // 用于存储映射后的地址
    uintptr_t mapped_addr;
 
-   if (arg2 != NULL) {
-      // 如果提供了两个参数，第一个应该是数字（打印字数）
-      n = strtol(arg1, NULL, 10);
+   char* endptr;
+   n = strtol(arg1, &endptr, 10); // 尝试将第一个参数解析为数字
+
+   if (*endptr == '\0') { // 如果第一个参数完全是数字
+      if (arg2 == NULL) {
+         printf("Missing address parameter.\n");
+         return -1;
+      }
       if (map_address_to_PMEM_BASE(arg2, &mapped_addr) != 0) {
          return -1; // 地址映射失败
       }
       addr = mapped_addr;
    }
-   else {
-      // 只提供了一个参数，应该是地址
+   else { // 第一个参数不是数字，应该是地址
+      n = 1; // 重置 n 为默认值
       if (map_address_to_PMEM_BASE(arg1, &mapped_addr) != 0) {
          return -1; // 地址映射失败
       }
       addr = mapped_addr;
-   }
 
-   // 尝试解析格式选项（如果有的话）
-   char* format_arg = strtok(NULL, " ");
-   if (format_arg != NULL) {
-      format = format_arg[0];  // 只取第一个字符作为格式
+      // 第二个参数可能是格式
+      if (arg2 != NULL) {
+         format = arg2[0];
+      }
    }
 
    // 根据格式打印内存内容
@@ -322,17 +326,17 @@ void ui_mainloop() {
       extern void sdl_clear_event_queue();
       sdl_clear_event_queue();
 #endif
-      int i = 0;//下方有适应别名数组的修改   
+      int i = 0;//下方存在适应别名数组的修改   
       for (; i < NR_CMD; i++) {
          if (strcmp(cmd, cmd_table[i].name) == 0) {
-            if (cmd_table[i].handler(args) < 0) { return; }
+            if (cmd_table[i].handler(args) < 0) { break; }
             goto found_command;
          }
 
          char** alias = cmd_table[i].aliases;
          while (*alias) {
             if (strcmp(cmd, *alias) == 0) {
-               if (cmd_table[i].handler(args) < 0) { return; }
+               if (cmd_table[i].handler(args) < 0) { break; }
                goto found_command;
             }
             alias++;
