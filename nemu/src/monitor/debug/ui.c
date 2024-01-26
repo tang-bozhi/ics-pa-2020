@@ -328,15 +328,15 @@ void ui_mainloop() {
 #endif
       int i = 0;//下方存在适应别名数组的修改   
       for (; i < NR_CMD; i++) {
-         if (strcmp(cmd, cmd_table[i].name) == 0) {
-            if (cmd_table[i].handler(args) < 0) { break; }
+         if (strcmp(cmd, cmd_table[i].name) == 0) {//比对 strtok取到的第一个token 与 结构体元素name
+            if (cmd_table[i].handler(args) < 0) { break; }//这里使用goto found_command;仅为避免打印printf("Unknown command '%s'\n", cmd);  如果有异常,换回break  不换return -1?:错误输入直接终止程序运行实在不便
             goto found_command;
          }
 
          char** alias = cmd_table[i].aliases;
          while (*alias) {
-            if (strcmp(cmd, *alias) == 0) {
-               if (cmd_table[i].handler(args) < 0) { break; }
+            if (strcmp(cmd, *alias) == 0) {//比对 strtok取到的第一个token 与 结构体元素aliases;//别名数组 
+               if (cmd_table[i].handler(args) < 0) { break; }//同上 面相同结构的注释
                goto found_command;
             }
             alias++;
