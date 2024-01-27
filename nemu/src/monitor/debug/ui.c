@@ -89,7 +89,7 @@ static int cmd_c(char* args) {
 }
 
 static int cmd_q(char* args) {
-   return -1;
+   return -2;  // 使用特殊的退出代码: 仅“q”命令能退出
 }
 
 #define NR_CMD (sizeof(cmd_table) / sizeof(cmd_table[0]))
@@ -296,6 +296,16 @@ static int cmd_d(char* args) {//实现一个命令来删除特定的监视点
    return 0;
 }
 
+// 辅助函数：检查是否是别名
+int is_alias(const char* cmd, char** aliases) {
+   while (*aliases) {
+      if (strcmp(cmd, *aliases) == 0) {
+         return 1;  // 是别名
+      }
+      aliases++;
+   }
+   return 0;  // 不是别名
+}
 
 
 void ui_mainloop() {
@@ -328,23 +338,14 @@ void ui_mainloop() {
 #endif
       int i = 0;//下方存在适应别名数组的修改   
       for (; i < NR_CMD; i++) {
-         if (strcmp(cmd, cmd_table[i].name) == 0) {//比对 strtok取到的第一个token 与 结构体元素name
-            if (cmd_table[i].handler(args) < 0) { break; }//这里使用goto found_command;仅为避免打印printf("Unknown command '%s'\n", cmd);  如果有异常,换回break  不换return -1?:错误输入直接终止程序运行实在不便
-            goto found_command;
-         }
-
-         char** alias = cmd_table[i].aliases;
-         while (*alias) {
-            if (strcmp(cmd, *alias) == 0) {//比对 strtok取到的第一个token 与 结构体元素aliases;//别名数组 
-               if (cmd_table[i].handler(args) < 0) { break; }//同上 面相同结构的注释
-               goto found_command;
+         if (strcmp(cmd, cmd_table[i].name) == 0 || is_alias(cmd, cmd_table[i].aliases)) {//比对 strtok取到的第一个token 与 结构体元素name
+            int ret = cmd_table[i].handler(args);
+            if (ret == -2) {
+               // 如果是 q 命令，返回特殊的退出代码 -2
+               return;
             }
-            alias++;
          }
+         if (i == NR_CMD) { printf("Unknown command '%s'\n", cmd); }
       }
-      printf("Unknown command '%s'\n", cmd);
-   found_command:;
-
-      if (i == NR_CMD) { printf("Unknown command '%s'\n", cmd); }
    }
 }
