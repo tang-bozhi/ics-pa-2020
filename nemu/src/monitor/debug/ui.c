@@ -50,8 +50,8 @@ static int cmd_w(char* args);
 //Deleting Watchpoints
 static int cmd_d(char* args);
 
-//别名数组
-static char* help_aliases[] = { "h", "info", "information", NULL };
+//别名数组 注意重名的问题
+static char* help_aliases[] = { "h", "information", NULL };
 static char* continue_aliases[] = { "cont", "run", "go", NULL };
 static char* quit_aliases[] = { "q", "exit", "close", NULL };
 static char* step_aliases[] = { "s", "stepi", "next", NULL };
@@ -112,7 +112,7 @@ static int cmd_help(char* args) {
             return 0;
          }
       }
-      printf("Unknown command '%s'\n", arg);
+      printf("Unknown command '%s' for help.\n", arg);
    }
    return 0;
 }
@@ -336,7 +336,7 @@ void ui_mainloop() {
       extern void sdl_clear_event_queue();
       sdl_clear_event_queue();
 #endif
-      int i = 0;//下方存在适应别名数组的修改   
+      int i = 0;//下方存在适应别名数组的修改 
       for (; i < NR_CMD; i++) {
          if (strcmp(cmd, cmd_table[i].name) == 0 || is_alias(cmd, cmd_table[i].aliases)) {//比对 strtok取到的第一个token 与 结构体元素name
             int ret = cmd_table[i].handler(args);

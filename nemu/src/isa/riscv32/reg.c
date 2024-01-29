@@ -13,7 +13,7 @@ const char* regs[] = {
 void isa_reg_display() {
    extern riscv32_CPU_state cpu;  // 假设这是你的CPU状态
    for (int i = 0; i < 32; i++) { // 遍历32个通用寄存器
-      printf("reg[%d] = 0x%x\n", i, cpu.gpr[i]._32); // 打印寄存器名和值
+      printf("%s reg[%d] = 0x%x\n", regs[i], i, cpu.gpr[i]._32); // 打印寄存器名和值
    }
    printf("pc = 0x%x\n", cpu.pc); // 打印程序计数器pc
 }
