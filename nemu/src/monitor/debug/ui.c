@@ -262,7 +262,7 @@ static int cmd_w(char* args) {
       return 0;
    }
 
-   WP* wp = new_wp();
+   WP* wp = new_wp();//new watchpoint
    strncpy(wp->expr, args, 255);  // 假设表达式长度不超过255
    wp->expr[255] = '\0';  // 确保字符串以空字符结尾
 
@@ -296,7 +296,7 @@ static int cmd_d(char* args) {//实现一个命令来删除特定的监视点
    return 0;
 }
 
-// 辅助函数：检查是否是别名
+// 辅助函数：检查命令是否是别名数组内的命令
 int is_alias(const char* cmd, char** aliases) {
    while (*aliases) {
       if (strcmp(cmd, *aliases) == 0) {

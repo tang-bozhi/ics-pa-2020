@@ -107,8 +107,8 @@ void cpu_exec(uint64_t n) {
 
 #ifdef DEBUG
       asm_print(this_pc, seq_pc - this_pc, n < MAX_INSTR_TO_PRINT);
-
-      /* TODO: check watchpoints here. */
+      check_watchpoints();
+      /* TODO: check watchpoints here. *///woc没看到,还研究了一下应该放到哪里
 #endif
 
 #ifdef HAS_IOE
