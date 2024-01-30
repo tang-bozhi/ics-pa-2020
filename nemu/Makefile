@@ -60,16 +60,12 @@ include Makefile.git
 
 .DEFAULT_GOAL = app
 
-# Compilation flags 
-CC = gcc#CC是一个常见的Makefile变量，它表示C编译器
-LD = gcc#LD是一个常见的Makefile变量，它表示链接器
-INCLUDES  = $(addprefix -I, $(INC_DIR))#INCLUDES变量包含了一些-I选项，这些选项指定了编译器在查找头文件时应该搜索的目录
+CC = gcc#CC 编译器
+LD = gcc#LD 链接器
+INCLUDES  = $(addprefix -I, $(INC_DIR))
 CFLAGS   += -O0 -MMD -Wall -Werror -ggdb3 $(INCLUDES) \
             -D__ENGINE_$(ENGINE)__ \
             -D__ISA__=$(ISA) -D__ISA_$(ISA)__ -D_ISA_H_=\"isa/$(ISA).h\"
-#CFLAGS += -O2 -MMD -Wall -Werror -ggdb3 $(INCLUDES) -D__ISA__=$(ISA) -fomit-frame-pointer：
-#这行代码向CFLAGS变量添加了一些编译选项。CFLAGS是一个常见的Makefile变量，它表示C编译器的选项。这些选项包括优化级别-O2，生成依赖文件-MMD，开启所有
-#警告-Wall，将警告视为错误-Werror，生成用于gdb调试的信息-ggdb3，添加包含目录$(INCLUDES)，定义宏__ISA__的值为$(ISA)，以及省略帧指针-fomit-frame-pointer。
 
 # Files to be compiled
 SRCS = $(shell find src/ -name "*.c" | grep -v "isa\|engine")
