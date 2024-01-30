@@ -280,6 +280,11 @@ static int cmd_w(char* args) {
 
 static int cmd_d(char* args) {//实现一个命令来删除特定的监视点
    int n;
+
+   if (args == NULL) {
+      printf("Need more parameters.\n");
+      return 0;
+   }
    if (sscanf(args, "%d", &n) != 1) {
       printf("Usage: d <watchpoint number>\n");
       return -1;
