@@ -72,13 +72,11 @@ static struct {//这里进行了命令的别名修改
   { "q",quit_aliases, "Exit NEMU", cmd_q },
   { "si",step_aliases, "Step through program by N instructions", cmd_si },
   { "info",info_aliases, "Print program status", cmd_info },
-  { "x",scan_aliases,"Find the value of the expression EXPR, \
-use the result as the starting memory address, \
-and output N consecutive 4-byte outputs in hexadecimal.",cmd_x},
+  { "x",scan_aliases,"Find the value of the expression EXPR, use the result as the starting memory address, and output N consecutive 4-byte outputs in hexadecimal.",cmd_x},
   {"p",print_aliases,"Find the value of the expression EXPR",cmd_p},
   {"w",watch_aliases,"Setting up monitoring points",cmd_w},
   {"d",delete_aliases,"Delete the monitoring point with serial number N",cmd_d},
-   /* TODO: Add more commands */
+  /* TODO: Add more commands */
 
 };
 
@@ -252,11 +250,11 @@ static int cmd_p(char* args) {//求出表达式EXPR的值, EXPR支持的运算�
    }
    bool success = true;
    word_t result = expr(arg, &success);
-   printf("%s = %d", arg, result);
+   printf("%s = %d\n", arg, result);
    return result;
 }
 
-static int cmd_w(char* args) {
+static int cmd_w(char* args) {//使用了expr来计算表达式
    if (args == NULL) {
       printf("Usage: w <expr>\n");
       return 0;

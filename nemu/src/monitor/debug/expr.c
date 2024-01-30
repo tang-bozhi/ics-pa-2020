@@ -303,11 +303,13 @@ int eval(int p, int q) {
          int next_expr_end = find_next_expr_end(p + 1, q);
          uint32_t addr = eval(p + 1, next_expr_end); // 计算地址
          // ...[地址有效性检查和读取内存的代码]...
-         if (addr < PMEM_BASE && PMEM_BASE + PMEM_SIZE - 1 <= addr) {
+         if (addr < PMEM_BASE || PMEM_BASE + PMEM_SIZE - 1 <= addr) {
             printf("Invalid memory access at address 0x%08x.\n", addr);
             return -1;
          }
-         return vaddr_read(addr, 4);
+         else if ((PMEM_BASE <= addr) && (addr <= PMEM_BASE + PMEM_SIZE - 1)) {
+            return paddr_read(addr, 4);
+         }
       }
       else {//这个else还不能删掉,会报control reaches end of non-void function,要确保在所有可能的执行路径上 eval 函数都有一个返回值
          printf("Dereference error at %d.\n", p);
