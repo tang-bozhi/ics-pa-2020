@@ -312,7 +312,7 @@ int eval(int p, int q) {
          }
       }
       else {//这个else还不能删掉,会报control reaches end of non-void function,要确保在所有可能的执行路径上 eval 函数都有一个返回值
-         printf("Dereference error at %d.\n", p);
+         printf("eval():DEREF:Dereference error at %d.\n", p);
          return -1;
       }
    }
