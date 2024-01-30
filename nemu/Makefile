@@ -12,16 +12,16 @@ ifeq ($(filter $(ENGINES), $(ENGINE)), ) # ENGINE must be valid
 $(error Invalid ENGINE. Supported: $(ENGINES))
 endif
 
-$(info Building $(ISA)-$(NAME)-$(ENGINE))
+$(info Building $(ISA)-$(NAME)-$(ENGINE))#info 函数用于打印一条消息.消息内容在括号内定义
 
 INC_DIR += ./include ./src/engine/$(ENGINE)
 BUILD_DIR ?= ./build
 
 ifdef SHARE
-SO = -so#-fPIC:Position Independent Code"的标志。这意味着生成的代码可以在任何地址运行，这是创建共享库所必需的
-SO_CFLAGS = -fPIC #Shared Object Compilation Flags 用于编译共享对象的编译标志
--D_SHARE=1#-D是定义宏的标志。这里，它定义了一个名为_SHARE的宏，并为其赋值1
-SO_LDLAGS = -shared -fPIC#LDLAGS:这是"Shared Object Linker Flags"的缩写，意思是用于链接共享对象的链接标志
+SO = -so
+SO_CFLAGS = -fPIC 
+-D_SHARE=1 
+SO_LDLAGS = -shared -fPIC 
 else
 LD_LIBS = -lSDL2 -lreadline -ldl
 endif

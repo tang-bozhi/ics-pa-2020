@@ -268,8 +268,8 @@ int find_main_op(int p, int q) {
    }
    return main_op;
 }
-
-int find_next_expr_end(int start, int end) {//辅助函数:判断*引用结束位置
+//辅助函数:判断*引用结束位置
+int find_next_expr_end(int start, int end) {
    int level = 0;
    for (int i = start; i <= end; i++) {
       if (tokens[i].type == TK_LPAR) level++;
@@ -296,7 +296,7 @@ int eval(int p, int q) {
    else if (tokens[p].type == TK_NEG) {//判断负号
       return -eval(p + 1, q);
    }
-   else if (tokens[p].type == TK_DEREF) {//判断解引用
+   else if (tokens[p].type == TK_DEREF) {//判断解引用:后面跟的参数好像只能是
       // 确保后续有一个表达式
       if (p + 1 <= q) {
          // 需要找到解引用操作符后的表达式的范围
