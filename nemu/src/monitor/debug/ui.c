@@ -73,9 +73,9 @@ static struct {//这里进行了命令的别名修改
   { "si",step_aliases, "Step through program by N instructions", cmd_si },
   { "info",info_aliases, "Print program status", cmd_info },
   { "x",scan_aliases,"Find the value of the expression EXPR, use the result as the starting memory address, and output N consecutive 4-byte outputs in hexadecimal.",cmd_x},
-  {"p",print_aliases,"Find the value of the expression EXPR",cmd_p},
-  {"w",watch_aliases,"Setting up monitoring points",cmd_w},
-  {"d",delete_aliases,"Delete the monitoring point with serial number N",cmd_d},
+  { "p",print_aliases,"Find the value of the expression EXPR",cmd_p},
+  { "w",watch_aliases,"Setting up monitoring points",cmd_w},
+  { "d",delete_aliases,"Delete the monitoring point with serial number N",cmd_d},
   /* TODO: Add more commands */
 
 };
@@ -155,20 +155,20 @@ int map_address_to_PMEM_BASE(char* arg, uintptr_t* out_addr) {
 
    if (*end != '\0') {
       // 输入不是有效的数字
-      printf("Invalid address format.\n");
+      printf("map_address_to_PMEM_BASE():Invalid address format.\n");
       return -1;
    }
 
    if (addr < PMEM_BASE) {
-      // 输入的地址是虚拟地址
+      // 输入的地址是虚拟地址: pmem[]数组下标
       *out_addr = addr + PMEM_BASE;
    }
    else if (addr >= PMEM_BASE && addr < PMEM_BASE + PMEM_SIZE) {
-      // 输入的地址是物理地址
+      // 输入的地址是物理地址 PMEM_BASE
       *out_addr = addr;
    }
    else {
-      printf("Address is out of range.\n");
+      printf("map_address_to_PMEM_BASE():Address is out of range.\n");
       return -1;
    }
 
@@ -257,6 +257,8 @@ static int cmd_p(char* args) {//求出表达式EXPR的值, EXPR支持的运算�
 static int cmd_w(char* args) {//使用了expr来计算表达式
    if (args == NULL) {
       printf("Usage: w <expr>\n");
+      char w = "w";
+      cmd_info(&w);
       return 0;
    }
 
