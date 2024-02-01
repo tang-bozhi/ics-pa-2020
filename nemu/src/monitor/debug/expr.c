@@ -375,6 +375,8 @@ int eval(int p, int q) {
       default: assert(0);
       }
    }
+   printf("Unhandled case in eval function.\n");
+   return -1;
 }
 
 //express

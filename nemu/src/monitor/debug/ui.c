@@ -149,9 +149,9 @@ static int cmd_info(char* args) {//info w监视点在之后pa实现到watchpoint
    return 0;
 }
 // 辅助函数：映射地址到 PMEM_BASE
-int map_address_to_PMEM_BASE(char* arg, uintptr_t* out_addr) {
+int map_address_to_PMEM_BASE(char* arg, uint32_t* out_addr) {
    char* end;
-   uintptr_t addr = strtol(arg, &end, 0); // 将字符串转换为地址 strtol--base:0
+   uint32_t addr = strtol(arg, &end, 0); // 将字符串转换为地址 strtol--base:0
 
    if (*end != '\0') {
       // 输入不是有效的数字
@@ -191,7 +191,7 @@ static int cmd_x(char* args) {
    }
 
    // 用于存储映射后的地址
-   uintptr_t mapped_addr;
+   uint32_t mapped_addr;
 
    char* endptr;
    n = strtol(arg1, &endptr, 10); // 尝试将第一个参数解析为数字
@@ -257,8 +257,11 @@ static int cmd_p(char* args) {//求出表达式EXPR的值, EXPR支持的运算�
 static int cmd_w(char* args) {//使用了expr来计算表达式
    if (args == NULL) {
       printf("Usage: w <expr>\n");
-      char w = "w";
-      cmd_info(&w);
+      WP* wp = get_head_wp();
+      while (wp != NULL) {//只输入‘w’,打印所有活跃监视点的信息
+         printf("Watchpoint %d: %s, value = %u\n", wp->NO, wp->expr, wp->new_value);
+         wp = wp->next;
+      }
       return 0;
    }
 
