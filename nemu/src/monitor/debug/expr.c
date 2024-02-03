@@ -303,9 +303,12 @@ int eval(int p, int q) {
          int next_expr_end = find_next_expr_end(p + 1, q);
          uint32_t addr = eval(p + 1, next_expr_end); // 计算地址
          // ...[地址有效性检查和读取内存的代码]...
-         if (addr < PMEM_BASE || PMEM_BASE + PMEM_SIZE - 1 <= addr) {
+         if (PMEM_BASE + PMEM_SIZE - 1 <= addr) {
             printf("Invalid memory access at address 0x%08x.\n", addr);
             return -1;
+         }
+         else if (addr < PMEM_BASE) {
+            return paddr_read(addr + PMEM_BASE, 4);
          }
          else if ((PMEM_BASE <= addr) && (addr <= PMEM_BASE + PMEM_SIZE - 1)) {
             return paddr_read(addr, 4);

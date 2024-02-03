@@ -31,7 +31,8 @@ WP* new_wp() {
 
    WP* wp = free_;  // 从空闲链表中获取一个监视点
    free_ = free_->next;  // 更新空闲链表的头指针
-   wp->next = NULL;      // 清除新监视点的next指针
+   wp->next = head;      // 将新监视点的next指针设置为当前的head
+   head = wp;            // 更新head为新监视点
 
    // 初始化新监视点的其他字段...
    wp->NO = next_wp_NO; // 分配一个序号给新监视点
@@ -49,6 +50,15 @@ WP* new_wp() {
 void free_wp(WP* wp) {
    if (wp == NULL) {
       return;  // 如果传入的监视点为空，则直接返回
+   }
+
+   WP** ptr = &head;
+   while (*ptr != NULL && *ptr != wp) {
+      ptr = &(*ptr)->next;
+   }
+
+   if (*ptr) {
+      *ptr = wp->next;  // 从已使用链表中移除
    }
 
    // 重置监视点的部分字段，以便于重用
