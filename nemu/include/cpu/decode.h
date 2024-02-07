@@ -7,27 +7,30 @@
 enum { OP_TYPE_REG, OP_TYPE_MEM, OP_TYPE_IMM };
 
 typedef struct {
-  uint32_t type;
-  int width;
-  union {
-    uint32_t reg;
-    word_t imm;
-    sword_t simm;
-  };
-  rtlreg_t *preg;
-  rtlreg_t val;
-  char str[OP_STR_SIZE];
+   uint32_t type;
+   int width;
+   union {
+      uint32_t reg;
+      word_t imm;
+      sword_t simm;
+   };
+   rtlreg_t* preg;
+   rtlreg_t val;
+   char str[OP_STR_SIZE];
 } Operand;
+//Operand 结构体用于描述一个操作数的信息，包括类型（寄存器、内存\
+或立即数）、宽度、具体值（寄存器编号、立即数、有符号立即数）、指向\
+结果寄存器的指针、实际值，以及一个字符串用于调试或显示
 
 typedef struct {
-  uint32_t opcode;
-  vaddr_t seq_pc;  // sequential pc
-  uint32_t is_jmp;
-  vaddr_t jmp_pc;
-  Operand src1, dest, src2;
-  int width;
-  rtlreg_t tmp_reg[4];
-  ISADecodeInfo isa;
+   uint32_t opcode;
+   vaddr_t seq_pc;  // sequential pc
+   uint32_t is_jmp;
+   vaddr_t jmp_pc;
+   Operand src1, dest, src2;
+   int width;
+   rtlreg_t tmp_reg[4];
+   ISADecodeInfo isa;
 } DecodeExecState;
 
 #define def_DHelper(name) void concat(decode_, name) (DecodeExecState *s)
