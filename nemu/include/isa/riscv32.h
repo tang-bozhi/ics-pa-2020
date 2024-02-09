@@ -31,7 +31,7 @@ typedef struct {
       struct {
          uint32_t opcode1_0 : 2;
          uint32_t opcode6_2 : 5;
-         uint32_t imm4_0 : 5;//imm4_0 和 simm11_5：存储指令中的立即数，用于确定存储位置的偏移量。
+         uint32_t imm4_0 : 5;  //imm4_0 和 simm11_5：存储指令中的立即数，用于确定存储位置的偏移量。
          uint32_t funct3 : 3;
          uint32_t rs1 : 5;
          uint32_t rs2 : 5;//其他字段与I-type相似，但rs2代表第二个源寄存器，用于存储到内存的值。
@@ -41,7 +41,7 @@ typedef struct {
          uint32_t opcode1_0 : 2;
          uint32_t opcode6_2 : 5;
          uint32_t rd : 5;
-         uint32_t imm31_12 : 20;
+         uint32_t imm31_12 : 20;//imm31_12：20位无符号立即数，通常用于长距离跳转和大数值的加载。
       } u;//U-type（无符号立即数类型）
       uint32_t val;//这是一个32位无类型字段，可以存储整个指令的值。在解码过程中，可以通过这个字段访问整个指令的原始值，然后根据需要解析为其他格式
    } instr; // 在riscv32_ISADecodeInfo中，instr联合体可以表示RISC - V指令集中的几种不同的指令格式
