@@ -18,9 +18,9 @@ typedef struct {
    rtlreg_t val;//val字段存储操作数的实际值，例如，在指令执行过程中计算得到的值。
    char str[OP_STR_SIZE];//str是一个字符数组，可能用于调试目的，存储操作数的文本表示。
 } Operand;
-//Operand 结构体用于描述一个操作数的信息，包括类型（寄存器、内存\
-或立即数）、宽度、具体值（寄存器编号、立即数、有符号立即数）、指向\
-结果寄存器的指针、实际值，以及一个字符串用于调试或显示
+/*Operand 结构体用于描述一个操作数的信息，包括类型（寄存器、内存
+或立即数）、宽度、具体值（寄存器编号、立即数、有符号立即数）、指向
+结果寄存器的指针、实际值，以及一个字符串用于调试或显示*/
 
 typedef struct {
    uint32_t opcode;//opcode：存储当前指令的操作码，即指令的唯一标识，用于确定CPU需要执行的操作类型。
@@ -32,9 +32,9 @@ typedef struct {
    rtlreg_t tmp_reg[4];//tmp_reg[4]：这是一个临时寄存器数组，可能用于指令执行过程中的临时存储。在复杂的指令执行过程中，可能需要临时保存数据或中间结果。
    ISADecodeInfo isa;//isa：这个字段包含了指令集架构（Instruction Set Architecture，ISA）特定的解码信息。ISA定义了CPU支持的指令和指令的格式，这个字段可能用来存储与特定ISA相关的额外信息，比如指令的扩展操作码、特定的控制标志等。
 } DecodeExecState;
-//DecodeExecState 结构体用于描述解码执行的状态，包括操作码、顺序 \
-执行的PC（程序计数器）、是否是跳转指令、跳转的目标PC、源操作数和目\
-标操作数、指令宽度、临时寄存器数组，以及ISA特定的解码信息。
+/*DecodeExecState 结构体用于描述解码执行的状态，包括操作码、顺序
+执行的PC（程序计数器）、是否是跳转指令、跳转的目标PC、源操作数和目
+标操作数、指令宽度、临时寄存器数组，以及ISA特定的解码信息。*/
 
 #define def_DHelper(name) void concat(decode_, name) (DecodeExecState *s)
 
