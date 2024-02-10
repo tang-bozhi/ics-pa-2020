@@ -22,10 +22,11 @@ static inline def_EHelper(store) {
 
 
 static inline void fetch_decode_exec(DecodeExecState* s) {
-   s->isa.instr.val = instr_fetch(&s->seq_pc, 4);//实际上，a->b是(*a).b的简写形式
+   s->isa.instr.val = instr_fetch(&s->seq_pc, 4);//instructions fetch指令获取
+   //实际上，a->b是(*a).b的简写形式
    Assert(s->isa.instr.i.opcode1_0 == 0x3, "Invalid instruction");
    switch (s->isa.instr.i.opcode6_2) {
-         IDEX(0b00000, I, load)
+      IDEX(0b00000, I, load)
          IDEX(0b01000, S, store)
          IDEX(0b01101, U, lui)
          EX(0b11010, nemu_trap)
