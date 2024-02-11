@@ -19,6 +19,10 @@
 
 // set_width() is defined in src/isa/$isa/exec/exec.c
 #define CASE_ENTRY(idx, id, ex, w) case idx: set_width(s, w); id(s); ex(s); break;
+//idx (Index)：这是指令的索引或者编号, 生成switch语句中的一个case项
+//id (Identifier for Decode)：这是解码函数的后缀部分
+//ex (Identifier for Execute)：这是执行函数的后缀部分。
+//w (Width)：这代表指令执行时的某种“宽度”参数，可能是指数据宽度或其他特定于架构的宽度概念。
 //如IDEXW(0xb0, mov_I2r, mov, 1)展开之后结果为:case 0xb0: set_width(s, 1); decode_mov_I2r(s); exec_mov(s); break;
 static inline uint32_t instr_fetch(vaddr_t* pc, int len) {
    uint32_t instr = vaddr_ifetch(*pc, len);
