@@ -11,11 +11,11 @@
 // empty decode helper
 #define decode_empty(s)
 
-#define IDEXW(idx, id, ex, w) CASE_ENTRY(idx, concat(decode_, id), concat(exec_, ex), w)
-#define IDEX(idx, id, ex)     IDEXW(idx, id, ex, 0)
-#define EXW(idx, ex, w)       IDEXW(idx, empty, ex, w)
-#define EX(idx, ex)           EXW(idx, ex, 0)
-#define EMPTY(idx)            EX(idx, inv)
+#define IDEXW(idx, id, ex, w) CASE_ENTRY(idx, concat(decode_, id), concat(exec_, ex), w)//生成switch语句中的一个case项，其中包括了设置执行宽度、调用解码函数和执行函数的代码
+#define IDEX(idx, id, ex)     IDEXW(idx, id, ex, 0)//这是一个特化的IDEXW宏，用于定义没有宽度参数（或宽度为0）的指令
+#define EXW(idx, ex, w)       IDEXW(idx, empty, ex, w)//这个宏用于定义没有专门解码步骤（或解码函数为空）的指令，只有执行步骤和宽度参数
+#define EX(idx, ex)           EXW(idx, ex, 0)//这是EXW的一个特化形式，用于定义没有宽度参数的执行指令
+#define EMPTY(idx)            EX(idx, inv)//这个宏用于定义一个“空”的或无效的指令
 
 // set_width() is defined in src/isa/$isa/exec/exec.c
 #define CASE_ENTRY(idx, id, ex, w) case idx: set_width(s, w); id(s); ex(s); break;
@@ -24,6 +24,7 @@
 //ex (Identifier for Execute)：这是执行函数的后缀部分。
 //w (Width)：这代表指令执行时的某种“宽度”参数，可能是指数据宽度或其他特定于架构的宽度概念。
 //如IDEXW(0xb0, mov_I2r, mov, 1)展开之后结果为:case 0xb0: set_width(s, 1); decode_mov_I2r(s); exec_mov(s); break;
+
 static inline uint32_t instr_fetch(vaddr_t* pc, int len) {
    uint32_t instr = vaddr_ifetch(*pc, len);
 #ifdef DEBUG
