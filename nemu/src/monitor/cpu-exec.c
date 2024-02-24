@@ -32,7 +32,7 @@ int is_exit_status_bad() {
    return !good;
 }
 
-void rtl_exit(int state, vaddr_t halt_pc, uint32_t halt_ret) {
+void rtl_exit(int state, vaddr_t halt_pc, uint32_t halt_ret) {//终止程序rtl_exit
    nemu_state = (NEMUState){ .state = state, .halt_pc = halt_pc, .halt_ret = halt_ret };
 }
 

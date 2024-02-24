@@ -42,7 +42,7 @@ def_rtl_compute_reg_imm(sarw)
 #define rtl_shriw rtl_shrwi
 #define rtl_sariw rtl_sarwi
 #endif
-
+//注意开头没有#define
 static inline def_rtl(setrelop, uint32_t relop, rtlreg_t* dest,//setrelop:set relational operation
    const rtlreg_t* src1, const rtlreg_t* src2) {//setrelop意味着"设置关系操作的结果"，即根据两个操作数之间的关系比较结果来设置一个目标寄存器的值
    *dest = interpret_relop(relop, *src1, *src2);
@@ -72,14 +72,14 @@ def_rtl_compute_reg(remw)
 def_rtl_compute_reg(remuw)
 #endif
 
-static inline def_rtl(div64_q, rtlreg_t* dest,
+static inline def_rtl(div64_q, rtlreg_t* dest,//div64_q: q: quotient (math.)
    const rtlreg_t* src1_hi, const rtlreg_t* src1_lo, const rtlreg_t* src2) {
-   uint64_t dividend = ((uint64_t)(*src1_hi) << 32) | (*src1_lo);
-   uint32_t divisor = (*src2);
+   uint64_t dividend = ((uint64_t)(*src1_hi) << 32) | (*src1_lo);//通过将src1_hi的值左移32位并与src1_lo的值进行按位或操作，构造出64位的被除数 
+   uint32_t divisor = (*src2);//然后使用这个被除数除以src2指向的32位无符号除数，计算出商，并将结果存储在dest指向的寄存器中 
    *dest = dividend / divisor;
 }
 
-static inline def_rtl(div64_r, rtlreg_t* dest,
+static inline def_rtl(div64_r, rtlreg_t* dest,//div64_r: r: residue (math.)
    const rtlreg_t* src1_hi, const rtlreg_t* src1_lo, const rtlreg_t* src2) {
    uint64_t dividend = ((uint64_t)(*src1_hi) << 32) | (*src1_lo);
    uint32_t divisor = (*src2);
@@ -101,15 +101,16 @@ static inline def_rtl(idiv64_r, rtlreg_t* dest,
 }
 
 // memory
-
+//`rtl_lm`, `rtl_lms` 和 `rtl_sm` 指的是访问guest（被模拟的系统）内存的操作，分别对应于加载内存、加载并修改内存、存储内存。
+//lm（Load Memory）加载内存
 static inline def_rtl(lm, rtlreg_t* dest, const rtlreg_t* addr, word_t offset, int len) {
    *dest = vaddr_read(*addr + offset, len);
 }
-
+//sm（Store Memory）存储内存
 static inline def_rtl(sm, const rtlreg_t* addr, word_t offset, const rtlreg_t* src1, int len) {
    vaddr_write(*addr + offset, *src1, len);
 }
-
+//lms（Load Memory with Sign-extension）加载并修改内存
 static inline def_rtl(lms, rtlreg_t* dest, const rtlreg_t* addr, word_t offset, int len) {
    word_t val = vaddr_read(*addr + offset, len);
    switch (len) {
@@ -119,7 +120,8 @@ static inline def_rtl(lms, rtlreg_t* dest, const rtlreg_t* addr, word_t offset, 
    default: assert(0);
    }
 }
-
+//`rtl_host_lm` 和 `rtl_host_sm` 指的是访问host（模拟器运行的系统）内存的操作。
+//host_lm（Host Load Memory）
 static inline def_rtl(host_lm, rtlreg_t* dest, const void* addr, int len) {
    switch (len) {
    case 4: *dest = *(uint32_t*)addr; return;
@@ -128,7 +130,7 @@ static inline def_rtl(host_lm, rtlreg_t* dest, const void* addr, int len) {
    default: assert(0);
    }
 }
-
+//host_sm（Host Store Memory）
 static inline def_rtl(host_sm, void* addr, const rtlreg_t* src1, int len) {
    switch (len) {
    case 4: *(uint32_t*)addr = *src1; return;
@@ -139,7 +141,7 @@ static inline def_rtl(host_sm, void* addr, const rtlreg_t* src1, int len) {
 }
 
 // control
-
+//跳转, 包括直接跳转rtl_j, 间接跳转rtl_jr和条件跳转rtl_jrelop
 static inline def_rtl(j, vaddr_t target) {
    s->jmp_pc = target;
    s->is_jmp = true;
