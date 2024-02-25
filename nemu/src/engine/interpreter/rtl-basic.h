@@ -142,17 +142,17 @@ static inline def_rtl(host_sm, void* addr, const rtlreg_t* src1, int len) {
 
 // control
 //跳转, 包括直接跳转rtl_j, 间接跳转rtl_jr和条件跳转rtl_jrelop
-static inline def_rtl(j, vaddr_t target) {
-   s->jmp_pc = target;
+static inline def_rtl(j, vaddr_t target) {//rtl_j 表示“Register Transfer Language Jump”
+   s->jmp_pc = target;//这种类型的跳转不依赖于任何条件，执行时直接将程序的控制流跳转到指定的地址。
    s->is_jmp = true;
 }
 
-static inline def_rtl(jr, rtlreg_t* target) {
-   s->jmp_pc = *target;
+static inline def_rtl(jr, rtlreg_t* target) {//“jump register”（寄存器跳转）
+   s->jmp_pc = *target;//一种间接跳转指令，意味着跳转的目的地（地址）存储在一个寄存器中，而不是直接在指令中给出。
    s->is_jmp = true;
 }
 
-static inline def_rtl(jrelop, uint32_t relop,
+static inline def_rtl(jrelop, uint32_t relop,//jrelop代表“jump relational operator”（跳转关系操作符）
    const rtlreg_t* src1, const rtlreg_t* src2, vaddr_t target) {
    bool is_jmp = interpret_relop(relop, *src1, *src2);
    if (is_jmp) rtl_j(s, target);
