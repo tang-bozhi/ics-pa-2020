@@ -45,7 +45,7 @@ typedef struct {
       } u;//U-type（无符号立即数类型）
       uint32_t val;//这是一个32位无类型字段，可以存储整个指令的值。在解码过程中，可以通过这个字段访问整个指令的原始值，然后根据需要解析为其他格式
    } instr; // 在riscv32_ISADecodeInfo中，instr联合体可以表示RISC - V指令集中的几种不同的指令格式
-} riscv32_ISADecodeInfo;
+} riscv32_ISADecodeInfo;//注意instr是union
 
 #define isa_vaddr_check(vaddr, type, len) (MEM_RET_OK)
 #define riscv32_has_mem_exception() (false)
