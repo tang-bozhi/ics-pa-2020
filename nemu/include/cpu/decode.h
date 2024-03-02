@@ -36,8 +36,8 @@ typedef struct {
 执行的PC（程序计数器）、是否是跳转指令、跳转的目标PC、源操作数和目
 标操作数、指令宽度、临时寄存器数组，以及ISA特定的解码信息。*/
 
-#define def_DHelper(name) void concat(decode_, name) (DecodeExecState *s)//其目的是为了简化解码辅助函数（DHelper 函数）的声明过程
-
+#define def_DHelper(name) void concat(decode_, name) (DecodeExecState *s)//每个译码辅助函数负责进行一种类型的操作数译码, 把指令中的操作数信息分别记录在译码信息s的src成员, src2成员和dest成员中, 它们分别代表两个源操作数和一个目的操作数.
+//其目的是为了简化解码辅助函数（DHelper 函数）的声明过程
 #ifdef DEBUG
 #define print_Dop(...) snprintf(__VA_ARGS__)
 #else
