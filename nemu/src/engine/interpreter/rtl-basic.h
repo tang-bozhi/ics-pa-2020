@@ -22,14 +22,14 @@
 
 // compute
 
-def_rtl_compute_reg_imm(add)
+def_rtl_compute_reg_imm(add)//static inline void rtl_add(DecodeExecState *s, rtlreg_t* dest, const rtlreg_t* src1, const rtlreg_t* src2) { *dest = ((*src1) + (*src2)); } static inline void rtl_addi(DecodeExecState *s, rtlreg_t* dest, const rtlreg_t* src1, const sword_t imm) { *dest = ((*src1) + (imm)); }
 def_rtl_compute_reg_imm(sub)
 def_rtl_compute_reg_imm(and)
 def_rtl_compute_reg_imm(or )
 def_rtl_compute_reg_imm(xor)
-def_rtl_compute_reg_imm(shl)
-def_rtl_compute_reg_imm(shr)
-def_rtl_compute_reg_imm(sar)
+def_rtl_compute_reg_imm(shl)//逻辑左移
+def_rtl_compute_reg_imm(shr)//逻辑右移
+def_rtl_compute_reg_imm(sar)//算术右移 Arithmetic Shift Right, ASR
 
 #ifdef ISA64
 def_rtl_compute_reg_imm(addw)
@@ -43,7 +43,7 @@ def_rtl_compute_reg_imm(sarw)
 #define rtl_sariw rtl_sarwi
 #endif
 //注意开头没有#define
-static inline def_rtl(setrelop, uint32_t relop, rtlreg_t* dest,//setrelop:set relational operation
+static inline def_rtl(setrelop, uint32_t relop, rtlreg_t* dest,//setrelop:set relational operation 设置关系操作符 
    const rtlreg_t* src1, const rtlreg_t* src2) {//setrelop意味着"设置关系操作的结果"，即根据两个操作数之间的关系比较结果来设置一个目标寄存器的值
    *dest = interpret_relop(relop, *src1, *src2);
 }
