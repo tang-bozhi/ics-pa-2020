@@ -18,36 +18,45 @@ static inline def_rtl(mv, rtlreg_t* dest, const rtlreg_t* src1) {//mv (move): de
 static inline def_rtl(not, rtlreg_t* dest, const rtlreg_t* src1) {//not (?bitwise NOT operator): dest <- ~src1
    // dest <- ~src1
    // TODO();
-   rtl_add(s, dest, ~(*src1), rz);
+   *s0 = ~(*src1); // 创建临时变量来存储取反结果
+   rtl_add(s, dest, s0, rz);
 }
 
 static inline def_rtl(neg, rtlreg_t* dest, const rtlreg_t* src1) {//neg (take a negative number): dest <- -src1
    // dest <- -src1
    //TODO();
-   rtl_add(s, dest, -(*src1), rz);
+   *s0 = -(*src1);
+   rtl_add(s, dest, s0, rz);
 }
 
 static inline def_rtl(sext, rtlreg_t* dest, const rtlreg_t* src1, int width) {//sext (Sign Extension): 符号扩展 dest <- signext(src1[(width * 8 - 1) .. 0])
    // dest <- signext(src1[(width * 8 - 1) .. 0])
    //TODO();
    // 假设 rtlreg_t 是一个32位的类型，且width以位为单位
-   int shift = 32 - width; // 计算需要左移然后右移的位数
+   *s0 = 32 - width; // 计算需要左移然后右移的位数
    // 先将src1左移，丢弃高位，然后算术右移回来，进行符号扩展
-   *dest = (rtlreg_t)(((int32_t)(*src1) << shift) >> shift);
+   *dest = (rtlreg_t)(((int32_t)(*src1) << *s0) >> *s0);
 }
 
 static inline def_rtl(zext, rtlreg_t* dest, const rtlreg_t* src1, int width) {//zext (Zero Extension):零扩展 dest <- zeroext(src1[(width * 8 - 1) .. 0])
    // dest <- zeroext(src1[(width * 8 - 1) .. 0])
    //TODO();
    // 创建一个掩码，它在低 width 位为 1，其他位为 0。
-   rtlreg_t mask = (1ULL << width) - 1;
+   *s0 = (1ULL << width) - 1;
    // 将 src1 的值与掩码进行 AND 操作，然后赋值给 dest。
-   *dest = *src1 & mask;
+   *dest = *src1 & *s0;
 }
 
-static inline def_rtl(msb, rtlreg_t* dest, const rtlreg_t* src1, int width) {
+static inline def_rtl(msb, rtlreg_t* dest, const rtlreg_t* src1, int width) {//msb (Most Significant Bit):用于获取一个数字中最重要的位（即最左边的位） dest <- src1[width * 8 - 1] 
    // dest <- src1[width * 8 - 1]
-   TODO();
+   //TODO();
+   // 由于rtlreg_t是无符号32位整型，所以这里不需要担心符号扩展的问题
+    // 计算位移量，以便将感兴趣的MSB位移到最低位
+   int shift = 8 * width - 1;
+
+   // 将src1右移，使目标MSB位于最低位，然后与1进行逻辑与操作
+   // 这样可以提取出MSB的值
+   *dest = (*src1 >> shift) & 1;
 }
 
 #endif
