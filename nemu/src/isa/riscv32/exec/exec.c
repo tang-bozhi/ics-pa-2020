@@ -8,14 +8,20 @@ static inline void set_width(DecodeExecState* s, int width) {
 
 static inline def_EHelper(load) {
    switch (s->isa.instr.i.funct3) {
-      EXW(2, ld, 4)
+      EXW(0, ld, 1) // LB
+         EXW(1, ld, 2) // LH
+         EXW(2, ld, 4) // LW
+         EXW(4, ld, 1) // LBU
+         EXW(5, ld, 2) // LHU
    default: exec_inv(s);
    }
 }
 
 static inline def_EHelper(store) {
    switch (s->isa.instr.s.funct3) {
-      EXW(2, st, 4)
+      EXW(0, st, 1) //SB（Store Byte）指令用于将一个字节（8位）的数据从寄存器存储到内存中。 
+         EXW(1, st, 2) //SH 
+         EXW(2, st, 4) //SW 
    default: exec_inv(s);
    }
 }
