@@ -1,3 +1,4 @@
+//exec.c：执行相关的C文件，可能包含了程序执行流程的主要逻辑代码
 #include <cpu/exec.h>
 #include "../local-include/decode.h"
 #include "all-instr.h"
@@ -20,8 +21,8 @@ static inline def_EHelper(load) {
 static inline def_EHelper(store) {
    switch (s->isa.instr.s.funct3) {
       EXW(0, st, 1) //SB（Store Byte）指令用于将一个字节（8位）的数据从寄存器存储到内存中。 
-         EXW(1, st, 2) //SH 
-         EXW(2, st, 4) //SW 
+         EXW(1, st, 2) //SH Halfword
+         EXW(2, st, 4) //SW Word
    default: exec_inv(s);
    }
 }
@@ -34,7 +35,7 @@ static inline void fetch_decode_exec(DecodeExecState* s) {
    switch (s->isa.instr.i.opcode6_2) {
       IDEX(0b00000, I, load)
          IDEX(0b01000, S, store)
-         IDEX(0b01101, U, lui)//lui（Load Upper Immediate）
+         IDEX(0b01101, U, lui)//lui（Load Upper Immediate）LUI(加载高位立即数)被用于构建32位常量,它使用U类型格式.LUI把32位U立即数值放在目的寄存器rd中,同时把最低的12位用零填充。
          EX(0b11010, nemu_trap)
    default: exec_inv(s);
    }

@@ -1,3 +1,7 @@
+// special.c 可能包含特殊或少见的指令，可能是为了特定的操作而设计的。例如：
+// 系统调用和特权指令
+// 自定义扩展指令
+// 设备控制指令
 #include <cpu/exec.h>
 #include <monitor/monitor.h>
 #include <monitor/difftest.h>
