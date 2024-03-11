@@ -6,8 +6,8 @@
   void concat(decode_op_, name) (DecodeExecState *s, Operand *op, word_t val, bool load_val)
 
 static inline def_DopHelper(i) {
-   op->type = OP_TYPE_IMM;
-   op->imm = val;
+   op->type = OP_TYPE_IMM;//这里是设置Oprand的种类,这将使得指令对应到其OP_TYPE_ 上 
+   op->imm = val;//将指令放入,这里就已经用union的特性使指令的相应部分得到其应有的意义 
 
    print_Dop(op->str, OP_STR_SIZE, "%d", op->imm);
 }
@@ -21,7 +21,7 @@ static inline def_DopHelper(r) {
 }
 
 static inline def_DHelper(I) {
-   decode_op_r(s, id_src1, s->isa.instr.i.rs1, true);
+   decode_op_r(s, id_src1, s->isa.instr.i.rs1, true);//这里的bool表示是否加载这个值
    decode_op_i(s, id_src2, s->isa.instr.i.simm11_0, true);
    decode_op_r(s, id_dest, s->isa.instr.i.rd, false);
 }

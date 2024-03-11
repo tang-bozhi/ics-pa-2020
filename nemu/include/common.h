@@ -30,7 +30,7 @@ typedef int64_t sword_t;
 #else
 typedef uint32_t word_t;
 typedef int32_t sword_t;
-#define FMT_WORD "0x%08x"
+#define FMT_WORD "0x%08x"//"word format" 字格式
 #endif
 
 typedef word_t rtlreg_t;

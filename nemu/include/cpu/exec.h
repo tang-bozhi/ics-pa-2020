@@ -25,22 +25,23 @@
 //w (Width)：这代表指令执行时的某种“宽度”参数，可能是指数据宽度或其他特定于架构的宽度概念。
 //如IDEXW(0xb0, mov_I2r, mov, 1)展开之后结果为:case 0xb0: set_width(s, 1); decode_mov_I2r(s); exec_mov(s); break;
 
+//vaddr_ifetch 函数的主要功能是根据请求的长度（len），从指定的虚拟地址（addr）中取出指令数据。这个函数通过内联（static inline）定义，以便在编译时直接嵌入到调用它的代码位置，从而减少函数调用的开销，提高效率。
 static inline uint32_t instr_fetch(vaddr_t* pc, int len) {
-   uint32_t instr = vaddr_ifetch(*pc, len);
+  uint32_t instr = vaddr_ifetch(*pc, len);
 #ifdef DEBUG
-   uint8_t* p_instr = (void*)&instr;
-   int i;
-   for (i = 0; i < len; i++) {
-      extern char log_bytebuf[];
-      strcatf(log_bytebuf, "%02x ", p_instr[i]);
-   }
+  uint8_t* p_instr = (void*)&instr;
+  int i;
+  for (i = 0; i < len; i++) {
+    extern char log_bytebuf[];
+    strcatf(log_bytebuf, "%02x ", p_instr[i]);
+  }
 #endif
-   (*pc) += len;
-   return instr;
+  (*pc) += len;
+  return instr;
 }
 
 static inline void update_pc(DecodeExecState* s) {
-   cpu.pc = (s->is_jmp ? s->jmp_pc : s->seq_pc);
+  cpu.pc = (s->is_jmp ? s->jmp_pc : s->seq_pc);
 }
 
 #ifdef DEBUG
