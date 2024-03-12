@@ -3,7 +3,7 @@
 
 #include <isa.h>
 
-#define OP_STR_SIZE 40//OP_STR_SIZE 定义为40，可能用于限制操作数字符串的最大长度。
+#define OP_STR_SIZE 40//OP_STR_SIZE 定义为40，可能用于限制操作数字符串的最大长度.(如print_Dop中被使用)
 enum { OP_TYPE_REG, OP_TYPE_MEM, OP_TYPE_IMM };
 
 typedef struct {
