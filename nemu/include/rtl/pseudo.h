@@ -54,7 +54,7 @@ static inline def_rtl(msb, rtlreg_t* dest, const rtlreg_t* src1, int width) {//m
    *s0 = 8 * width - 1;
 
    // 将src1右移，使目标MSB位于最低位，然后与1进行逻辑与操作
-   // 这样可以提取出MSB的值
+   // 这样可以提取出MSB的值(最重要的位--最高位--最右边的)
    *dest = (*src1 >> *s0) & 1;
 }
 

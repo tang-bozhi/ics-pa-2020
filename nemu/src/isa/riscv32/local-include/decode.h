@@ -26,14 +26,14 @@ static inline def_DHelper(I) {
    decode_op_r(s, id_dest, s->isa.instr.i.rd, false);
 }
 
-static inline def_DHelper(U) {
+static inline def_DHelper(U) {//Upper 上移
    decode_op_i(s, id_src1, s->isa.instr.u.imm31_12 << 12, true);
    decode_op_r(s, id_dest, s->isa.instr.u.rd, false);
 
    print_Dop(id_src1->str, OP_STR_SIZE, "0x%x", s->isa.instr.u.imm31_12);
 }
 
-static inline def_DHelper(S) {
+static inline def_DHelper(S) {//Store 存储
    decode_op_r(s, id_src1, s->isa.instr.s.rs1, true);
    sword_t simm = (s->isa.instr.s.simm11_5 << 5) | s->isa.instr.s.imm4_0;
    decode_op_i(s, id_src2, simm, true);
@@ -41,7 +41,7 @@ static inline def_DHelper(S) {
 }
 
 //下方均为后来添加(没有核实)
-static inline def_DHelper(R) {
+static inline def_DHelper(R) {//Register
    // 解码源寄存器1
    decode_op_r(s, id_src1, s->isa.instr.r.rs1, true);
    // 解码源寄存器2
@@ -50,7 +50,7 @@ static inline def_DHelper(R) {
    decode_op_r(s, id_dest, s->isa.instr.r.rd, false);
 }
 
-static inline def_DHelper(B) {
+static inline def_DHelper(B) {//Branch
    // 解码源寄存器1
    decode_op_r(s, id_src1, s->isa.instr.b.rs1, true);
 
@@ -59,14 +59,14 @@ static inline def_DHelper(B) {
 
    // B-type 指令立即数字段的位组合
    int32_t imm = (
-      (s->isa.instr.b.imm11 << 11) |//这里的B类型没有在教案的isa.instr中定义
-      (s->isa.instr.b.imm10_5 << 5) |
-      (s->isa.instr.b.imm4_1 << 1) |
-      (s->isa.instr.b.imm12 << 12)
+      ((s->isa.instr.b.imm11) << 11) |
+      ((s->isa.instr.b.imm10_5) << 5) |
+      ((s->isa.instr.b.imm4_1) << 1) |
+      ((s->isa.instr.b.imm12) << 12)
       );
 
    // 立即数字段进行符号扩展
-   imm = (imm << 19) >> 19;
+   imm = (imm << 19) >> 19;//这里的B类型没有在教案的isa.instr中定义(已补充定义)
 
    // 计算跳转目标地址（当前 PC 加上偏移量）
    s->jmp_pc = s->seq_pc + imm;
@@ -75,4 +75,25 @@ static inline def_DHelper(B) {
    s->is_jmp = 1;
 }
 
+static inline def_DHelper(J) {//Jump
+   // 解码目标寄存器
+   decode_op_r(s, id_dest, s->isa.instr.j.rd, false);
+
+   // J-type 指令立即数字段的位组合
+   int32_t imm = (
+      (s->isa.instr.j.imm20 << 20) |
+      (s->isa.instr.j.imm19_12 << 12) |
+      (s->isa.instr.j.imm11 << 11) |
+      (s->isa.instr.j.imm10_1 << 1)
+      );
+
+   // 立即数字段进行符号扩展
+   imm = (imm << 11) >> 11;
+
+   // 计算跳转目标地址（当前 PC 加上偏移量）
+   s->jmp_pc = s->seq_pc + imm;
+
+   // 设置跳转标志
+   s->is_jmp = 1;
+}
 
