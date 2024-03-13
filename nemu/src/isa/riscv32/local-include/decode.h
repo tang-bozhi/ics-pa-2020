@@ -40,7 +40,7 @@ static inline def_DHelper(S) {//Store 存储
    decode_op_r(s, id_dest, s->isa.instr.s.rs2, true);
 }
 
-//下方均为后来添加(没有核实)
+//下方均为后来添加
 static inline def_DHelper(R) {//Register
    // 解码源寄存器1
    decode_op_r(s, id_src1, s->isa.instr.r.rs1, true);
