@@ -21,4 +21,4 @@ static inline def_EHelper(st) {
   default: assert(0);
   }
 }
-//教案已经完成 
+//已被教案完成 

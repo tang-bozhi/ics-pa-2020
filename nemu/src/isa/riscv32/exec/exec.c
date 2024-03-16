@@ -13,7 +13,7 @@ static inline def_EHelper(load) {
          EXW(1, ld, 2) // LH
          EXW(2, ld, 4) // LW
          EXW(4, ld, 1) // LBU
-         EXW(5, ld, 2) // LHU
+         EXW(5, ld, 2) // LHU 在RISC-V指令集架构中，LHU（Load Halfword Unsigned）指令是一个I类型（Immediate类型）指令。这类指令主要用于从内存中加载16位无符号半字到寄存器，并将其符号扩展为32位或64位（取决于处理器的位宽）。
    default: exec_inv(s);
    }
 }
@@ -38,6 +38,7 @@ static inline void fetch_decode_exec(DecodeExecState* s) {
          IDEX(0b01101, U, lui)//lui（Load Upper Immediate）LUI(加载高位立即数)被用于构建32位常量,它使用U类型格式.LUI把32位U立即数值放在目的寄存器rd中,同时把最低的12位用零填充。
          EX(0b11010, nemu_trap)
          IDEX(0b00101, U, auipc)
+         IDEX(0b11011, U, jal)
    default: exec_inv(s);
    }
 }
