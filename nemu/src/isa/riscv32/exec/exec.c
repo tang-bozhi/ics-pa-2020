@@ -39,6 +39,7 @@ static inline void fetch_decode_exec(DecodeExecState* s) {
          EX(0b11010, nemu_trap)
          IDEX(0b00101, U, auipc)
          IDEX(0b11011, U, jal)
+         IDEX(0b11001, I, jalr)
    default: exec_inv(s);
    }
 }

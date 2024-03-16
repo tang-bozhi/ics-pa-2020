@@ -76,7 +76,7 @@ static inline def_DHelper(B) {//Branch
 }
 
 static inline def_DHelper(J) {//Jump
-   // 解码目标寄存器
+   // 解码目标寄存器 
    decode_op_r(s, id_dest, s->isa.instr.j.rd, false);
 
    // J-type 指令立即数字段的位组合

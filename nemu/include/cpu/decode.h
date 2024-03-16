@@ -7,7 +7,7 @@
 enum { OP_TYPE_REG, OP_TYPE_MEM, OP_TYPE_IMM };
 
 typedef struct {
-   uint32_t type;//type字段表明操作数的类型，如寄存器、内存地址或立即数。
+   uint32_t type;//type字段表明操作数的类型，如OP_TYPE_IMM,OP_TYPE_REG
    int width;//width字段指示操作数的数据宽度，即操作数的大小（例如，8位、16位、32位等）。
    union {
       uint32_t reg;//reg：如果操作数是寄存器类型的，这里存储寄存器的编号。
