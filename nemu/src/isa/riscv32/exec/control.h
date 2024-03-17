@@ -15,3 +15,8 @@ static inline def_EHelper(jal) {
    // 格式化打印此指令，用于调试
    print_asm_template2(jal);
 }
+
+
+static inline def_EHelper(jalr) {
+
+}
