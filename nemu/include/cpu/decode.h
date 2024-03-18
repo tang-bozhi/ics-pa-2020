@@ -14,7 +14,7 @@ typedef struct {
       word_t imm;//imm和simm：用于存储立即数值，
       sword_t simm;//其中simm是有符号立即数，用于需要表示负数的情况。
    };
-   rtlreg_t* preg;//preg是一个指向寄存器的指针，可能用于存储操作结果:为了提高性能, 我们在Operand结构体中定义了一个RTL寄存器的指针preg, 用于直接指向那些已经存在的RTL寄存器.
+   rtlreg_t* preg;//preg是一个指向寄存器的指针，由&reg_l(val);指向:为了提高性能, 我们在Operand结构体中定义了一个RTL寄存器的指针preg, 用于直接指向那些已经存在的RTL寄存器.
    rtlreg_t val;//val字段存储操作数的实际值，例如，在指令执行过程中计算得到的值。
    char str[OP_STR_SIZE];//str是一个字符数组，可能用于调试目的，存储操作数的文本表示。
 } Operand;

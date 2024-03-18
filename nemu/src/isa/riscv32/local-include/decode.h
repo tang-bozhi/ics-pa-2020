@@ -7,14 +7,14 @@
 
 static inline def_DopHelper(i) {
    op->type = OP_TYPE_IMM;//这里是设置Oprand的种类,这将使得指令对应到其OP_TYPE_ 上 
-   op->s0 = val;//将指令放入,这里就已经用union的特性使指令的相应部分得到其应有的意义 
+   op->imm = val;//将指令放入 
 
-   print_Dop(op->str, OP_STR_SIZE, "%d", op->s0);
+   print_Dop(op->str, OP_STR_SIZE, "%d", op->imm);
 }
 
 static inline def_DopHelper(r) {
-   op->type = OP_TYPE_REG;//同上
-   op->reg = val;//同上
+   op->type = OP_TYPE_REG;//同上 //这里是设置Oprand的种类,这将使得指令对应到其OP_TYPE_ 上 
+   op->reg = val;//同上 
    op->preg = &reg_l(val);//preg直接指向word_t val()
 
    print_Dop(op->str, OP_STR_SIZE, "%s", reg_name(op->reg));
@@ -58,7 +58,7 @@ static inline def_DHelper(B) {//Branch
    decode_op_r(s, id_src2, s->isa.instr.b.rs2, true);
 
    // B-type 指令立即数字段的位组合
-   s0 = (
+   *s0 = (
       ((s->isa.instr.b.imm11) << 11) |
       ((s->isa.instr.b.imm10_5) << 5) |
       ((s->isa.instr.b.imm4_1) << 1) |
@@ -66,10 +66,10 @@ static inline def_DHelper(B) {//Branch
       );
 
    // 立即数字段进行符号扩展
-   s0 = (s0 << 19) >> 19;//这里的B类型没有在教案的isa.instr中定义(已补充定义)
+   *s0 = (*s0 << 19) >> 19;//这里的B类型没有在教案的isa.instr中定义(已补充定义)
 
    // 计算跳转目标地址（当前 PC 加上偏移量）
-   s->jmp_pc = s->seq_pc + s0;
+   s->jmp_pc = s->seq_pc + *s0;
 
    // 设置分支标志
    s->is_jmp = 1;
@@ -80,7 +80,7 @@ static inline def_DHelper(J) {//Jump
    decode_op_r(s, id_dest, s->isa.instr.j.rd, false);
 
    // J-type 指令立即数字段的位组合
-   s0 = (
+   *s0 = (
       (s->isa.instr.j.imm20 << 20) |
       (s->isa.instr.j.imm19_12 << 12) |
       (s->isa.instr.j.imm11 << 11) |
@@ -88,10 +88,10 @@ static inline def_DHelper(J) {//Jump
       );
 
    // 立即数字段进行符号扩展
-   s0 = (s0 << 11) >> 11;
+   *s0 = (*s0 << 11) >> 11;
 
    // 计算跳转目标地址（当前 PC 加上偏移量）
-   s->jmp_pc = s->seq_pc + s0;
+   s->jmp_pc = s->seq_pc + *s0;
 
    // 设置跳转标志
    s->is_jmp = 1;
