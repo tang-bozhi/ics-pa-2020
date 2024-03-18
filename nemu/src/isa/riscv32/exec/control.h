@@ -5,12 +5,11 @@
 
 static inline def_EHelper(jal) {
    // 将下一条指令的地址（PC + 4）保存到 rd 寄存器中，除非 rd 是 x0
-   if (ddest != 0) {
+   if (ddest != rz) {// 注意这里使用 rz 检查是否为 x0
       rtl_li(s, ddest, s->seq_pc + 4);
    }
-
-   // 计算跳转目标地址并更新 PC
-   rtl_j(s, s->seq_pc + imm);
+   //不需要下面的步骤,def_DHelper(J)已经完成了设定s->jmp_pc和s->is_jmp // 计算跳转目标地址并更新 PC
+   //rtl_j(s, s->seq_pc + imm);
 
    // 格式化打印此指令，用于调试
    print_asm_template2(jal);
@@ -18,5 +17,17 @@ static inline def_EHelper(jal) {
 
 
 static inline def_EHelper(jalr) {
+   // 计算跳转目标地址并进行对齐（清零最低位）
+   rtlreg_t target = (*dsrc1 + id_src2->imm) & ~1;
 
+   // 将下一条指令的地址保存到 rd 寄存器中，除非 rd 是 x0
+   if (ddest != rz) { // 注意这里使用 rz 检查是否为 x0
+      rtl_li(s, ddest, s->seq_pc + 4);
+   }
+
+   // 更新 PC 为跳转目标地址
+   rtl_j(s, target);
+
+   // 格式化打印此指令，用于调试
+   print_asm_template3(jalr);
 }
