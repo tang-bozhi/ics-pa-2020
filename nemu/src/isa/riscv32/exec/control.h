@@ -27,9 +27,57 @@ static inline def_EHelper(jalr) {
    }
 
    // 更新 PC 为跳转目标地址
-   rtl_j(s, *s0);
+   rtl_jr(s, s0);
 
    // 格式化打印此指令，用于调试
    print_asm_template2(jalr);
 }
 
+
+static inline def_EHelper(beq) {
+   // 检查两个源寄存器的值是否相等
+   if (*dsrc1 == *dsrc2) {
+      // 计算跳转目标地址，s->isa.instr.i.simm11_0是指令中的立即数字段，已经在解码阶段符号扩展
+      rtl_li(s, s0, s->isa.instr.i.simm11_0);
+      // 跳转到 (当前PC) + (偏移量)
+      rtl_add(s, s0, &s->seq_pc, s0);
+      rtl_j(s, *s0);
+   }
+   // 如果不相等，不做任何事，继续执行下一条指令
+}
+
+static inline def_EHelper(bnq) {//上方BEQ稍作修改得来 
+   // 检查两个源寄存器的值是否不相等
+   if (*dsrc1 != *dsrc2) {
+      // 计算跳转目标地址，s->isa.instr.i.simm11_0是指令中的立即数字段，已经在解码阶段符号扩展
+      rtl_li(s, s0, s->isa.instr.i.simm11_0);
+      // 跳转到 (当前PC) + (偏移量)
+      rtl_add(s, s0, &s->seq_pc, s0);
+      rtl_j(s, *s0);
+   }
+   // 如果相等，不做任何事，继续执行下一条指令
+}
+
+static inline def_EHelper(blt) {//上方BEQ稍作修改得来 
+   // 检查寄存器rs1中的值是否小于寄存器rs2中的值（作为有符号整数比较）
+   if (*dsrc1 <= *dsrc2) {
+      // 计算跳转目标地址，s->isa.instr.i.simm11_0是指令中的立即数字段，已经在解码阶段符号扩展
+      rtl_li(s, s0, s->isa.instr.i.simm11_0);
+      // 跳转到 (当前PC) + (偏移量)
+      rtl_add(s, s0, &s->seq_pc, s0);
+      rtl_j(s, *s0);
+   }
+   // 如果不符合条件，不做任何事，继续执行下一条指令
+}
+
+static inline def_EHelper(bgt) {//上方BEQ稍作修改得来 
+   // 检查寄存器rs1中的值是否大于寄存器rs2中的值（作为有符号整数比较）
+   if (*dsrc1 >= *dsrc2) {
+      // 计算跳转目标地址，s->isa.instr.i.simm11_0是指令中的立即数字段，已经在解码阶段符号扩展
+      rtl_li(s, s0, s->isa.instr.i.simm11_0);
+      // 跳转到 (当前PC) + (偏移量)
+      rtl_add(s, s0, &s->seq_pc, s0);
+      rtl_j(s, *s0);
+   }
+   // 如果不符合条件，不做任何事，继续执行下一条指令
+}

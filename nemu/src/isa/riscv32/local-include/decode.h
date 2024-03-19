@@ -7,15 +7,15 @@
 
 static inline def_DopHelper(i) {
    op->type = OP_TYPE_IMM;//这里是设置Oprand的种类,这将使得指令对应到其OP_TYPE_ 上 
-   op->imm = val;//将指令放入 
+   op->imm = val;//将指令放入 这里有隐式类型转换 不用考虑op->imm是uint32_t可能和val不匹配的问题
 
    print_Dop(op->str, OP_STR_SIZE, "%d", op->imm);
 }
 
 static inline def_DopHelper(r) {
    op->type = OP_TYPE_REG;//同上 //这里是设置Oprand的种类,这将使得指令对应到其OP_TYPE_ 上 
-   op->reg = val;//同上 
-   op->preg = &reg_l(val);//preg直接指向word_t val()
+   op->reg = val;//这里存储寄存器的编号。
+   op->preg = &reg_l(val);//preg直接指向word_t val()  &reg_l(val)对相应寄存器取值 
 
    print_Dop(op->str, OP_STR_SIZE, "%s", reg_name(op->reg));
 }
