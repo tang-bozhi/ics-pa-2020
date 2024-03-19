@@ -30,11 +30,11 @@ static inline def_EHelper(store) {
 static inline def_EHelper(branch) {
    switch (s->isa.instr.b.funct3) {
       EX(0, beq)
-         EX(1, BNE)
-         EX(4, BLT)
-         EX(5, BGE)
-         EX(6, BLTU)
-         EX(7, BGEU)
+         EX(1, bne)
+         EX(4, blt)
+         EX(5, bge)
+         EX(6, bltu)
+         EX(7, bgeu)
    default: exec_inv(s);
    }
 }
