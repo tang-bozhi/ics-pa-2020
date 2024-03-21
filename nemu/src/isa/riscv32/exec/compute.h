@@ -10,9 +10,55 @@ static inline def_EHelper(lui) {
    print_asm_template2(lui);
 }
 
+//下方均为后来添加
 //AUIPC(加高位立即数到 pc)被用于构建 pc 相对地址它使用 U 类型格式。AUIPC 根据 U 立即数形成 32 位偏移量(最低 12 位填零)，把这个偏移量加到 AUIPC 指令的地址，然后把结 果放在寄存器 rd 中。
 static inline def_EHelper(auipc) {
    rtl_li(s, ddest, s->seq_pc + id_src1->imm);
    print_asm_template2(auipc);
 }
 
+
+static inline def_EHelper(addi) {
+   rtl_addi(s, ddest, dsrc1, id_src2->imm);
+   print_asm_template3(addi);
+}
+
+static inline def_EHelper(slti) {
+   rtl_setrelopi(s, RELOP_LT, ddest, dsrc1, id_src2->imm);
+   print_asm_template2(slti);
+}
+
+static inline def_EHelper(sltiu) {//由def_EHelper(slti)稍作修改得到
+   rtl_setrelopi(s, RELOP_LTU, ddest, dsrc1, id_src2->imm);
+   print_asm_template2(slti);
+}
+
+static inline def_EHelper(xori) {
+   rtl_xori(s, ddest, dsrc1, id_src2->imm);
+   print_asm_template2(xori);
+}
+
+static inline def_EHelper(ori) {
+   rtl_ori(s, ddest, dsrc1, id_src2->imm);
+   print_asm_template2(ori);
+}
+
+static inline def_EHelper(andi) {
+   rtl_andi(s, ddest, dsrc1, id_src2->imm);
+   print_asm_template2(andi);
+}
+
+static inline def_EHelper(srli) {//SRLI(Shift Logical Right Immediate)
+   rtl_shri(s, ddest, dsrc1, id_src2->imm);
+   print_asm_template2(andi);
+}
+
+static inline def_EHelper(slli) {//SLLI(Shift Logical Left Immediate)
+   rtl_shli(s, ddest, dsrc1, id_src2->imm);
+   print_asm_template2(andi);
+}
+
+static inline def_EHelper(srai) {//SRAI(Shift Right Arithmetic Immediate)
+   rtl_srai(s, ddest, dsrc1, id_src2->imm);
+   print_asm_template2(srai);
+}

@@ -16,7 +16,7 @@
 #define c_xor(a, b) ((a) ^ (b))
 #define c_shl(a, b) ((a) << ((b) & c_shift_mask))
 #define c_shr(a, b) ((a) >> ((b) & c_shift_mask))
-#define c_sar(a, b) ((sword_t)(a) >> ((b) & c_shift_mask))
+#define c_sra(a, b) ((sword_t)(a) >> ((b) & c_shift_mask))
 
 #ifdef ISA64
 #define c_sext32to64(a) ((int64_t)(int32_t)(a))

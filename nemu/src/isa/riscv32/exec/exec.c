@@ -39,6 +39,19 @@ static inline def_EHelper(branch) {
    }
 }
 
+static inline def_EHelper(imm) {
+   switch (s->isa.instr.i.funct3) {
+      EX(0, addi)
+         EX(2, slti)
+         EX(3, sltiu)
+         EX(4, xori)
+         EX(6, ori)
+         EX(7, andi)
+         EX(1, slli)
+   case 5:switch (s->isa.instr.i.simm11_0) { EX(0b0000000, srli) EX(0b0100000, srai) }
+   default: exec_inv(s);
+   }
+}
 
 static inline void fetch_decode_exec(DecodeExecState* s) {
    s->isa.instr.val = instr_fetch(&s->seq_pc, 4);//instructions fetch指令获取:seq_pc（sequential program counter，顺序程序计数器）isa.instr.val（指令集架构中指令的值）
@@ -53,6 +66,7 @@ static inline void fetch_decode_exec(DecodeExecState* s) {
          IDEX(0b11011, U, jal)
          IDEX(0b11001, I, jalr)
          IDEX(0b11000, B, branch)
+         IDEX(0b00100, I, imm)
    default: exec_inv(s);
    }
 }
