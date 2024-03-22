@@ -62,3 +62,53 @@ static inline def_EHelper(srai) {//SRAI(Shift Right Arithmetic Immediate)
    rtl_srai(s, ddest, dsrc1, id_src2->imm);
    print_asm_template2(srai);
 }
+
+static inline def_EHelper(add) {
+   rtl_add(s, ddest, dsrc1, dsrc2);
+   print_asm_template3(add);
+}
+
+static inline def_EHelper(sub) {
+   rtl_sub(s, ddest, dsrc1, dsrc2);
+   print_asm_template3(sub);
+}
+
+static inline def_EHelper(sll) {//逻辑左移 
+   rtl_setrelop(s, RELOP_LT, ddest, dsrc1, dsrc2);
+   print_asm_template3(shl);
+}
+
+static inline def_EHelper(slt) {//set less than 
+   rtl_setrelop(s, RELOP_LT, ddest, dsrc1, dsrc2);
+   print_asm_template3(slt);
+}
+
+static inline def_EHelper(sltu) {//set less than unsigned
+   rtl_setrelop(s, RELOP_LTU, ddest, dsrc1, dsrc2);
+   print_asm_template3(sltu);
+}
+
+static inline def_EHelper(xor) {
+   rtl_xor(s, ddest, dsrc1, dsrc2);
+   print_asm_template3(xor);
+}
+
+static inline def_EHelper(srl) {
+   rtl_shr(s, ddest, dsrc1, dsrc2);//手册中的逻辑右移是srl,这里把rtl_shr的名字更改了
+   print_asm_template3(srl);
+}
+
+static inline def_EHelper(sra) {
+   rtl_sra(s, ddest, dsrc1, dsrc2);
+   print_asm_template3(sra);
+}
+
+static inline def_EHelper(or ) {
+   rtl_or(s, ddest, dsrc1, dsrc2);
+   print_asm_template3(or );
+}
+
+static inline def_EHelper(and) {
+   rtl_and(s, ddest, dsrc1, dsrc2);
+   print_asm_template3(and);
+}
