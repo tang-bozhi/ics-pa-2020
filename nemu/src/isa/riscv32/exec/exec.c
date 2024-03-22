@@ -48,7 +48,30 @@ static inline def_EHelper(imm) {
          EX(6, ori)
          EX(7, andi)
          EX(1, slli)
-   case 5:switch (s->isa.instr.i.simm11_0) { EX(0b0000000, srli) EX(0b0100000, srai) }
+   case 5:switch (s->isa.instr.r.funct7) {//使用了union的性质,懒得作位的操作了 
+         EX(0b0000000, srli)
+            EX(0b0100000, srai)
+      }
+   default: exec_inv(s);
+   }
+}
+
+static inline def_EHelper(reg) {
+   switch (s->isa.instr.r.funct3) {
+   case 0:switch (s->isa.instr.r.funct7) {
+      EX(0, add)
+         EX(1, sub)
+   }
+         EX(1, sll)
+            EX(2, slt)
+            EX(3, sltu)
+            EX(4, xor)
+   case 5:switch (s->isa.instr.r.funct7) {
+            EX(0, srl)
+               EX(1, sra)
+         }
+         EX(6, or )
+            EX(7, and)
    default: exec_inv(s);
    }
 }
@@ -67,6 +90,7 @@ static inline void fetch_decode_exec(DecodeExecState* s) {
          IDEX(0b11001, I, jalr)
          IDEX(0b11000, B, branch)
          IDEX(0b00100, I, imm)
+         IDEX(0b01100, R, reg)
    default: exec_inv(s);
    }
 }
