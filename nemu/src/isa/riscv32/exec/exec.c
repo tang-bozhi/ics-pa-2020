@@ -3,16 +3,13 @@
 #include "all-instr.h"
 #include <cpu/exec.h>
 
-static inline void set_width(DecodeExecState *s, int width)
-{
+static inline void set_width(DecodeExecState* s, int width) {
    if (width != 0)
       s->width = width;
 }
 
-static inline def_EHelper(load)
-{
-   switch (s->isa.instr.i.funct3)
-   {
+static inline def_EHelper(load) {
+   switch (s->isa.instr.i.funct3) {
       EXW(0, ld, 1); // LB
       EXW(1, ld, 2); // LH
       EXW(2, ld, 4); // LW
@@ -23,10 +20,8 @@ static inline def_EHelper(load)
    }
 }
 
-static inline def_EHelper(store)
-{
-   switch (s->isa.instr.s.funct3)
-   {
+static inline def_EHelper(store) {
+   switch (s->isa.instr.s.funct3) {
       EXW(0, st, 1); // SB（Stor
       // Byte）指令用于将一个字节（8位）的数据从寄存器存储到内存中。
       EXW(1, st, 2); // SH Halfword
@@ -36,10 +31,8 @@ static inline def_EHelper(store)
    }
 }
 
-static inline def_EHelper(branch)
-{
-   switch (s->isa.instr.b.funct3)
-   {
+static inline def_EHelper(branch) {
+   switch (s->isa.instr.b.funct3) {
       EX(0, beq);
       EX(1, bne);
       EX(4, blt);
@@ -51,10 +44,8 @@ static inline def_EHelper(branch)
    }
 }
 
-static inline def_EHelper(imm)
-{
-   switch (s->isa.instr.i.funct3)
-   {
+static inline def_EHelper(imm) {
+   switch (s->isa.instr.i.funct3) {
       EX(0, addi);
       EX(2, slti);
       EX(3, sltiu);
@@ -63,8 +54,7 @@ static inline def_EHelper(imm)
       EX(7, andi);
       EX(1, slli);
    case 5:
-      switch (s->isa.instr.r.funct7)
-      { // 使用了union的性质,懒得作位的操作了
+      switch (s->isa.instr.r.funct7) { // 使用了union的性质,懒得作位的操作了
          EX(0b0000000, srli);
          EX(0b0100000, srai);
       }
@@ -73,13 +63,10 @@ static inline def_EHelper(imm)
    }
 }
 
-static inline def_EHelper(reg)
-{
-   switch (s->isa.instr.r.funct3)
-   {
+static inline def_EHelper(reg) {
+   switch (s->isa.instr.r.funct3) {
    case 0:
-      switch (s->isa.instr.r.funct7)
-      {
+      switch (s->isa.instr.r.funct7) {
          EX(0, add);
          EX(1, sub);
       }
@@ -88,26 +75,23 @@ static inline def_EHelper(reg)
       EX(3, sltu);
       EX(4, xor);
    case 5:
-      switch (s->isa.instr.r.funct7)
-      {
+      switch (s->isa.instr.r.funct7) {
          EX(0, srl);
          EX(1, sra);
       }
-      EX(6, or);
+      EX(6, or );
       EX(7, and);
    default:
       exec_inv(s);
    }
 }
 
-static inline void fetch_decode_exec(DecodeExecState *s)
-{
+static inline void fetch_decode_exec(DecodeExecState* s) {
    s->isa.instr.val = instr_fetch(&s->seq_pc, 4); // instructions fetch指令获取:seq_pc（sequential program
    // counter，顺序程序计数器）isa.instr.val（指令集架构中指令的值）
    // 实际上，a->b是(*a).b的简写形式
    Assert(s->isa.instr.i.opcode1_0 == 0x3, "Invalid instruction");
-   switch (s->isa.instr.i.opcode6_2)
-   {
+   switch (s->isa.instr.i.opcode6_2) {
       IDEX(0b00000, I, load);
       IDEX(0b01000, S, store);
       IDEX(0b01101, U, lui); // lui（Load Upper
@@ -126,8 +110,7 @@ static inline void fetch_decode_exec(DecodeExecState *s)
 
 static inline void reset_zero() { reg_l(0) = 0; }
 
-vaddr_t isa_exec_once()
-{
+vaddr_t isa_exec_once() {
    DecodeExecState s;
    s.is_jmp = 0;
    s.seq_pc = cpu.pc;
