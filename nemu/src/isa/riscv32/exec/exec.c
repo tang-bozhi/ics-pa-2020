@@ -98,7 +98,7 @@ static inline void fetch_decode_exec(DecodeExecState* s) {
       // Immediate）LUI(加载高位立即数)被用于构建32位常量,它使用U类型格式.LUI把32位U立即数值放在目的寄存器rd中,同时把最低的12位用零填充。
       EX(0b11010, nemu_trap);
       IDEX(0b00101, U, auipc);
-      IDEX(0b11011, U, jal);
+      IDEX(0b11011, J, jal);
       IDEX(0b11001, I, jalr);
       IDEX(0b11000, B, branch);
       IDEX(0b00100, I, imm);
