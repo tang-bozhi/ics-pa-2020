@@ -1,11 +1,11 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#define DEBUG
-//#define DIFF_TEST
+// #define DEBUG
+//  #define DIFF_TEST
 
 #ifdef __ISA_riscv64__
-# define ISA64
+#define ISA64
 #endif
 
 #if _SHARE
@@ -15,7 +15,7 @@
 #endif
 
 /* You will define this macro in PA2 */
-//#define HAS_IOE
+// #define HAS_IOE
 
 #include <stdint.h>
 #include <assert.h>
@@ -30,7 +30,7 @@ typedef int64_t sword_t;
 #else
 typedef uint32_t word_t;
 typedef int32_t sword_t;
-#define FMT_WORD "0x%08x"//"word format" 字格式
+#define FMT_WORD "0x%08x" //"word format" 字格式
 #endif
 
 typedef word_t rtlreg_t;
