@@ -15,8 +15,8 @@ static inline def_EHelper(load) {
       EXW(2, ld, 4); // LW
       EXW(4, ld, 1); // LBU
       EXW(5, ld, 2); // LHU 在RISC-V指令集架构中，LHU（Load Halfword Unsigned）指令是一个I类型（Immediate类型）指令。这类指令主要用于从内存中加载16位无符号半字到寄存器，并将其符号扩展为32位或64位（取决于处理器的位宽）。
-      default:
-         exec_inv(s);
+   default:
+      exec_inv(s);
    }
 }
 
@@ -26,8 +26,8 @@ static inline def_EHelper(store) {
       // Byte）指令用于将一个字节（8位）的数据从寄存器存储到内存中。
       EXW(1, st, 2); // SH Halfword
       EXW(2, st, 4); // SW Word
-      default:
-         exec_inv(s);
+   default:
+      exec_inv(s);
    }
 }
 
@@ -39,8 +39,8 @@ static inline def_EHelper(branch) {
       EX(5, bge);
       EX(6, bltu);
       EX(7, bgeu);
-      default:
-         exec_inv(s);
+   default:
+      exec_inv(s);
    }
 }
 
@@ -53,36 +53,36 @@ static inline def_EHelper(imm) {
       EX(6, ori);
       EX(7, andi);
       EX(1, slli);
-      case 5:
-         switch (s->isa.instr.r.funct7) { // 使用了union的性质,懒得作位的操作了
-            EX(0b0000000, srli);
-            EX(0b0100000, srai);
-         }
-      default:
-         exec_inv(s);
+   case 5:
+      switch (s->isa.instr.r.funct7) { // 使用了union的性质,懒得作位的操作了
+         EX(0b0000000, srli);
+         EX(0b0100000, srai);
+      }
+   default:
+      exec_inv(s);
    }
 }
 
 static inline def_EHelper(reg) {
    switch (s->isa.instr.r.funct3) {
-      case 0:
-         switch (s->isa.instr.r.funct7) {
-            EX(0, add);
-            EX(1, sub);
-         }
-         EX(1, sll);
-         EX(2, slt);
-         EX(3, sltu);
-         EX(4, xor);
-      case 5:
-         switch (s->isa.instr.r.funct7) {
-            EX(0, srl);
-            EX(1, sra);
-         }
-         EX(6, or );
-         EX(7, and);
-      default:
-         exec_inv(s);
+   case 0:
+      switch (s->isa.instr.r.funct7) {
+         EX(0, add);
+         EX(1, sub);
+      }
+      EX(1, sll);
+      EX(2, slt);
+      EX(3, sltu);
+      EX(4, xor);
+   case 5:
+      switch (s->isa.instr.r.funct7) {
+         EX(0, srl);
+         EX(1, sra);
+      }
+      EX(6, or );
+      EX(7, and);
+   default:
+      exec_inv(s);
    }
 }
 
@@ -103,8 +103,8 @@ static inline void fetch_decode_exec(DecodeExecState* s) {
       IDEX(0b11000, B, branch);
       IDEX(0b00100, I, imm);
       IDEX(0b01100, R, reg);
-      default:
-         exec_inv(s);
+   default:
+      exec_inv(s);
    }
 }
 
