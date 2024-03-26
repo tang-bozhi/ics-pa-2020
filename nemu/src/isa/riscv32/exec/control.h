@@ -9,7 +9,7 @@ static inline def_EHelper(jal) {
       rtl_li(s, ddest, s->seq_pc + 4);
    }
    // 不需要下面的步骤,def_DHelper(J)已经完成了设定s->jmp_pc和s->is_jmp // 计算跳转目标地址并更新 PC
-   // rtl_j(s, s->seq_pc + imm);
+   // rtl_j(s, s->seq_pc + id_src2->imm);
 
    // 格式化打印此指令，用于调试
    print_asm_template2(jal);
