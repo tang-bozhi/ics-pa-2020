@@ -72,7 +72,7 @@ static inline def_DHelper(B) {//Branch
    id_src2->imm = *s0;
 
    // 计算跳转目标地址（当前 PC 加上偏移量）
-   s->jmp_pc = s->seq_pc + *s0;
+   s->jmp_pc = cpu.pc + *s0;//必须使用cpu.pc,s->seq_pc已经由instr_fetch中的(*pc) += len;指向了下一个指令
 
    // 设置分支标志
    s->is_jmp = 1;
@@ -97,7 +97,7 @@ static inline def_DHelper(J) {//Jump
    id_src2->imm = *s0;
 
    // 计算跳转目标地址（当前 PC 加上偏移量）
-   s->jmp_pc = s->seq_pc + *s0;
+   s->jmp_pc = cpu.pc + *s0;
 
    // 设置跳转标志
    s->is_jmp = 1;
