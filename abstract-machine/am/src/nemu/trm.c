@@ -1,8 +1,8 @@
 #include <am.h>
 #include <nemu.h>
 
-extern char _heap_start;
-int main(const char *args);
+extern char _heap_start;//标记了堆（heap）内存开始的地方
+int main(const char* args);
 
 Area heap = RANGE(&_heap_start, PMEM_END);
 #ifndef MAINARGS
