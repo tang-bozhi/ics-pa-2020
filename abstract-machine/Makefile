@@ -32,8 +32,8 @@ endif#如果$(ARCHS)是x86_64-qemu riscv32-nemu等，而$(ARCH)是riscv32-nemu�
 
 ### Extract instruction set architecture (`ISA`) and platform from `$ARCH`. Example: `ARCH=x86_64-qemu -> ISA=x86_64; PLATFORM=qemu`
 ARCH_SPLIT = $(subst -, ,$(ARCH))#$(subst <from>,<to>,<text>)<from>:这是你想要在 <text> 中查找并替换的字符串   这是你想要将 <from> 替换成的字符串   <text>：这是包含你想要替换的文本的字符串 
-ISA        = $(word 1,$(ARCH_SPLIT))#$(word <n>,<text>):<n>：表示你想要提取的单词的位置，其中第一个单词是 1   
-PLATFORM   = $(word 2,$(ARCH_SPLIT)) 
+ISA        = $(word 1,$(ARCH_SPLIT))#意义参考上方###后的解释		$(word <n>,<text>):<n>：表示你想要提取的单词的位置，其中第一个单词是 1   
+PLATFORM   = $(word 2,$(ARCH_SPLIT))#意义参考上方###后的解释
 
 ### Checks end here
 endif
