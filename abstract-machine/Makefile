@@ -72,7 +72,7 @@ READELF   = $(CROSS_COMPILE)readelf#用于显示ELF格式文件（Executable and
 
 ### Compilation flags
 INC_PATH += $(WORK_DIR)/include $(addsuffix /include/, $(addprefix $(AM_HOME)/, $(LIBS)))
-INCFLAGS += $(addprefix -I, $(INC_PATH))
+INCFLAGS += $(addprefix -I, $(INC_PATH))#在C和C++的编译命令中，-I选项后跟一个目录路径，用于指定额外的头文件搜索路径。
 
 CFLAGS   += -O2 -MMD -Wall -Werror -ggdb $(INCFLAGS) \
             -D__ISA__=\"$(ISA)\" -D__ISA_$(shell echo $(ISA) | tr a-z A-Z)__ \
