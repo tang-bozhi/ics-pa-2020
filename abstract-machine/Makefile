@@ -51,24 +51,24 @@ IMAGE     = $(abspath $(IMAGE_REL))#abspath:absolute path 将上方的相对路�
 ARCHIVE   = $(WORK_DIR)/build/$(NAME)-$(ARCH).a#这行定义了另一个路径变量ARCHIVE，指向编译过程中生成的归档文件（通常是静态库）
 
 ### Files to be linked: object files (`.o`) and libraries (`.a`)
-OBJS      = $(addprefix $(DST_DIR)/, $(addsuffix .o, $(basename $(SRCS))))
-LIBS     := $(sort $(LIBS) am klib) # lazy evaluation ("=") causes infinite recursions
+OBJS      = $(addprefix $(DST_DIR)/, $(addsuffix .o, $(basename $(SRCS))))#Add Prefix:添加前缀
+LIBS     := $(sort $(LIBS) am klib) # lazy evaluation ("=") causes infinite recursions		sort:(这里是升序)排序
 LINKAGE   = $(OBJS) \
   $(addsuffix -$(ARCH).a, $(join \
     $(addsuffix /build/, $(addprefix $(AM_HOME)/, $(LIBS))), \
     $(LIBS) \
-))
+))#这行代码定义了一个LINKAGE变量，它构造了一个包含所有目标文件（.o文件）和指定库（.a文件）的完整路径列表，这个列表将用于后续的链接步骤。
 
 ## 3. General Compilation Flags
 
 ### (Cross) compilers, e.g., mips-linux-gnu-g++
-AS        = $(CROSS_COMPILE)gcc
-CC        = $(CROSS_COMPILE)gcc
-CXX       = $(CROSS_COMPILE)g++
-LD        = $(CROSS_COMPILE)ld
-OBJDUMP   = $(CROSS_COMPILE)objdump
-OBJCOPY   = $(CROSS_COMPILE)objcopy
-READELF   = $(CROSS_COMPILE)readelf
+AS        = $(CROSS_COMPILE)gcc#汇编器（Assembler）。虽然这里用gcc（GNU Compiler Collection）来代替传统的as，因为gcc可以在调用汇编器前处理一些预处理指令
+CC        = $(CROSS_COMPILE)gcc#C语言编译器。用于将C源代码编译成目标文件（.o文件）
+CXX       = $(CROSS_COMPILE)g++#C++语言编译器。用于将C++源代码编译成目标文件。这里使用g++，它是GCC中处理C++的部分
+LD        = $(CROSS_COMPILE)ld#链接器（Linker）。用于将多个目标文件或库文件链接成单个可执行文件或库文件
+OBJDUMP   = $(CROSS_COMPILE)objdump#objdump是一个命令行程序，用于在类Unix操作系统上显示有关对象文件的各种信息。例如，它可以用作反汇编器，以汇编形式查看可执行文件。
+OBJCOPY   = $(CROSS_COMPILE)objcopy#用于复制和转换目标文件格式的工具。可以用于从完整的可执行文件中提取二进制镜像，或者进行格式转换。
+READELF   = $(CROSS_COMPILE)readelf#用于显示ELF格式文件（Executable and Linkable Format，可执行与可链接格式）的信息的工具。ELF格式是Linux系统中常用的二进制文件格式，用于可执行文件、目标代码、共享库等。
 
 ### Compilation flags
 INC_PATH += $(WORK_DIR)/include $(addsuffix /include/, $(addprefix $(AM_HOME)/, $(LIBS)))
