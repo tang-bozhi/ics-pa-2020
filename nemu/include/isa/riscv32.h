@@ -66,10 +66,10 @@ typedef struct {
       struct {
          uint32_t opcode1_0 : 2;
          uint32_t opcode6_2 : 5;
+         uint32_t rd : 5;
          uint32_t imm19_12 : 8; // 跳转偏移量的立即数部分。
          uint32_t imm11 : 1;
          uint32_t imm10_1 : 10;
-         uint32_t rd : 5;
          uint32_t imm20 : 1;   // 跳转偏移量的立即数部分。
       } j;// J-type指令（用于跳转）
       uint32_t val;//这是一个32位无类型字段，可以存储整个指令的值。在解码过程中，可以通过这个字段访问整个指令的原始值，然后根据需要解析为其他格式
