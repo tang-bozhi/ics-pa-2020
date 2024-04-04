@@ -89,7 +89,7 @@ static inline def_EHelper(reg) {
 static inline void fetch_decode_exec(DecodeExecState* s) {
    s->isa.instr.val = instr_fetch(&s->seq_pc, 4); // instructions fetch指令获取:seq_pc（sequential program
    // counter，顺序程序计数器）isa.instr.val（指令集架构中指令的值）
-// 实际上，a->b是(*a).b的简写形式
+   // 实际上，a->b是(*a).b的简写形式
    Assert(s->isa.instr.i.opcode1_0 == 0x3, "Invalid instruction");
    switch (s->isa.instr.i.opcode6_2) {
       IDEX(0b00000, I, load);
