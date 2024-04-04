@@ -81,7 +81,7 @@ CFLAGS   += -O2 -MMD -Wall -Werror -ggdb $(INCFLAGS) \
             -DISA_H=\"$(ISA).h\" \
             -DARCH_H=\"arch/$(ARCH).h\" \
             -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector \
-            -Wno-main
+            -Wno-main#-D相关注释在mac的你创建的Desktop/md/阅读abstract-machine/Makefile-GPT回答.md中
 CXXFLAGS +=  $(CFLAGS) -ffreestanding -fno-rtti -fno-exceptions
 ASFLAGS  += -MMD $(INCFLAGS)
 
