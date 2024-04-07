@@ -82,8 +82,8 @@ CFLAGS   += -O2 -MMD -Wall -Werror -ggdb $(INCFLAGS) \
             -DARCH_H=\"arch/$(ARCH).h\" \
             -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector \
             -Wno-main#-D相关注释在mac的你创建的Desktop/md/阅读abstract-machine/Makefile-GPT回答.md中
-CXXFLAGS +=  $(CFLAGS) -ffreestanding -fno-rtti -fno-exceptions
-ASFLAGS  += -MMD $(INCFLAGS)
+CXXFLAGS +=  $(CFLAGS) -ffreestanding -fno-rtti -fno-exceptions#CXXFLAGS（C++编译器标志）
+ASFLAGS  += -MMD $(INCFLAGS)#Assembler Flags 汇编器标志
 
 ## 4. Arch-Specific Configurations
 
@@ -93,12 +93,15 @@ ASFLAGS  += -MMD $(INCFLAGS)
 ## 5. Compilation Rules
 
 ### Rule (compile): a single `.c` -> `.o` (gcc)
-$(DST_DIR)/%.o: %.c
-	@mkdir -p $(dir $@) && echo + CC $<
+$(DST_DIR)/%.o: %.c#$(DST_DIR)/%.o: %.c：此行指定了Make中的一个模式规则。它意味着任何匹配模式$(DST_DIR)/%.o（其中%作为通配符）的文件都依赖于当前目录中同名的.c文件。
+	@mkdir -p $(dir $@) && echo + CC $< 
+#@mkdir -p $(dir $@):创建当前对象($(DST_DIR)/%.o)目录,确保目录结构与源代码结构相匹配
+#echo + CC $< :		打印+ CC $< 
 	@$(CC) -std=gnu11 $(CFLAGS) -c -o $@ $(realpath $<)
+#上方这句分析参考GPT生成的同名.md 
 
 ### Rule (compile): a single `.cc` -> `.o` (g++)
-$(DST_DIR)/%.o: %.cc
+$(DST_DIR)/%.o: %.cc#$< 表示规则中的第一个依赖项	$@ 表示规则的目标文件，也就是规则要生成的文件
 	@mkdir -p $(dir $@) && echo + CXX $<
 	@$(CXX) -std=c++17 $(CXXFLAGS) -c -o $@ $(realpath $<)
 
@@ -108,12 +111,12 @@ $(DST_DIR)/%.o: %.cpp
 	@$(CXX) -std=c++17 $(CXXFLAGS) -c -o $@ $(realpath $<)
 
 ### Rule (compile): a single `.S` -> `.o` (gcc, which calls as)
-$(DST_DIR)/%.o: %.S
+$(DST_DIR)/%.o: %.S#下一行:-c compile(只编译不连接)	-g debug(用于生成包含调试信息的目标代码)
 	@mkdir -p $(dir $@) && echo + AS $<
 	@$(AS) $(ASFLAGS) -c -o $@ $(realpath $<)
 
 ### Rule (recursive make): build a dependent library (am, klib, ...)
-$(LIBS): %:
+$(LIBS): %:#下一行-C: change directory 
 	@$(MAKE) -s -C $(AM_HOME)/$* archive
 
 ### Rule (link): objects (`*.o`) and libraries (`*.a`) -> `IMAGE.elf`, the final ELF binary to be packed into image (ld)
