@@ -150,6 +150,8 @@ image-dep: $(OBJS) am $(LIBS)
 ### Clean a single project (remove `build/`)
 clean:
 	rm -rf Makefile.html $(WORK_DIR)/build/
+#-r:Recursion递归   选项-r代表递归删除，用于删除目录及其包含的所有内容
+#-f:force强制   选项-f表示强制执行删除操作，忽略不存在的文件，不会因为文件不存在而报错
 .PHONY: clean
 
 ### Clean all sub-projects within depth 2 (and ignore errors)
