@@ -128,7 +128,8 @@ $(IMAGE).elf: $(OBJS) am $(LIBS)#ELF（Executable and Linkable Format）:可执�
 #$(LINKAGE)是被链接对象
 
 ### Rule (archive): objects (`*.o`) -> `ARCHIVE.a` (ar)
-$(ARCHIVE): $(OBJS)
+#根据教案和GPT推断,这里的ar打包了AM源文件的: 1. gcc将$ISA-nemu的AM实现源文件编译成目标文件, 然后通过ar将这些目标文件作为一个库, 打包成一个归档文件am-$ISA-nemu.a 2. 通过gcc和ar把程序依赖的运行库(如abstract-machine/klib/)也编译并打包成归档文件 
+$(ARCHIVE): $(OBJS) 
 	@echo + AR "->" $(shell realpath $@ --relative-to .)
 	@ar rcs $(ARCHIVE) $(OBJS)
 #ar：是用于创建静态库的Unix工具
@@ -160,3 +161,4 @@ clean-all: $(CLEAN_ALL) clean
 $(CLEAN_ALL):
 	-@$(MAKE) -s -C $@ clean
 .PHONY: clean-all $(CLEAN_ALL)
+#解释参考相关.md      clean-all目标---abstract machine/makefile.md
