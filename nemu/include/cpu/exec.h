@@ -36,7 +36,7 @@ static inline uint32_t instr_fetch(vaddr_t* pc, int len) {
     strcatf(log_bytebuf, "%02x ", p_instr[i]);
   }
 #endif
-  (*pc) += len;
+  //(*pc) += len;//危险修改:修改了框架代码,将这一步骤移动到了指令执行完之后
   return instr;
 }
 
