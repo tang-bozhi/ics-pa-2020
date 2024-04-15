@@ -94,8 +94,7 @@ static inline void fetch_decode_exec(DecodeExecState* s) {
    switch (s->isa.instr.i.opcode6_2) {
       IDEX(0b00000, I, load);
       IDEX(0b01000, S, store);
-      IDEX(0b01101, U, lui); // lui（Load Upper
-      // Immediate）LUI(加载高位立即数)被用于构建32位常量,它使用U类型格式.LUI把32位U立即数值放在目的寄存器rd中,同时把最低的12位用零填充。
+      IDEX(0b01101, U, lui); // lui（Load Upper Immediate）LUI(加载高位立即数)被用于构建32位常量,它使用U类型格式.LUI把32位U立即数值放在目的寄存器rd中,同时把最低的12位用零填充。
       EX(0b11010, nemu_trap);
       IDEX(0b00101, U, auipc);
       IDEX(0b11011, J, jal);

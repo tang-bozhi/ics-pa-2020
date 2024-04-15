@@ -76,12 +76,6 @@ static inline def_DHelper(B) {//Branch
    }
    //存放处理好了的立即数  "按照特定的位模式组合并进行符号扩展"了的立即数
    id_src2->imm = *s0;
-
-   // 计算跳转目标地址（当前 PC 加上偏移量）
-   s->jmp_pc = cpu.pc + *s0;//必须使用cpu.pc,s->seq_pc已经由instr_fetch中的(*pc) += len;指向了下一个指令
-
-   // 设置分支标志
-   s->is_jmp = 1;
 }
 
 static inline def_DHelper(J) {//Jump
@@ -108,11 +102,5 @@ static inline def_DHelper(J) {//Jump
 
    //存放处理好了的立即数  "按照特定的位模式组合并进行符号扩展"了的立即数
    id_src2->imm = *s0;
-
-   // 计算跳转目标地址（当前 PC 加上偏移量）
-   s->jmp_pc = cpu.pc + *s0;
-
-   // 设置跳转标志
-   s->is_jmp = 1;
 }
 
