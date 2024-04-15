@@ -11,7 +11,6 @@
 .*
 _*
 *~
-build/
+!build/
 !.gitignore
 
-!am-kernels/tests/cpu-tests/build/add-riscv32-nemu.txt
