@@ -13,3 +13,5 @@ _*
 *~
 build/
 !.gitignore
+
+!add-riscv32-nemu.txt
