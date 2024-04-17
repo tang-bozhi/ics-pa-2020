@@ -23,11 +23,11 @@ typedef struct {
       struct {//R,B,J没有核实
          uint32_t opcode1_0 : 2; // opcode1_0 和 opcode6_2：指令操作码的一部分。
          uint32_t opcode6_2 : 5;
-         uint32_t funct7 : 7;  // funct7：额外的功能码，与funct3一起用于确定确切的操作。
-         uint32_t rs2 : 5;     // rs2：第二个源寄存器。
-         uint32_t rs1 : 5;     // rs1：第一个源寄存器。
-         uint32_t funct3 : 3;  // funct3：功能码，与操作码一起确定确切的操作。
          uint32_t rd : 5;      // rd：目标寄存器。
+         uint32_t funct3 : 3;  // funct3：功能码，与操作码一起确定确切的操作。
+         uint32_t rs1 : 5;     // rs1：第一个源寄存器。
+         uint32_t rs2 : 5;     // rs2：第二个源寄存器。
+         uint32_t funct7 : 7;  // funct7：额外的功能码，与funct3一起用于确定确切的操作。
       } r;// R-type指令
       struct {
          uint32_t opcode1_0 : 2;//opcode1_0 和 opcode6_2：指令操作码的一部分，用于指定指令的类型。
