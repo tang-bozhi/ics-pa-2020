@@ -68,7 +68,7 @@ static inline def_EHelper(reg) {
    case 0:
       switch (s->isa.instr.r.funct7) {
          EX(0, add);
-         EX(1, sub);
+         EX(32, sub);
       }break;
       EX(1, sll);
       EX(2, slt);
