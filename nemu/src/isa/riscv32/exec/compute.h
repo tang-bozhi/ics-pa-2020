@@ -54,12 +54,12 @@ static inline def_EHelper(srli) {//SRLI(Shift Logical Right Immediate)
 }
 
 static inline def_EHelper(slli) {//SLLI(Shift Logical Left Immediate)
-   rtl_shli(s, ddest, dsrc1, ((id_src2->imm) & 3071)));
+   rtl_shli(s, ddest, dsrc1, ((id_src2->imm) & 3071));
    print_asm_template2(andi);
 }
 
 static inline def_EHelper(srai) {//SRAI(Shift Right Arithmetic Immediate)
-   rtl_srai(s, ddest, dsrc1, ((id_src2->imm) & 3071)));
+   rtl_srai(s, ddest, dsrc1, ((id_src2->imm) & 3071));
    print_asm_template2(srai);
 }
 
