@@ -1,4 +1,4 @@
-include nemu/Makefile.git
+include nemu/Makefile.
 
 default:
 	@echo "Please run 'make' under any subprojects to compile."
