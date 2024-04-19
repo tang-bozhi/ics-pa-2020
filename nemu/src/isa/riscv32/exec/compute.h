@@ -75,7 +75,7 @@ static inline def_EHelper(sub) {
 
 static inline def_EHelper(sll) {//逻辑左移 
    rtl_setrelop(s, RELOP_LT, ddest, dsrc1, dsrc2);
-   print_asm_template3(shl);
+   print_asm_template3(sll);
 }
 
 static inline def_EHelper(slt) {//set less than 

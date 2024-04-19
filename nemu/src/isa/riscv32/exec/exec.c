@@ -56,7 +56,7 @@ static inline def_EHelper(imm) {
    case 5:
       switch (s->isa.instr.r.funct7) { // 使用了union的性质,懒得作位的操作了
          EX(0b0000000, srli);
-         EX(0b0100000, srai);
+         EX(0b0100000, srai);//这里的case:0b0100000就处理得很好
       }break;
    default:
       exec_inv(s);
@@ -67,8 +67,8 @@ static inline def_EHelper(reg) {
    switch (s->isa.instr.r.funct3) {
    case 0:
       switch (s->isa.instr.r.funct7) {
-         EX(0, add);
-         EX(32, sub);
+         EX(0b0000000, add);
+         EX(0b0100000, sub);//0b0100000:32
       }break;
       EX(1, sll);
       EX(2, slt);
@@ -76,8 +76,8 @@ static inline def_EHelper(reg) {
       EX(4, xor);
    case 5:
       switch (s->isa.instr.r.funct7) {
-         EX(0, srl);
-         EX(1, sra);
+         EX(0b0000000, srl);
+         EX(0b0100000, sra);//0b0100000:32
       }break;
       EX(6, or );
       EX(7, and);

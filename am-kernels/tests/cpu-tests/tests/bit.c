@@ -2,19 +2,19 @@
 
 typedef unsigned char uint8_t;
 __attribute__((noinline))
-bool getbit(void *buf, int offset){
-	int byte = offset >> 3;
-	offset &= 7;
+bool getbit(void* buf, int offset) {
+	int byte = offset >> 3;//通过位移运算实现除以8的效果，以提高效率
+	offset &= 7;//计算该字节内的位位置（等同于offset % 8）。
 	uint8_t mask = 1 << offset;
-	return (((uint8_t *)buf)[byte] & mask) != 0;
+	return (((uint8_t*)buf)[byte] & mask) != 0;
 }
 __attribute__((noinline))
-void setbit(void *buf, int offset, bool bit){
+void setbit(void* buf, int offset, bool bit) {
 	int byte = offset >> 3;
 	offset &= 7;
 	uint8_t mask = 1 << offset;
 
-	uint8_t * volatile p = buf + byte;
+	uint8_t* volatile p = buf + byte;
 	*p = (bit == 0 ? (*p & ~mask) : (*p | mask));
 }
 
