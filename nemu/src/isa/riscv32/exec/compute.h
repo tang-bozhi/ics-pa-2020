@@ -73,8 +73,8 @@ static inline def_EHelper(sub) {
    print_asm_template3(sub);
 }
 
-static inline def_EHelper(sll) {//逻辑左移 
-   rtl_setrelop(s, RELOP_LT, ddest, dsrc1, dsrc2);
+static inline def_EHelper(sll) {//逻辑左移 Shift-left logical
+   rtl_shl(s, ddest, dsrc1, dsrc2);
    print_asm_template3(sll);
 }
 
