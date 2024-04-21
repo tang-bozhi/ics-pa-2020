@@ -68,19 +68,45 @@ static inline def_EHelper(reg) {
    case 0:
       switch (s->isa.instr.r.funct7) {
          EX(0b0000000, add);
+         EX(0b0000001, mul);
          EX(0b0100000, sub);//0b0100000:32
       }break;
-      EX(1, sll);
-      EX(2, slt);
-      EX(3, sltu);
-      EX(4, xor);
+   case 1:
+      switch (s->isa.instr.r.funct7) {
+         EX(0b0000000, sll);//EX(1, sll);
+         EX(0x0000001, mulh);
+      }break;
+   case 2:
+      switch (s->isa.instr.r.funct7) {
+         EX(0b0000000, slt);//EX(2, slt);
+         EX(0x0000001, mulhsu);
+      }break;
+   case 3:
+      switch (s->isa.instr.r.funct7) {
+         EX(0b0000000, sltu);//EX(3, sltu);
+         EX(0x0000001, mulhu);
+      }break;
+   case 4:
+      switch (s->isa.instr.r.funct7) {
+         EX(0b0000000, xor);//EX(4, xor);
+         EX(0x0000001, div);
+      }break;
    case 5:
       switch (s->isa.instr.r.funct7) {
          EX(0b0000000, srl);
+         EX(0b0000001, divu);
          EX(0b0100000, sra);//0b0100000:32
       }break;
-      EX(6, or );
-      EX(7, and);
+   case 6:
+      switch (s->isa.instr.r.funct7) {
+         EX(0b0000000, or );//EX(6, or );
+         EX(0x0000001, rem);
+      }break;
+   case 7:
+      switch (s->isa.instr.r.funct7) {
+         EX(0b0000000, and);//EX(7, and);
+         EX(0x0000001, remu);
+      }break;
    default:
       exec_inv(s);
    }
