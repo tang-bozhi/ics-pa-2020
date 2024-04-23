@@ -29,7 +29,7 @@ typedef int64_t sword_t;
 #define FMT_WORD "0x%016lx"
 #else
 typedef uint32_t word_t;
-typedef int32_t sword_t;
+typedef int32_t sword_t;//s: signed
 #define FMT_WORD "0x%08x" //"word format" 字格式
 #endif
 
