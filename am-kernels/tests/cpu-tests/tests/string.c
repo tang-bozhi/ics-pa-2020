@@ -1,6 +1,7 @@
 #include "trap.h"
+#include <string.h>
 
-char *s[] = {
+char* s[] = {
 	"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 	"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
 	"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -19,7 +20,7 @@ int main() {
 	check(strcmp(s[0] + 2, s[1] + 2) < 0);
 	check(strcmp(s[0] + 3, s[1] + 3) < 0);
 
-	check(strcmp( strcat(strcpy(str, str1), s[3]), s[4]) == 0);
+	check(strcmp(strcat(strcpy(str, str1), s[3]), s[4]) == 0);
 
 	check(memcmp(memset(str, '#', 5), s[5], 5) == 0);
 
