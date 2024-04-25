@@ -27,7 +27,7 @@
 #define c_sarw(a, b) c_sext32to64(( int32_t)(a) >> ((b) & 0x1f))
 #endif
 
-#define c_mul_lo(a, b) ((a) * (b))//lo:low:假设我们在一个32位系统上操作，如果 a 和 b 都是32位整数，它们的乘积可能需要多达64位来完全表示。在这种情况下，c_mul_lo(a, b) 会返回这个64位结果的低32位，而对应的 c_mul_hi(a, b) 函数则会返回结果的高32位部分
+#define c_mul_lo(a, b) ((a) * (b))
 #define c_imul_lo(a, b) ((sword_t)(a) * (sword_t)(b))
 #ifdef ISA64
 # define c_mul_hi(a, b) (((__uint128_t)(a) * (__uint128_t)(b)) >> 64)
@@ -39,8 +39,17 @@
 # define c_remuw(a, b) c_sext32to64((uint32_t)(a) % (uint32_t)(b))
 #else
 #define c_mul_hi(a, b) (((uint64_t)(a) * (uint64_t)(b)) >> 32)
-#define c_imul_hi(a, b) (((int64_t)(sword_t)(a) * (int64_t)(sword_t)(b)) >> 32)//i: 有符号整数
+#define c_imul_hi(a, b) (((int64_t)(sword_t)(a) * (int64_t)(sword_t)(b)) >> 32)
 #endif
+
+#ifdef ISA64
+// 对于 64 位 ISA
+#define c_mulhsu_hi(a, b) (((__int128_t)(int64_t)(a) * (__uint128_t)(uint64_t)(b)) >> 64)
+#else
+// 对于 32 位 ISA
+#define c_mulhsu_hi(a, b) (((int64_t)(int32_t)(a) * (uint64_t)(uint32_t)(b)) >> 32)
+#endif
+//专为MULHSU实现
 
 #define c_div_q(a, b) ((a) / (b))
 #define c_div_r(a, b)  ((a) % (b))
