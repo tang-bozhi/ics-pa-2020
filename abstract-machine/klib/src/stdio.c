@@ -11,7 +11,7 @@
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
 // 实现 printf 函数
-int printf(const char* fmt, ...) {
+int printf(const char* fmt, ...) {// fmt 格式化字符串
    va_list args;                  // 定义一个 va_list 类型的变量用于访问可变参数
    va_start(args, fmt);           // 初始化 args 变量，让它指向第一个可变参数
    char buffer[1024];             // 定义一个字符数组作为输出缓冲区
@@ -64,7 +64,7 @@ static int print_int(char* buf, int max_len, int value) {
       value = -value; // 转换为正数
    }
    do {
-      temp[pos++] = (char)('0' + value % 10);
+      temp[pos++] = (char)('0' + value % 10);//数字转对应ASCII,加0字符,'0'ASCII值:48
       value /= 10;
    } while (value > 0 && pos < sizeof(temp) - 1);
 
