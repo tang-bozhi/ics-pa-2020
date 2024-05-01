@@ -1,3 +1,6 @@
+#include <stdint.h>
+#include <assert.h>
+
 #define N 32
 uint8_t data[N];
 
