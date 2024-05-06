@@ -1,5 +1,4 @@
-#include <stdint.h>
-#include <assert.h>
+#include "trap.h"
 
 #define N 32
 uint8_t data[N];
