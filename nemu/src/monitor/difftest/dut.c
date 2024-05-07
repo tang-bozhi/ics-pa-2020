@@ -1,12 +1,12 @@
-#include <dlfcn.h>
+#include <dlfcn.h>//"Dynamic Loading Function" 
 
 #include <isa.h>
 #include <memory/paddr.h>
 #include <monitor/monitor.h>
 
-void (*ref_difftest_memcpy_from_dut)(paddr_t dest, void *src, size_t n) = NULL;
-void (*ref_difftest_getregs)(void *c) = NULL;
-void (*ref_difftest_setregs)(const void *c) = NULL;
+void (*ref_difftest_memcpy_from_dut)(paddr_t dest, void* src, size_t n) = NULL;
+void (*ref_difftest_getregs)(void* c) = NULL;
+void (*ref_difftest_setregs)(const void* c) = NULL;
 void (*ref_difftest_exec)(uint64_t n) = NULL;
 
 static bool is_skip_ref = false;
@@ -35,19 +35,19 @@ void difftest_skip_ref() {
 void difftest_skip_dut(int nr_ref, int nr_dut) {
   skip_dut_nr_instr += nr_dut;
 
-  while (nr_ref -- > 0) {
+  while (nr_ref-- > 0) {
     ref_difftest_exec(1);
   }
 }
 
-void init_difftest(char *ref_so_file, long img_size, int port) {
+void init_difftest(char* ref_so_file, long img_size, int port) {
 #ifndef DIFF_TEST
   return;
 #endif
 
   assert(ref_so_file != NULL);
 
-  void *handle;
+  void* handle;
   handle = dlopen(ref_so_file, RTLD_LAZY | RTLD_DEEPBIND);
   assert(handle);
 
@@ -68,15 +68,15 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
 
   Log("Differential testing: \33[1;32m%s\33[0m", "ON");
   Log("The result of every instruction will be compared with %s. "
-      "This will help you a lot for debugging, but also significantly reduce the performance. "
-      "If it is not necessary, you can turn it off in include/common.h.", ref_so_file);
+    "This will help you a lot for debugging, but also significantly reduce the performance. "
+    "If it is not necessary, you can turn it off in include/common.h.", ref_so_file);
 
   ref_difftest_init(port);
   ref_difftest_memcpy_from_dut(IMAGE_START + PMEM_BASE, guest_to_host(IMAGE_START), img_size);
   ref_difftest_setregs(&cpu);
 }
 
-static void checkregs(CPU_state *ref, vaddr_t pc) {
+static void checkregs(CPU_state* ref, vaddr_t pc) {
   if (!isa_difftest_checkregs(ref, pc)) {
     isa_reg_display();
     nemu_state.state = NEMU_ABORT;
@@ -94,7 +94,7 @@ void difftest_step(vaddr_t this_pc, vaddr_t next_pc) {
       skip_dut_nr_instr = 0;
       return;
     }
-    skip_dut_nr_instr --;
+    skip_dut_nr_instr--;
     if (skip_dut_nr_instr == 0)
       panic("can not catch up with ref.pc = " FMT_WORD " at pc = " FMT_WORD, ref_r.pc, this_pc);
     return;
