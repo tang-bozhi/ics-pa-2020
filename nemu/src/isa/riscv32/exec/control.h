@@ -34,7 +34,7 @@ static inline def_EHelper(jalr) {
    print_asm_template2(jalr);
 
    // 校准 QEMU 和 NEMU 的执行差异
-   difftest_skip_dut(1, 2);
+   //difftest_skip_dut(1, 2);
 }
 
 static inline def_EHelper(beq) {
