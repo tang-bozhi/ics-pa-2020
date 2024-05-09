@@ -68,8 +68,8 @@ CFLAGS   += -O0 -MMD -Wall -Werror -ggdb3 $(INCLUDES) \
             -D__ISA__=$(ISA) -D__ISA_$(ISA)__ -D_ISA_H_=\"isa/$(ISA).h\"
 
 # Files to be compiled
-SRCS = $(shell find src/ -name "*.c" | grep -v "isa\|engine")
-SRCS += $(shell find src/isa/$(ISA) -name "*.c")
+SRCS = $(shell find src/ -name "*.c" | grep -v "isa\|engine") # -v:反转匹配（inverse match）
+SRCS += $(shell find src/isa/$(ISA) -name "*.c")				  # \|：表示“或者”的逻辑关系
 SRCS += $(shell find src/engine/$(ENGINE) -name "*.c")
 OBJS = $(SRCS:src/%.c=$(OBJ_DIR)/%.o)
 

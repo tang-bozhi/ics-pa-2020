@@ -32,6 +32,9 @@ static inline def_EHelper(jalr) {
 
    // 格式化打印此指令，用于调试
    print_asm_template2(jalr);
+
+   // 校准 QEMU 和 NEMU 的执行差异
+   difftest_skip_dut(1, 2);
 }
 
 static inline def_EHelper(beq) {
