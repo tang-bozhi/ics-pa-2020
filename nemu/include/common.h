@@ -15,7 +15,7 @@
 #endif
 
 /* You will define this macro in PA2 */
-#define HAS_IOE
+#define HAS_IOE//你会看到运行NEMU时会弹出一个新窗口, 用于显示VGA的输出(见下文)
 
 #include <stdint.h>
 #include <assert.h>
