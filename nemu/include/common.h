@@ -1,8 +1,8 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-//#define DEBUG
-//#define DIFF_TEST
+// #define DEBUG
+// #define DIFF_TEST
 
 #ifdef __ISA_riscv64__
 #define ISA64
@@ -15,7 +15,7 @@
 #endif
 
 /* You will define this macro in PA2 */
-#define HAS_IOE//你会看到运行NEMU时会弹出一个新窗口, 用于显示VGA的输出(见下文)
+#define HAS_IOE // 你会看到运行NEMU时会弹出一个新窗口, 用于显示VGA的输出(见下文)
 
 #include <stdint.h>
 #include <assert.h>
@@ -29,7 +29,7 @@ typedef int64_t sword_t;
 #define FMT_WORD "0x%016lx"
 #else
 typedef uint32_t word_t;
-typedef int32_t sword_t;//s: signed
+typedef int32_t sword_t; // s: signed
 #define FMT_WORD "0x%08x" //"word format" 字格式
 #endif
 
