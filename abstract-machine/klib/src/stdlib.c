@@ -83,9 +83,38 @@ void* malloc(size_t size) {
 }
 
 void free(void* ptr) {
-  Block* block = (Block*)ptr - 1;  // 获取控制块(1指的是从指针 `ptr` 中减去一个 `Block` 结构的大小。)
-  block->next = (Block*)free_list;
-  free_list = block;
+  Block* block = (Block*)ptr - 1;  // 获取释放块的 Block 控制信息
+  Block* current = (Block*)free_list;
+  Block* prev = NULL;
+
+  // 插入并保持空闲链表排序（按地址）
+  while (current != NULL && current < block) {
+    prev = current;
+    current = current->next;
+  }
+
+  // 插入释放的块到空闲链表中
+  if (prev == NULL) {  // 插入为首元素
+    free_list = block;
+  }
+  else {
+    prev->next = block;
+  }
+  block->next = current;
+
+  // 尝试与前一个空闲块合并
+  if (prev && (char*)prev + prev->size + sizeof(Block) == (char*)block) {
+    prev->size += sizeof(Block) + block->size;
+    prev->next = block->next;
+    block = prev;  // 更新 block 指针以便可能的下一次合并
+  }
+
+  // 尝试与后一个空闲块合并
+  if (current && (char*)block + block->size + sizeof(Block) == (char*)current) {
+    block->size += sizeof(Block) + current->size;
+    block->next = current->next;
+  }
 }
+
 
 #endif
