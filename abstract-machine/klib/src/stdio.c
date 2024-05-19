@@ -93,6 +93,22 @@ static int print_float(char* buf, int max_len, double value, int precision) {
    return 0;
 }
 
+//添加了一个 print_size_t 辅助函数来处理 size_t 类型的数据
+static int print_size_t(char* buf, int max_len, size_t value) {
+   char temp[20];
+   int pos = 0;
+   do {
+      temp[pos++] = (char)('0' + value % 10);
+      value /= 10;
+   } while (value > 0 && pos < sizeof(temp) - 1);
+
+   int count = 0;
+   for (int i = pos - 1; i >= 0 && count < max_len; i--) {
+      buf[count++] = temp[i];
+   }
+   return count;
+}
+
 // 实现 vsnprintf 函数
 int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
    int count = 0;
@@ -114,6 +130,12 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
          case 'c':  // 字符输出
             temp_buf[0] = (char)va_arg(ap, int);
             sublen = 1;
+            break;
+         case 'z':
+            if (*(fmt + 1) == 'u') {
+               fmt++;
+               sublen = print_size_t(temp_buf, sizeof(temp_buf), va_arg(ap, size_t));
+            }
             break;
          default:  // 处理其他未知格式
             temp_buf[0] = '%';

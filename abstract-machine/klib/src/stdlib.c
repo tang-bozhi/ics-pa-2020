@@ -30,25 +30,94 @@ int atoi(const char* nptr) {
 }
 
 //下方是malloc和free的实现
+// 定义空闲块结构
+typedef struct FreeBlock {
+  size_t size;
+  struct FreeBlock* next;
+} FreeBlock;
 
-static char* addr;  // 用来追踪堆中当前位置的指针
+static FreeBlock* free_list;
+static char* heap_start;
+static char* heap_end;
+
+// 初始化堆
+void heap_init(Area heap) {
+  heap_start = (char*)heap.start;
+  heap_end = (char*)heap.end;
+  free_list = (FreeBlock*)heap_start;
+  free_list->size = heap_end - heap_start - sizeof(FreeBlock);
+  free_list->next = NULL;
+}
 
 void* malloc(size_t size) {
-  if (addr + size > (char*)heap.end) {  // 检查是否有足够的空间
-    return NULL;  // 空间不足
+  if (size == 0) return NULL;
+
+  FreeBlock** best_fit = NULL;
+  FreeBlock** curr = &free_list;
+
+  // 找到最适合的空闲块
+  while (*curr) {
+    if ((*curr)->size >= size) {
+      if (!best_fit || (*curr)->size < (*best_fit)->size) {
+        best_fit = curr;
+      }
+    }
+    curr = &(*curr)->next;
   }
 
-  char* ret = addr;  // 保存当前地址以返回
-  addr += size;  // 通过分配块的大小增加 addr
-  return ret;  // 返回之前的当前地址
+  if (!best_fit) {
+    printf("Error allocating memory! Requested size: %zu\n", size);  // Debugging output
+    return NULL;  // 找不到合适的块
+  }
+
+  FreeBlock* block = *best_fit;
+  if (block->size >= size + sizeof(FreeBlock) + 1) {
+    // 如果块足够大，则拆分
+    char* allocated_memory = (char*)block + sizeof(FreeBlock);
+    size_t remaining_size = block->size - size - sizeof(FreeBlock);
+    FreeBlock* new_block = (FreeBlock*)(allocated_memory + size);
+    new_block->size = remaining_size;
+    new_block->next = block->next;
+    *best_fit = new_block;
+  }
+  else {
+    *best_fit = block->next;
+  }
+
+  return (char*)block + sizeof(FreeBlock);
 }
-
-
 
 void free(void* ptr) {
-  // 这个函数故意留空
-  // 通过这个 malloc 分配的内存不能被释放
+  if (!ptr) return;
+
+  if ((char*)ptr < heap_start || (char*)ptr >= heap_end) {
+    printf("Error: trying to free memory outside the heap range!\n");  // Debugging output
+    return;
+  }
+
+  FreeBlock* block_to_free = (FreeBlock*)((char*)ptr - sizeof(FreeBlock));
+  FreeBlock** curr = &free_list;
+
+  // 按地址顺序插入释放的块
+  while (*curr && *curr < block_to_free) {
+    curr = &(*curr)->next;
+  }
+  block_to_free->next = *curr;
+  *curr = block_to_free;
+
+  // 合并相邻的空闲块
+  curr = &free_list;
+  while (*curr && (*curr)->next) {
+    if ((char*)(*curr) + (*curr)->size + sizeof(FreeBlock) == (char*)(*curr)->next) {
+      (*curr)->size += (*curr)->next->size + sizeof(FreeBlock);
+      (*curr)->next = (*curr)->next->next;
+    }
+    else {
+      curr = &(*curr)->next;
+    }
+  }
 }
+
 
 
 #endif
