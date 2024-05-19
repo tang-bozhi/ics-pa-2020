@@ -39,3 +39,8 @@ void test_memset() {
       }
    }
 }
+
+void main() {
+   test_memset();
+   return;
+}
