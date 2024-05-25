@@ -3,6 +3,11 @@
 
 static uint64_t boot_time;
 
+void __am_timer_config(AM_TIMER_CONFIG_T* config) {
+   config->present = true;  // 表示时钟设备存在
+   config->has_rtc = has_rtc;  // 从全局变量获取 RTC 状态
+}
+
 void __am_timer_init() {
    // 获取系统启动时间
    boot_time = inl(RTC_ADDR);
