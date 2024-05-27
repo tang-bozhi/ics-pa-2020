@@ -15,7 +15,11 @@ int main(int argc, char* argv[]) {
    init_monitor(argc, argv);
    engine_start();
 
-   // // 打开输入文件
+   return is_exit_status_bad();
+}
+
+
+// // 打开输入文件
    // FILE* fp = fopen("/home/ics-pa-2020/nemu/tools/gen-expr/input", "r");
    // if (fp == NULL) {
    //    perror("Error opening file");
@@ -50,5 +54,3 @@ int main(int argc, char* argv[]) {
 
    // // 关闭文件
    // fclose(fp);
-   return is_exit_status_bad();
-}
