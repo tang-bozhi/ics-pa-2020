@@ -64,7 +64,7 @@ static inline def_EHelper(bne) { // 上方BEQ稍作修改得来
    // 如果相等，不做任何事，继续执行下一条指令
 
    // 格式化打印此指令，用于调试
-   print_asm_template2(beq);
+   print_asm_template2(bne);
 }
 
 static inline def_EHelper(blt) { // 上方BEQ稍作修改得来
@@ -79,7 +79,7 @@ static inline def_EHelper(blt) { // 上方BEQ稍作修改得来
    // 如果不符合条件，不做任何事，继续执行下一条指令
 
    // 格式化打印此指令，用于调试
-   print_asm_template2(beq);
+   print_asm_template2(blt);
 }
 
 static inline def_EHelper(bltu) { // 上方BEQ稍作修改得来
@@ -94,7 +94,7 @@ static inline def_EHelper(bltu) { // 上方BEQ稍作修改得来
    // 如果不符合条件，不做任何事，继续执行下一条指令
 
    // 格式化打印此指令，用于调试
-   print_asm_template2(beq);
+   print_asm_template2(bltu);
 }
 
 static inline def_EHelper(bge) { // 上方BEQ稍作修改得来
@@ -109,7 +109,7 @@ static inline def_EHelper(bge) { // 上方BEQ稍作修改得来
    // 如果不符合条件，不做任何事，继续执行下一条指令
 
    // 格式化打印此指令，用于调试
-   print_asm_template2(beq);
+   print_asm_template2(bge);
 }
 
 static inline def_EHelper(bgeu) { // 上方BEQ稍作修改得来
@@ -124,5 +124,5 @@ static inline def_EHelper(bgeu) { // 上方BEQ稍作修改得来
    // 如果不符合条件，不做任何事，继续执行下一条指令
 
    // 格式化打印此指令，用于调试
-   print_asm_template2(beq);
+   print_asm_template2(bgeu);
 }
