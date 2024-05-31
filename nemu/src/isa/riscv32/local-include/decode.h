@@ -76,6 +76,8 @@ static inline def_DHelper(B) {//Branch
    }
    //存放处理好了的立即数  "按照特定的位模式组合并进行符号扩展"了的立即数
    id_dest->imm = *s0;
+   id_src1->type = OP_TYPE_IMM;
+   print_Dop(id_dest->str, OP_STR_SIZE, "%d", id_dest->imm);
 }
 
 static inline def_DHelper(J) {//Jump
@@ -103,5 +105,6 @@ static inline def_DHelper(J) {//Jump
    //存放处理好了的立即数  "按照特定的位模式组合并进行符号扩展"了的立即数
    id_src1->imm = *s0;
    id_src1->type = OP_TYPE_IMM;
+   print_Dop(id_src1->str, OP_STR_SIZE, "%d", id_src1->imm);
 }
 

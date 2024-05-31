@@ -12,7 +12,7 @@ static inline def_EHelper(jal) {
    rtl_j(s, s->seq_pc + id_src1->imm);
 
    // 格式化打印此指令，用于调试
-   print_asm(str(jal) "%c %s,%s", suffix_char(id_dest->width), id_dest->str, id_src1->str);
+   print_asm_template2(jal);
 }
 
 static inline def_EHelper(jalr) {
@@ -79,7 +79,7 @@ static inline def_EHelper(blt) { // 上方BEQ稍作修改得来
    // 如果不符合条件，不做任何事，继续执行下一条指令
 
    // 格式化打印此指令，用于调试
-   print_asm_template2(blt);
+   print_asm_template3(blt);
 }
 
 static inline def_EHelper(bltu) { // 上方BEQ稍作修改得来
@@ -124,5 +124,5 @@ static inline def_EHelper(bgeu) { // 上方BEQ稍作修改得来
    // 如果不符合条件，不做任何事，继续执行下一条指令
 
    // 格式化打印此指令，用于调试
-   print_asm_template2(bgeu);
+   print_asm_template3(bgeu);
 }
