@@ -12,7 +12,7 @@ static inline def_EHelper(jal) {
    rtl_j(s, s->seq_pc + id_src1->imm);
 
    // 格式化打印此指令，用于调试
-   print_asm(str(instr) "%c %s,%s", suffix_char(id_dest->width), id_src1->str, id_dest->str);
+   print_asm(str(jal) "%c %s,%s", suffix_char(id_dest->width), id_dest->str, id_src1->str);
 }
 
 static inline def_EHelper(jalr) {
@@ -49,7 +49,7 @@ static inline def_EHelper(beq) {
    // 如果不相等，不做任何事，继续执行下一条指令
 
    // 格式化打印此指令，用于调试
-   print_asm(str(instr) "%c %s,%s", suffix_char(id_dest->width), id_src1->str, id_src2->str);
+   print_asm(str(beq) "%c %s,%s", suffix_char(id_dest->width), id_src1->str, id_src2->str);
 }
 
 static inline def_EHelper(bne) { // 上方BEQ稍作修改得来
