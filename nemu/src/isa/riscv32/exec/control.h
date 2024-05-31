@@ -9,10 +9,10 @@ static inline def_EHelper(jal) {
       rtl_li(s, ddest, s->seq_pc + 4);
    }
    // 计算跳转目标地址并更新 PC
-   rtl_j(s, s->seq_pc + id_src2->imm);
+   rtl_j(s, s->seq_pc + id_src1->imm);
 
    // 格式化打印此指令，用于调试
-   print_asm_template2(jal);
+   print_asm_template3(jal);
 }
 
 static inline def_EHelper(jalr) {
@@ -49,7 +49,7 @@ static inline def_EHelper(beq) {
    // 如果不相等，不做任何事，继续执行下一条指令
 
    // 格式化打印此指令，用于调试
-   print_asm_template2(beq);
+   print_asm_template3(beq);
 }
 
 static inline def_EHelper(bne) { // 上方BEQ稍作修改得来
