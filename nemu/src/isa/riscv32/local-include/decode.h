@@ -101,6 +101,6 @@ static inline def_DHelper(J) {//Jump
    }
 
    //存放处理好了的立即数  "按照特定的位模式组合并进行符号扩展"了的立即数
-   id_src2->imm = *s0;
+   id_src1->imm = *s0;
 }
 
