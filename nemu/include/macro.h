@@ -1,7 +1,7 @@
 #ifndef __MACRO_H__
 #define __MACRO_H__
 
-#define str_temp(x) #x
+#define str_temp(x) #x//将宏参数转换为字符串
 #define str(x) str_temp(x)
 
 #define concat_temp(x, y) x ## y
