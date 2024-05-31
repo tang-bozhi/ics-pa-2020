@@ -75,12 +75,12 @@ static inline def_DHelper(B) {//Branch
       *s0 &= 0x00001FFF; // 如果不是负数，确保只有13位有效，高位清零
    }
    //存放处理好了的立即数  "按照特定的位模式组合并进行符号扩展"了的立即数
-   id_src2->imm = *s0;
+   id_dest->imm = *s0;
 }
 
 static inline def_DHelper(J) {//Jump
    // 解码目标寄存器 
-   decode_op_r(s, id_dest, s->isa.instr.j.rd, false);
+   decode_op_r(s, id_dest, s->isa.instr.j.rd, true);
 
    // J-type 指令立即数字段的位组合
    *s0 = (
