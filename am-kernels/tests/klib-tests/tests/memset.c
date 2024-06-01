@@ -1,5 +1,9 @@
 #include "trap.h"
 
+// #include <stdint.h>
+// #include <string.h>
+// #include <assert.h>//这三行用于在"make ARCH=riscv32-nemu ALL=memset run"的时候让native使用glibc
+
 #define N 32
 uint8_t data[N];
 
@@ -43,7 +47,7 @@ void test_memset() {
 }
 
 // 主函数，运行测试
-void main() {
+int main() {
    test_memset();
-   return;
+   return 0;
 }
