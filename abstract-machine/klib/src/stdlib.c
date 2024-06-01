@@ -30,27 +30,67 @@ int atoi(const char* nptr) {
 }
 
 //下方是malloc和free的实现
-// 用来追踪当前分配位置的指针
-static char* addr;
+typedef struct Block {
+  size_t size;
+  struct Block* next;
+} Block;
+
+static Block* free_list = NULL;
+static char* heap_start;
+static char* heap_end;
 
 void malloc_init() {
-  // 初始化 addr 为堆的起始地址
-  addr = (char*)heap.start;
+  heap_start = (char*)heap.start;
+  heap_end = (char*)heap.end;
+  free_list = (Block*)heap_start;
+  free_list->size = heap_end - heap_start - sizeof(Block);
+  free_list->next = NULL;
 }
 
 void* malloc(size_t size) {
-  // 检查是否有足够的内存分配请求的大小
-  if (addr + size > (char*)heap.end) {
-    return NULL;  // 没有足够空间，返回 NULL
+  Block* block = free_list;
+  Block* prev = NULL;
+
+  size = (size + sizeof(size_t) - 1) & ~(sizeof(size_t) - 1);  // Align size to size_t
+  size += sizeof(Block);  // Add size for the header
+
+  while (block != NULL) {
+    if (block->size >= size) {
+      if (block->size > size + sizeof(Block)) {
+        // Split block
+        Block* new_block = (Block*)((char*)block + size);
+        new_block->size = block->size - size;
+        new_block->next = block->next;
+        block->size = size - sizeof(Block);
+        block->next = new_block;
+      }
+      else {
+        // Block is perfectly sized or too small to split
+        if (prev == NULL) {
+          free_list = block->next;
+        }
+        else {
+          prev->next = block->next;
+        }
+      }
+
+      return (char*)block + sizeof(Block);
+    }
+    prev = block;
+    block = block->next;
   }
 
-  char* ret = addr;  // 保存当前地址以返回
-  addr += size;  // 通过分配块的大小增加 addr
-  return ret;  // 返回已分配内存的起始地址
+  return NULL;  // No suitable block found
 }
 
 void free(void* ptr) {
-  // 根据指示留空
+  if (ptr == NULL) return;
+
+  Block* block = (Block*)((char*)ptr - sizeof(Block));
+  block->next = free_list;
+  free_list = block;
+
+  // Optional: Coalesce adjacent free blocks
 }
 
 #endif
