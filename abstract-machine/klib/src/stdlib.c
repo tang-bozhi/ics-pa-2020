@@ -35,62 +35,99 @@ typedef struct Block {
   struct Block* next;
 } Block;
 
-static Block* free_list = NULL;
-static char* heap_start;
-static char* heap_end;
+#define NUM_LISTS 10
+static Block* free_lists[NUM_LISTS];
+static char* heap_start = NULL;
+static char* heap_end = NULL;
 
 void malloc_init() {
   heap_start = (char*)heap.start;
   heap_end = (char*)heap.end;
-  free_list = (Block*)heap_start;
-  free_list->size = heap_end - heap_start - sizeof(Block);
-  free_list->next = NULL;
+  for (int i = 0; i < NUM_LISTS; i++) {
+    free_lists[i] = NULL;
+  }
+  // Initialize one large block in the smallest list
+  Block* initial = (Block*)heap_start;
+  initial->size = heap_end - heap_start - sizeof(Block);
+  initial->next = NULL;
+  free_lists[0] = initial;
 }
 
 void* malloc(size_t size) {
-  Block* block = free_list;
+  if (size == 0) return NULL;
+
+  size = (size + sizeof(size_t) - 1) & ~(sizeof(size_t) - 1);
+  size += sizeof(Block);
+  int list_idx = size / 1024;
+  if (list_idx >= NUM_LISTS) list_idx = NUM_LISTS - 1;
+
   Block* prev = NULL;
+  Block* block = NULL;
+  int search_idx = list_idx;
 
-  size = (size + sizeof(size_t) - 1) & ~(sizeof(size_t) - 1);  // Align size to size_t
-  size += sizeof(Block);  // Add size for the header
-
-  while (block != NULL) {
-    if (block->size >= size) {
-      if (block->size > size + sizeof(Block)) {
-        // Split block
-        Block* new_block = (Block*)((char*)block + size);
-        new_block->size = block->size - size;
-        new_block->next = block->next;
-        block->size = size - sizeof(Block);
-        block->next = new_block;
-      }
-      else {
-        // Block is perfectly sized or too small to split
-        if (prev == NULL) {
-          free_list = block->next;
-        }
-        else {
-          prev->next = block->next;
-        }
-      }
-
-      return (char*)block + sizeof(Block);
+  while (search_idx < NUM_LISTS) {
+    block = free_lists[search_idx];
+    prev = NULL;
+    while (block && block->size < size) {
+      prev = block;
+      block = block->next;
     }
-    prev = block;
-    block = block->next;
+    if (block) break;
+    search_idx++;
   }
 
-  return NULL;  // No suitable block found
+  if (!block) return NULL; // No suitable block found
+
+  // Split the block if it is large enough
+  if (block->size > size + sizeof(Block)) {
+    Block* new_block = (Block*)((char*)block + size);
+    new_block->size = block->size - size;
+    new_block->next = block->next;
+    block->size = size - sizeof(Block);
+    block->next = new_block;
+  }
+  else {
+    if (prev) prev->next = block->next;
+    else free_lists[search_idx] = block->next;
+  }
+
+  return (char*)block + sizeof(Block);
 }
 
 void free(void* ptr) {
-  if (ptr == NULL) return;
+  if (!ptr) return;
 
   Block* block = (Block*)((char*)ptr - sizeof(Block));
-  block->next = free_list;
-  free_list = block;
+  int list_idx = block->size / 1024;
+  if (list_idx >= NUM_LISTS) list_idx = NUM_LISTS - 1;
 
-  // Optional: Coalesce adjacent free blocks
+  Block* current = free_lists[list_idx];
+  Block* prev = NULL;
+
+  // Find the correct place to insert the free block
+  while (current != NULL && (char*)current < (char*)block) {
+    prev = current;
+    current = current->next;
+  }
+
+  // Coalesce with next block if possible
+  if ((char*)block + block->size == (char*)current) {
+    block->size += current->size;
+    block->next = current->next;
+  }
+  else {
+    block->next = current;
+  }
+
+  // Coalesce with previous block if possible
+  if (prev && (char*)prev + prev->size == (char*)block) {
+    prev->size += block->size;
+    prev->next = block->next;
+  }
+  else {
+    if (prev) prev->next = block;
+    else free_lists[list_idx] = block;
+  }
 }
 
 #endif
