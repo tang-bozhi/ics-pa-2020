@@ -39,9 +39,9 @@ void test_free_null() {
 
 void test_malloc_free_random_sizes() {
    printf("Testing random size memory allocations...\n");
-   srand(12345);  // 设置随机种子
+   srand(79589);  // 设置随机种子
    for (int i = 0; i < 100; i++) {
-      size_t size = rand() % 1024;  // 随机大小，最大1023字节
+      size_t size = rand() % 1500;  // 随机大小，最大1023字节
       char* buffer = malloc(size);
       if (buffer == NULL) {
          printf("Failed to allocate %zu bytes\n", size);

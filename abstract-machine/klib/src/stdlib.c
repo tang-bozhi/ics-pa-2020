@@ -54,21 +54,12 @@ static char* heap_end = NULL;          // 堆的结束地址
 void malloc_init() {
   heap_start = (char*)heap.start;
   heap_end = (char*)heap.end;
-  for (int i = 0; i < NUM_LISTS; i++) {
-    free_lists[i] = NULL;
-  }
-  // 预设多个大小的空闲块
-  size_t initial_size = heap_end - heap_start;
-  char* current = heap_start;
-  while (initial_size > 0) {
-    size_t block_size = (initial_size > 1024 ? 1024 : initial_size) - sizeof(Block);
-    Block* block = (Block*)current;
-    block->size = block_size;
-    block->next = free_lists[block_size / 1024];
-    free_lists[block_size / 1024] = block;
-    current += block_size + sizeof(Block);
-    initial_size -= block_size + sizeof(Block);
-  }
+  size_t initial_size = heap_end - heap_start - sizeof(Block);
+
+  Block* block = (Block*)heap_start;
+  block->size = initial_size;
+  block->next = NULL;
+  free_lists[0] = block;  // 使用free_lists的第一个元素作为整个空闲链表的入口
 }
 
 
@@ -80,43 +71,31 @@ void* malloc(size_t size) {
   size = (size + sizeof(size_t) - 1) & ~(sizeof(size_t) - 1);
   size += sizeof(Block);
 
-  int list_idx = size / 1024;
-  if (list_idx >= NUM_LISTS) list_idx = NUM_LISTS - 1;
-
+  Block* block = free_lists[0];
   Block* prev = NULL;
-  Block* block = NULL;
-  int search_idx = list_idx;
 
-  // 查找合适的块
-  while (search_idx < NUM_LISTS) {
-    block = free_lists[search_idx];
-    while (block && block->size < size) {
-      prev = block;
-      block = block->next;
-    }
-    if (block) break;
-    search_idx++;
+  // 查找第一个足够大的块
+  while (block != NULL && block->size < size) {
+    prev = block;
+    block = block->next;
   }
 
-  if (!block) return NULL;  // 未找到合适的块
+  if (!block) return NULL; // 未找到合适的块
 
-  // 如果块足够大，进行分割
-  if (block->size > size + sizeof(Block)) {
+  // 分割块
+  if (block->size > size) {
     Block* new_block = (Block*)((char*)block + size);
     new_block->size = block->size - size;
     new_block->next = block->next;
     block->size = size - sizeof(Block);
 
-    int new_idx = new_block->size / 1024;
-    if (new_idx >= NUM_LISTS) new_idx = NUM_LISTS - 1;
-
-    // 将剩余部分重新放入适当的链表
-    new_block->next = free_lists[new_idx];
-    free_lists[new_idx] = new_block;
+    if (prev) prev->next = new_block;
+    else free_lists[0] = new_block;
   }
-
-  if (prev) prev->next = block->next;
-  else free_lists[search_idx] = block->next;
+  else {
+    if (prev) prev->next = block->next;
+    else free_lists[0] = block->next;
+  }
 
   return (char*)block + sizeof(Block);
 }
@@ -126,10 +105,7 @@ void free(void* ptr) {
   if (!ptr) return;
 
   Block* block = (Block*)((char*)ptr - sizeof(Block));
-  int list_idx = block->size / 1024;
-  if (list_idx >= NUM_LISTS) list_idx = NUM_LISTS - 1;
-
-  Block* current = free_lists[list_idx];
+  Block* current = free_lists[0];
   Block* prev = NULL;
 
   // 在链表中找到正确的插入位置
@@ -141,19 +117,19 @@ void free(void* ptr) {
   block->next = current;
 
   // 尝试与下一个块合并
-  if (current && (char*)block + block->size == (char*)current) {
-    block->size += current->size;
+  if (current && (char*)block + block->size + sizeof(Block) == (char*)current) {
+    block->size += current->size + sizeof(Block);
     block->next = current->next;
   }
 
   // 尝试与前一个块合并
-  if (prev && (char*)prev + prev->size == (char*)block) {
-    prev->size += block->size;
+  if (prev && (char*)prev + prev->size + sizeof(Block) == (char*)block) {
+    prev->size += block->size + sizeof(Block);
     prev->next = block->next;
   }
   else {
     if (prev) prev->next = block;
-    else free_lists[list_idx] = block;
+    else free_lists[0] = block;
   }
 }
 
