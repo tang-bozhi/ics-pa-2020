@@ -67,8 +67,8 @@ void malloc_init() {
 void* malloc(size_t size) {
   if (size == 0) return NULL;
 
-  // 调整大小以包含块头，并对齐到 sizeof(size_t) 的倍数
-  size = (size + sizeof(size_t) - 1) & ~(sizeof(size_t) - 1);
+  // 调整大小以包含块头，并对齐到 sizeof(Block) 的倍数
+  size = (size + sizeof(Block) - 1) & ~(sizeof(Block) - 1);
   size += sizeof(Block);
 
   Block* block = free_lists[0];

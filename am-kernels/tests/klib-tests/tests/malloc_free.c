@@ -41,7 +41,7 @@ void test_malloc_free_random_sizes() {
    printf("Testing random size memory allocations...\n");
    srand(79589);  // 设置随机种子
    for (int i = 0; i < 100; i++) {
-      size_t size = rand() % 1500;  // 随机大小，最大1023字节
+      size_t size = rand() % 3000;  // 随机大小，最大3000字节(可以到10^16,但是堆空间没有这么大,不知道什么问题,malloc没有找到足够大的块应该是要返回NULL这里下面要报错的)
       char* buffer = malloc(size);
       if (buffer == NULL) {
          printf("Failed to allocate %zu bytes\n", size);

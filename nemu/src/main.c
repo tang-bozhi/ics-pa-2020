@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <assert.h>
 
-
 void init_monitor(int, char* []);
 void engine_start();
 int is_exit_status_bad();
