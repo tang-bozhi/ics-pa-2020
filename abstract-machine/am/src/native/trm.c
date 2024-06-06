@@ -6,6 +6,7 @@ void __am_exit_platform(int code);
 
 void trm_init() {
   __am_platform_dummy();
+  malloc_init(); //设置堆后立即调用 malloc_init
 }
 
 void putch(char ch) {

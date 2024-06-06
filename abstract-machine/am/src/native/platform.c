@@ -125,9 +125,7 @@ static void init_platform() {
 
   // set up the AM heap
   heap = RANGE(pmem, pmem + PMEM_SIZE);
-#if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
-  malloc_init(); //设置堆后立即调用 malloc_init
-#endif
+
   // initialize sigmask for interrupts
   ret2 = sigemptyset(&__am_intr_sigmask);
   assert(ret2 == 0);
