@@ -5,7 +5,7 @@
 #include <klib.h>
 #include <klib-macros.h>
 
-#define IOE ({ ioe_init();  })
+#define IOE ({ ioe_init();  })//好像不用子在nemu/trm.c/_trm_init()中添加ioe_init();
 #define CTE(h) ({ Context *h(Event, Context *); cte_init(h); })
 #define VME(f1, f2) ({ void *f1(int); void f2(void *); vme_init(f1, f2); })
 #define MPE ({ mpe_init(entry); })

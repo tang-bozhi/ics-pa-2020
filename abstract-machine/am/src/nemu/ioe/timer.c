@@ -14,7 +14,7 @@ void __am_timer_init() {
 
 void __am_timer_uptime(AM_TIMER_UPTIME_T* uptime) {
    uint64_t now = inl(RTC_ADDR);
-   // 假设 RTC_ADDR 返回从系统启动至今的微秒数
+
    uptime->us = now - boot_time;
 }
 

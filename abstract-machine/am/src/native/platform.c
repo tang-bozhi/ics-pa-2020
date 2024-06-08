@@ -159,6 +159,8 @@ static void init_platform() {
   setbuf(stdout, NULL);
 
   const char* args = getenv("mainargs");
+  malloc_init();//malloc初始化
+
   halt(main(args ? args : "")); // call main here!
 }
 
