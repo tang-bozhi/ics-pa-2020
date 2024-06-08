@@ -56,7 +56,6 @@ static int print_chars(char* buf, int max_len, const char* str, int len) {
 }
 
 // 辅助函数，用于将整数转换为字符串并复制到缓冲区
-// 辅助函数，用于将整数转换为字符串并复制到缓冲区，支持宽度和填充
 static int print_int(char* buf, int max_len, int value, int width, char pad) {
    char temp[12]; // 足够存储 INT_MIN 和空字符
    int pos = 0;
@@ -140,21 +139,50 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
          fmt++;
          int width = 0;
          char pad = ' ';
-         if (*fmt == '0') {  // 检查是否需要填充零
+
+         // 解析可能的填充字符和宽度
+         if (*fmt == '0') {
             pad = '0';
             fmt++;
          }
-         while (*fmt >= '0' && *fmt <= '9') {  // 解析宽度
+         while (*fmt >= '0' && *fmt <= '9') {
             width = width * 10 + (*fmt - '0');
             fmt++;
          }
+
          int sublen = 0;
          char temp_buf[64];
-         switch (*fmt) {
-         case 'd':
-            sublen = print_int(temp_buf, sizeof(temp_buf), va_arg(ap, int), width, pad);
-            break;
-            // 其他case处理略...
+         if (*fmt == 'l' && *(fmt + 1) == 'u') {  // 检查是否为 %lu
+            fmt++; // 跳过 'l'
+            sublen = print_unsigned_long(temp_buf, sizeof(temp_buf), va_arg(ap, unsigned long));
+         }
+         else {
+            switch (*fmt) {
+            case 'd':
+               sublen = print_int(temp_buf, sizeof(temp_buf), va_arg(ap, int), width, pad);
+               break;
+            case 'f':
+               sublen = print_float(temp_buf, sizeof(temp_buf), va_arg(ap, double), 6);
+               break;
+            case 's':
+               sublen = print_chars(temp_buf, sizeof(temp_buf), va_arg(ap, char*), INT_MAX);
+               break;
+            case 'c':
+               temp_buf[0] = (char)va_arg(ap, int);
+               sublen = 1;
+               break;
+            case 'z':
+               if (*(fmt + 1) == 'u') {
+                  fmt++;
+                  sublen = print_size_t(temp_buf, sizeof(temp_buf), va_arg(ap, size_t));
+               }
+               break;
+            default:
+               temp_buf[0] = '%';
+               temp_buf[1] = *fmt;
+               sublen = 2;
+               break;
+            }
          }
          sublen = print_chars(buf + count, n - count - 1, temp_buf, sublen);
          count += sublen;
