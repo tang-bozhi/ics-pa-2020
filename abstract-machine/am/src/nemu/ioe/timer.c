@@ -3,10 +3,6 @@
 
 static uint64_t boot_time;
 
-void __am_timer_config(AM_TIMER_CONFIG_T* config) {
-   config->present = config->has_rtc = true;  // 表示时钟设备存在
-}
-
 void __am_timer_init() {
    // 获取系统启动时间
    uint32_t low = inl(RTC_ADDR);           // 读取微秒值
