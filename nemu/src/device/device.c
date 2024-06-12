@@ -44,10 +44,12 @@ void device_update() {
       break;
     case SDL_KEYDOWN:  // 按键按下事件
     case SDL_KEYUP:  // 按键释放事件
+    {
       uint8_t k = event.key.keysym.scancode;  // 获取按键的扫描码
       bool is_keydown = (event.key.type == SDL_KEYDOWN);  // 判断是按下还是释放
       send_key(k, is_keydown);  // 发送按键信息
       break;
+    }
     default: break;  // 其他事件不处理
     }
   }

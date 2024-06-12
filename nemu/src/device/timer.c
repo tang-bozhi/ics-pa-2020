@@ -20,7 +20,10 @@ static void rtc_io_handler(uint32_t offset, int len, bool is_write) {
 
 static void timer_intr() {
   if (nemu_state.state == NEMU_RUNNING) {
-    rtc_io_handler();
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    rtc_port_base[0] = now.tv_usec;
+    rtc_port_base[1] = now.tv_sec;
   }
 }
 
