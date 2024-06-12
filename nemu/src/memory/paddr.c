@@ -55,7 +55,7 @@ static inline void pmem_write(paddr_t addr, word_t data, int len) {
 
 /* Memory accessing interfaces */
 
-inline word_t paddr_read(paddr_t addr, int len) {
+inline word_t paddr_read(paddr_t addr, int len) {//mmio.c中没有read函数,集成到了这个paddr_read之中
    if (in_pmem(addr)) return pmem_read(addr, len);
    else return map_read(addr, len, fetch_mmio_map(addr));
 }
