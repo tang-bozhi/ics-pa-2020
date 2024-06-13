@@ -18,23 +18,16 @@ static void rtc_io_handler(uint32_t offset, int len, bool is_write) {
   }
 }
 
-static uint64_t simulated_time = 0;  // Simulated time counter
-
 static void timer_intr() {
   if (nemu_state.state == NEMU_RUNNING) {
-    simulated_time += 16667;  // Increment by 16667 microseconds per tick (1/60th of a second)
-
-    uint32_t seconds = simulated_time / 1000000;
-    uint32_t microseconds = simulated_time % 1000000;
-
-    rtc_port_base[0] = microseconds;
-    rtc_port_base[1] = seconds;
+    extern void dev_raise_intr();
+    dev_raise_intr();
   }
 }
 
 void init_timer() {
   rtc_port_base = (void*)new_space(8);
   add_pio_map("rtc", RTC_PORT, (void*)rtc_port_base, 8, rtc_io_handler);
-  add_mmio_map("rtc", RTC_MMIO, (void*)rtc_port_base, 8, rtc_io_handler);//当 nemu的CPU 试图通过地址 0xa1000048 访问虚拟机内存时，实际上访问的是 rtc_port_base 指向的物理机内存
+  add_mmio_map("rtc", RTC_MMIO, (void*)rtc_port_base, 8, rtc_io_handler);
   add_alarm_handle(timer_intr);
 }
