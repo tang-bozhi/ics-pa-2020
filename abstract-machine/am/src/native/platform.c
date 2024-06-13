@@ -159,7 +159,10 @@ static void init_platform() {
   setbuf(stdout, NULL);
 
   const char* args = getenv("mainargs");
-  malloc_init();//malloc初始化
+
+#if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
+  malloc_init();//malloc初始化:后来添加 
+#endif
 
   halt(main(args ? args : "")); // call main here!
 }
