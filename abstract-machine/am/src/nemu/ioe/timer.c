@@ -1,19 +1,19 @@
 #include <am.h>
 #include <nemu.h>
 
-static uint64_t boot_time;
+static long int boot_time;
 
 void __am_timer_init() {
    // 获取系统启动时间
-   uint32_t low = inl(RTC_ADDR);           // 读取微秒值
-   uint32_t high = inl(RTC_ADDR + 4);      // 读取秒值
+   long int low = inl(RTC_ADDR);           // 读取微秒值
+   long int high = inl(RTC_ADDR + 4);      // 读取秒值
    boot_time = ((uint64_t)high << 32) | low;  // 组合秒和微秒
 }
 
 void __am_timer_uptime(AM_TIMER_UPTIME_T* uptime) {
-   uint32_t low = inl(RTC_ADDR);           // 读取微秒值
-   uint32_t high = inl(RTC_ADDR + 4);      // 读取秒值
-   uint64_t now = ((uint64_t)high << 32) | low;  // 组合秒和微秒
+   long int low = inl(RTC_ADDR);           // 读取微秒值
+   long int high = inl(RTC_ADDR + 4);      // 读取秒值
+   long int now = ((long long int)high << 32) | low;  // 组合秒和微秒
    uptime->us = now - boot_time;
 }
 

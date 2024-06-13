@@ -131,6 +131,66 @@ static int print_unsigned_long(char* buf, int max_len, unsigned long value) {
    return count;
 }
 
+// 为 long 和 long long 添加辅助函数
+static int print_long(char* buf, int max_len, long value, int width, char pad) {
+   char temp[22];  // 缓冲区大小足以容纳长整型
+   int pos = 0;
+   bool is_negative = value < 0;
+   if (is_negative) {
+      value = -value;
+   }
+   do {
+      temp[pos++] = (char)('0' + value % 10);
+      value /= 10;
+   } while (value > 0 && pos < sizeof(temp) - 1);
+
+   if (is_negative) {
+      temp[pos++] = '-';
+   }
+
+   int needed = width - pos;
+   int count = 0;
+   while (needed > 0 && count < max_len) {
+      buf[count++] = pad;
+      needed--;
+   }
+
+   for (int i = pos - 1; i >= 0 && count < max_len; i--) {
+      buf[count++] = temp[i];
+   }
+   return count;
+}
+
+static int print_long_long(char* buf, int max_len, long long value, int width, char pad) {
+   char temp[22];  // 缓冲区大小足以容纳长长整型
+   int pos = 0;
+   bool is_negative = value < 0;
+   if (is_negative) {
+      value = -value;
+   }
+   do {
+      temp[pos++] = (char)('0' + value % 10);
+      value /= 10;
+   } while (value > 0 && pos < sizeof(temp) - 1);
+
+   if (is_negative) {
+      temp[pos++] = '-';
+   }
+
+   int needed = width - pos;
+   int count = 0;
+   while (needed > 0 && count < max_len) {
+      buf[count++] = pad;
+      needed--;
+   }
+
+   for (int i = pos - 1; i >= 0 && count < max_len; i--) {
+      buf[count++] = temp[i];
+   }
+
+   return count;
+}
+
 // 实现 vsnprintf 函数
 int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
    int count = 0;
@@ -151,10 +211,27 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
          }
 
          int sublen = 0;
-         char temp_buf[64];
-         if (*fmt == 'l' && *(fmt + 1) == 'u') {  // 检查是否为 %lu
-            fmt++; // 跳过 'l'
-            sublen = print_unsigned_long(temp_buf, sizeof(temp_buf), va_arg(ap, unsigned long));
+         char temp_buf[128];  // 增加缓冲区大小以适应更大的数字
+
+         // 处理 long 和 long long 格式说明符
+         if (*fmt == 'l') {
+            fmt++;  // 跳过 'l'
+            if (*fmt == 'd') {
+               sublen = print_long(temp_buf, sizeof(temp_buf), va_arg(ap, long), width, pad);
+            }
+            else if (*fmt == 'l' && *(fmt + 1) == 'd') {
+               fmt++;  // 跳过第二个 'l'
+               sublen = print_long_long(temp_buf, sizeof(temp_buf), va_arg(ap, long long), width, pad);
+            }
+            else if (*fmt == 'u') {
+               sublen = print_unsigned_long(temp_buf, sizeof(temp_buf), va_arg(ap, unsigned long));
+            }
+            else {
+               temp_buf[0] = '%';
+               temp_buf[1] = 'l';
+               temp_buf[2] = *fmt;
+               sublen = 3;
+            }
          }
          else {
             switch (*fmt) {
@@ -189,11 +266,10 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
          fmt++;
       }
       else {
-         buf[count++] = *fmt++; // 复制非格式化部分的字符
+         buf[count++] = *fmt++; // 复制非格式部分的字符
       }
    }
    buf[count] = '\0'; // 确保字符串以空字符结尾
    return count;
 }
-
 #endif
