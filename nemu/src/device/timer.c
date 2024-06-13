@@ -18,12 +18,17 @@ static void rtc_io_handler(uint32_t offset, int len, bool is_write) {
   }
 }
 
+static uint64_t simulated_time = 0;  // Simulated time counter
+
 static void timer_intr() {
   if (nemu_state.state == NEMU_RUNNING) {
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    rtc_port_base[0] = now.tv_usec;
-    rtc_port_base[1] = now.tv_sec;
+    simulated_time += 16667;  // Increment by 16667 microseconds per tick (1/60th of a second)
+
+    uint32_t seconds = simulated_time / 1000000;
+    uint32_t microseconds = simulated_time % 1000000;
+
+    rtc_port_base[0] = microseconds;
+    rtc_port_base[1] = seconds;
   }
 }
 
