@@ -20,10 +20,17 @@ char* strcpy(char* dst, const char* src) {
 // 最多复制`n`个字符从字符串`src`到`dst`。如果`src`的长度小于`n`，`dst`的剩余部分将用`\0`填充。
 char* strncpy(char* dst, const char* src, size_t n) {
    char* ret = dst;
-   while (n-- && (*dst++ = *src++)); // 复制直到达到n个字符或复制了空字符
-   while (n-- > 0) *dst++ = '\0';    // 如果n大于src的长度，用空字节填充
+   size_t count = 0; // 使用一个计数器来确保正确复制和填充
+   while (count < n && (*dst++ = *src++)) {
+      count++; // 只有当src不是空字符时，才增加计数
+   }
+   while (count < n) { // 填充剩余部分
+      *dst++ = '\0';
+      count++;
+   }
    return ret;
 }
+
 
 // 将字符串`src`追加到`dst`的末尾。假设`dst`有足够的空间来保存结果。
 char* strcat(char* dst, const char* src) {
@@ -45,12 +52,15 @@ int strcmp(const char* s1, const char* s2) {
 // 比较两个字符串`s1`和`s2`的前`n`个字符。
 // 如果相等或`n`为零，返回0。如果在比较`n`个字符之前`s1 < s2`，返回负值；如果`s1 > s2`，返回正值。
 int strncmp(const char* s1, const char* s2, size_t n) {
-   while (n-- && *s1 && (*s1 == *s2)) {
+   if (n == 0) return 0; // 如果n为零，直接返回0
+
+   while (--n && *s1 && (*s1 == *s2)) {
       s1++;
       s2++;
    }
-   return n == (size_t)-1 ? 0 : *(unsigned char*)s1 - *(unsigned char*)s2;
+   return *(unsigned char*)s1 - *(unsigned char*)s2;
 }
+
 
 // 将从`v`开始的`n`个字节设定为字节`c`。
 void* memset(void* v, int c, size_t n) {

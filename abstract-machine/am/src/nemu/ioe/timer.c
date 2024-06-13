@@ -3,18 +3,17 @@
 
 static uint64_t boot_time;
 
-void __am_timer_config(AM_TIMER_CONFIG_T* config) {
-   config->present = config->has_rtc = true;  // 表示时钟设备存在
-}
-
 void __am_timer_init() {
    // 获取系统启动时间
-   boot_time = inl(RTC_ADDR);
+   uint32_t low = inl(RTC_ADDR);           // 读取微秒值
+   uint32_t high = inl(RTC_ADDR + 4);      // 读取秒值
+   boot_time = ((uint64_t)high << 32) | low;  // 组合秒和微秒
 }
 
 void __am_timer_uptime(AM_TIMER_UPTIME_T* uptime) {
-   uint64_t now = inl(RTC_ADDR);
-   // 假设 RTC_ADDR 返回从系统启动至今的微秒数
+   uint32_t low = inl(RTC_ADDR);           // 读取微秒值
+   uint32_t high = inl(RTC_ADDR + 4);      // 读取秒值
+   uint64_t now = ((uint64_t)high << 32) | low;  // 组合秒和微秒
    uptime->us = now - boot_time;
 }
 

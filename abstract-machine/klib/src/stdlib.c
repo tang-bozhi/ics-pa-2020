@@ -2,26 +2,33 @@
 #include <klib.h>
 #include <klib-macros.h>
 
+// 仅当非本地 ISA 或启用了本地 klib 时才编译以下代码
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 static unsigned long int next = 1;
 
+// 生成伪随机数，返回值在 [0, 32767] 范围内
 int rand(void) {
-  // RAND_MAX assumed to be 32767
+  // RAND_MAX 假设为 32767
   next = next * 1103515245 + 12345;
   return (unsigned int)(next / 65536) % 32768;
 }
 
+// 设置随机数生成器的种子
 void srand(unsigned int seed) {
   next = seed;
 }
 
+// 返回整数的绝对值
 int abs(int x) {
   return (x < 0 ? -x : x);
 }
 
+// 将字符串转换为整数
 int atoi(const char* nptr) {
   int x = 0;
+  // 跳过前导空格
   while (*nptr == ' ') { nptr++; }
+  // 转换每个字符为数字并累加
   while (*nptr >= '0' && *nptr <= '9') {
     x = x * 10 + *nptr - '0';
     nptr++;
@@ -29,95 +36,101 @@ int atoi(const char* nptr) {
   return x;
 }
 
-//下方是malloc和free的实现
-// 定义空闲块结构
-typedef struct FreeBlock {
-  size_t size;
-  struct FreeBlock* next;
-} FreeBlock;
+// 下面是 malloc 和 free 的实现
 
-static FreeBlock* free_list;
-static char* heap_start;
-static char* heap_end;
+typedef struct Block {
+  size_t size;          // 块大小
+  struct Block* next;   // 指向下一个块的指针
+} Block;
 
-// 初始化堆
-void heap_init(Area heap) {
+#define PMEM_SIZE (128 * 1024 * 1024)
+#define BLOCK_SIZE 1024  // 每个链表负责的基本块大小
+#define NUM_LISTS (PMEM_SIZE / BLOCK_SIZE)
+static Block* free_lists[NUM_LISTS];   // 空闲块链表数组
+static char* heap_start = NULL;        // 堆的起始地址
+static char* heap_end = NULL;          // 堆的结束地址
+
+// 初始化 malloc 系统
+void malloc_init() {
   heap_start = (char*)heap.start;
   heap_end = (char*)heap.end;
-  free_list = (FreeBlock*)heap_start;
-  free_list->size = heap_end - heap_start - sizeof(FreeBlock);
-  free_list->next = NULL;
+  size_t initial_size = heap_end - heap_start - sizeof(Block);
+
+  Block* block = (Block*)heap_start;
+  block->size = initial_size;
+  block->next = NULL;
+  free_lists[0] = block;  // 使用free_lists的第一个元素作为整个空闲链表的入口
 }
 
+
+// 分配指定大小的内存
 void* malloc(size_t size) {
   if (size == 0) return NULL;
 
-  FreeBlock** best_fit = NULL;
-  FreeBlock** curr = &free_list;
+  // 调整大小以包含块头，并对齐到 sizeof(Block) 的倍数
+  size = (size + sizeof(Block) - 1) & ~(sizeof(Block) - 1);
+  size += sizeof(Block);
 
-  // 找到最适合的空闲块
-  while (*curr) {
-    if ((*curr)->size >= size) {
-      if (!best_fit || (*curr)->size < (*best_fit)->size) {
-        best_fit = curr;
-      }
-    }
-    curr = &(*curr)->next;
+  Block* block = free_lists[0];
+  Block* prev = NULL;
+
+  // 查找第一个足够大的块
+  while (block != NULL && block->size < size) {
+    prev = block;
+    block = block->next;
   }
 
-  if (!best_fit) {
-    printf("Error allocating memory! Requested size: %zu\n", size);  // Debugging output
-    return NULL;  // 找不到合适的块
-  }
+  if (!block) return NULL; // 未找到合适的块
 
-  FreeBlock* block = *best_fit;
-  if (block->size >= size + sizeof(FreeBlock) + 1) {
-    // 如果块足够大，则拆分
-    char* allocated_memory = (char*)block + sizeof(FreeBlock);
-    size_t remaining_size = block->size - size - sizeof(FreeBlock);
-    FreeBlock* new_block = (FreeBlock*)(allocated_memory + size);
-    new_block->size = remaining_size;
+  // 分割块
+  if (block->size > size) {
+    Block* new_block = (Block*)((char*)block + size);
+    new_block->size = block->size - size;
     new_block->next = block->next;
-    *best_fit = new_block;
+    block->size = size - sizeof(Block);
+
+    if (prev) prev->next = new_block;
+    else free_lists[0] = new_block;
   }
   else {
-    *best_fit = block->next;
+    if (prev) prev->next = block->next;
+    else free_lists[0] = block->next;
   }
 
-  return (char*)block + sizeof(FreeBlock);
+  return (char*)block + sizeof(Block);
 }
 
+// 释放已分配的内存
 void free(void* ptr) {
   if (!ptr) return;
 
-  if ((char*)ptr < heap_start || (char*)ptr >= heap_end) {
-    printf("Error: trying to free memory outside the heap range!\n");  // Debugging output
-    return;
+  Block* block = (Block*)((char*)ptr - sizeof(Block));
+  Block* current = free_lists[0];
+  Block* prev = NULL;
+
+  // 在链表中找到正确的插入位置
+  while (current != NULL && (char*)current < (char*)block) {
+    prev = current;
+    current = current->next;
   }
 
-  FreeBlock* block_to_free = (FreeBlock*)((char*)ptr - sizeof(FreeBlock));
-  FreeBlock** curr = &free_list;
+  block->next = current;
 
-  // 按地址顺序插入释放的块
-  while (*curr && *curr < block_to_free) {
-    curr = &(*curr)->next;
+  // 尝试与下一个块合并
+  if (current && (char*)block + block->size + sizeof(Block) == (char*)current) {
+    block->size += current->size + sizeof(Block);
+    block->next = current->next;
   }
-  block_to_free->next = *curr;
-  *curr = block_to_free;
 
-  // 合并相邻的空闲块
-  curr = &free_list;
-  while (*curr && (*curr)->next) {
-    if ((char*)(*curr) + (*curr)->size + sizeof(FreeBlock) == (char*)(*curr)->next) {
-      (*curr)->size += (*curr)->next->size + sizeof(FreeBlock);
-      (*curr)->next = (*curr)->next->next;
-    }
-    else {
-      curr = &(*curr)->next;
-    }
+  // 尝试与前一个块合并
+  if (prev && (char*)prev + prev->size + sizeof(Block) == (char*)block) {
+    prev->size += block->size + sizeof(Block);
+    prev->next = block->next;
+  }
+  else {
+    if (prev) prev->next = block;
+    else free_lists[0] = block;
   }
 }
-
-
 
 #endif

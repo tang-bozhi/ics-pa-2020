@@ -30,7 +30,7 @@ static inline def_EHelper(slti) {
 
 static inline def_EHelper(sltiu) {//由def_EHelper(slti)稍作修改得到
    rtl_setrelopi(s, RELOP_LTU, ddest, dsrc1, id_src2->imm);
-   print_asm_template2(slti);
+   print_asm_template2(sltiu);
 }
 
 static inline def_EHelper(xori) {
@@ -50,12 +50,12 @@ static inline def_EHelper(andi) {
 
 static inline def_EHelper(srli) {//SRLI(Shift Logical Right Immediate)
    rtl_shri(s, ddest, dsrc1, ((id_src2->imm) & 3071));//去除func7,保留imm[4:0]:0b0100000
-   print_asm_template2(andi);
+   print_asm_template2(srli);
 }
 
 static inline def_EHelper(slli) {//SLLI(Shift Logical Left Immediate)
    rtl_shli(s, ddest, dsrc1, ((id_src2->imm) & 3071));
-   print_asm_template2(andi);
+   print_asm_template2(slli);
 }
 
 static inline def_EHelper(srai) {//SRAI(Shift Right Arithmetic Immediate)
