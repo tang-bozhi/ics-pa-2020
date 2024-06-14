@@ -198,7 +198,7 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
       if (*fmt == '%') {
          fmt++;  // 跳过 '%'
          int width = 0, precision = -1; // 默认精度
-         char pad = ' ';
+         char pad = ' ';//填充字符初始化
 
          // 解析填充字符和宽度
          if (*fmt == '0') {
@@ -213,10 +213,16 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
          // 检查精度
          if (*fmt == '.') {
             fmt++;  // 跳过 '.'
-            precision = 0;  // 初始化精度为0
-            while (*fmt >= '0' && *fmt <= '9') {
-               precision = precision * 10 + (*fmt - '0');
-               fmt++;
+            if (*fmt == '*') {
+               fmt++;  // 跳过 '*'
+               precision = va_arg(ap, int);  // 从参数列表中获取精度值
+            }
+            else {
+               precision = -1;  // 初始化精度为0
+               while (*fmt >= '0' && *fmt <= '9') {
+                  precision = precision * 10 + (*fmt - '0');
+                  fmt++;
+               }
             }
          }
 
@@ -250,12 +256,8 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
             // 根据格式说明符进行相应处理
             switch (*fmt) {
             case 'f':
-               if (precision >= 0) {
+               if (precision >= 0)
                   sublen = print_float(temp_buf, sizeof(temp_buf), va_arg(ap, double), precision);
-               }
-               else {
-                  sublen = print_float(temp_buf, sizeof(temp_buf), va_arg(ap, double), 6);  // 默认精度
-               }
                break;
             case 'd':
                if (precision == -1) precision = 1;  // 默认精度
