@@ -191,7 +191,7 @@ static int print_long_long(char* buf, int max_len, long long value, int width, c
    return count;
 }
 
-// 实现 vsnprintf 函数// 实现 vsnprintf 函数，这是一个可变参数的字符串格式化函数。
+// 实现 vsnprintf 函数，这是一个可变参数的字符串格式化函数。
 int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
    int count = 0;  // 用于统计已写入的字符数
 
@@ -226,9 +226,10 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
          char temp_buf[128];  // 临时缓冲区，用于存储单个转换结果
          int sublen = 0;  // 单个转换结果的长度
 
-         // 根据格式指示符进行处理
+         // 根据格式说明符进行处理
          switch (*fmt) {
          case 'd':  // 整数
+         case 'i':  // 整数
             sublen = print_int(temp_buf, sizeof(temp_buf), va_arg(ap, int), width, pad);
             break;
          case 'f':  // 浮点数
@@ -240,6 +241,29 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
          case 'c':  // 字符
             temp_buf[0] = (char)va_arg(ap, int);
             sublen = 1;
+            break;
+         case 'l':  // 长整型或长长整型
+            fmt++;
+            if (*fmt == 'l') {  // 处理长长整型
+               fmt++;
+               if (*fmt == 'd' || *fmt == 'i') {
+                  sublen = print_long_long(temp_buf, sizeof(temp_buf), va_arg(ap, long long), width, pad);
+               }
+            }
+            else if (*fmt == 'd' || *fmt == 'i') {  // 长整型
+               sublen = print_long(temp_buf, sizeof(temp_buf), va_arg(ap, long), width, pad);
+            }
+            else if (*fmt == 'u') {  // 无符号长整型
+               sublen = print_unsigned_long(temp_buf, sizeof(temp_buf), va_arg(ap, unsigned long));
+               fmt++;
+            }
+            break;
+         case 'z':  // 处理 size_t
+            if (*(fmt + 1) == 'u') {
+               fmt++;
+               sublen = print_size_t(temp_buf, sizeof(temp_buf), va_arg(ap, size_t));
+            }
+            fmt++;
             break;
          default:  // 处理未识别的格式
             temp_buf[0] = '%';
@@ -261,6 +285,5 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
    buf[count] = '\0';  // 确保字符串以空字符结尾
    return count;
 }
-
 
 #endif
