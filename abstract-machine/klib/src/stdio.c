@@ -196,11 +196,11 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
    int count = 0;
    while (*fmt && count < n - 1) {
       if (*fmt == '%') {
-         fmt++;
-         int width = 0;
+         fmt++;  // 跳过 '%'
+         int width = 0, precision = -1; // 默认精度
          char pad = ' ';
 
-         // 解析可能的填充字符和宽度
+         // 解析填充字符和宽度
          if (*fmt == '0') {
             pad = '0';
             fmt++;
@@ -210,36 +210,56 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
             fmt++;
          }
 
+         // 检查精度
+         if (*fmt == '.') {
+            fmt++;  // 跳过 '.'
+            precision = 0;  // 初始化精度为0
+            while (*fmt >= '0' && *fmt <= '9') {
+               precision = precision * 10 + (*fmt - '0');
+               fmt++;
+            }
+         }
+
          int sublen = 0;
-         char temp_buf[128];  // 增加缓冲区大小以适应更大的数字
+         char temp_buf[128];  // 用于存储单个转换结果
 
          // 处理 long 和 long long 格式说明符
          if (*fmt == 'l') {
             fmt++;  // 跳过 'l'
             if (*fmt == 'd') {
                sublen = print_long(temp_buf, sizeof(temp_buf), va_arg(ap, long), width, pad);
+               fmt++;
             }
             else if (*fmt == 'l' && *(fmt + 1) == 'd') {
-               fmt++;  // 跳过第二个 'l'
+               fmt += 2;  // 跳过第二个 'l' 和 'd'
                sublen = print_long_long(temp_buf, sizeof(temp_buf), va_arg(ap, long long), width, pad);
             }
             else if (*fmt == 'u') {
                sublen = print_unsigned_long(temp_buf, sizeof(temp_buf), va_arg(ap, unsigned long));
+               fmt++;
             }
             else {
                temp_buf[0] = '%';
                temp_buf[1] = 'l';
                temp_buf[2] = *fmt;
                sublen = 3;
+               fmt++;
             }
          }
          else {
+            // 根据格式说明符进行相应处理
             switch (*fmt) {
-            case 'd':
-               sublen = print_int(temp_buf, sizeof(temp_buf), va_arg(ap, int), width, pad);
-               break;
             case 'f':
-               sublen = print_float(temp_buf, sizeof(temp_buf), va_arg(ap, double), 6);
+               if (precision >= 0) {
+                  sublen = print_float(temp_buf, sizeof(temp_buf), va_arg(ap, double), precision);
+               }
+               else {
+                  sublen = print_float(temp_buf, sizeof(temp_buf), va_arg(ap, double), 6);  // 默认精度
+               }
+               break;
+            case 'd':
+               if (precision == -1) precision = 1;  // 默认精度
+               sublen = print_int(temp_buf, sizeof(temp_buf), va_arg(ap, int), width, pad);
                break;
             case 's':
                sublen = print_chars(temp_buf, sizeof(temp_buf), va_arg(ap, char*), INT_MAX);
@@ -260,16 +280,17 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
                sublen = 2;
                break;
             }
+            fmt++;
          }
          sublen = print_chars(buf + count, n - count - 1, temp_buf, sublen);
          count += sublen;
-         fmt++;
       }
       else {
-         buf[count++] = *fmt++; // 复制非格式部分的字符
+         buf[count++] = *fmt++;  // 复制非格式部分的字符
       }
    }
-   buf[count] = '\0'; // 确保字符串以空字符结尾
+   buf[count] = '\0';  // 确保字符串以空字符结尾
    return count;
 }
+
 #endif
