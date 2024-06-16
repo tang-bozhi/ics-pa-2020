@@ -162,43 +162,40 @@ static int print_unsigned_long(char* buf, int max_len, unsigned long value) {
 // 为 long 和 long long 添加辅助函数
 // 辅助函数，用于将 long 类型整数转换为字符串并复制到缓冲区
 static int print_long(char* buf, int max_len, long value, int width, char pad) {
-   char temp[22];  // 缓冲区大小足以容纳长整型
-   int pos = 0;  // 用于临时存储转换结果的位置指针
+   char temp[22];  // 缓冲区大小足以容纳长整型数字
+   int pos = 0;  // 临时存储转换结果的位置指针
    bool is_negative = value < 0;  // 检查数值是否为负
 
-   if (is_negative) {
-      value = -value;  // 如果是负数，转换为正数处理
-   }
+   // 使用 unsigned long 安全处理负数的绝对值
+   unsigned long abs_value = (is_negative) ? -(unsigned long)value : (unsigned long)value;
 
-   // 将整数部分从个位开始转换为字符，存储到临时数组
+   // 从个位开始将整数部分转换为字符，存储在临时数组中
    do {
-      temp[pos++] = (char)('0' + value % 10);  // 将当前最低位转换为字符
-      value /= 10;  // 移除当前最低位
-   } while (value > 0 && pos < sizeof(temp) - 1);
+      temp[pos++] = '0' + (abs_value % 10);  // 将当前最低位转换为字符
+      abs_value /= 10;  // 移除当前最低位
+   } while (abs_value > 0 && pos < sizeof(temp) - 1);
 
    // 如果原数是负数，添加负号
    if (is_negative) {
       temp[pos++] = '-';
    }
 
-   int needed = width - pos;  // 需要的填充字符数是指定的宽度减去数字字符数量
-   int count = 0;  // 计数器，记录已复制到主缓冲区的字符数
+   int needed = width - pos;  // 计算需要的填充字符数，即指定宽度减去数字字符数量
+   int count = 0;  // 计数器，记录已复制到输出缓冲区的字符数
 
-   // 首先将数字字符从临时数组反序复制到输出缓冲区，因为之前的存储是从个位开始的
-   for (int i = pos - 1; i >= 0 && count < max_len; i--) {
-      buf[count++] = temp[i];
-   }
-
-   // 添加填充字符到输出缓冲区，直到达到指定宽度或填充完所有字符
-   while (needed > 0 && count < max_len) {
+   // 在数字之前向输出缓冲区添加填充字符
+   while (needed > 0 && count < max_len && count + pos < width) {
       buf[count++] = pad;  // 将填充字符复制到输出缓冲区
       needed--;  // 减少所需的填充字符数量
    }
 
-   // 返回已复制到输出缓冲区的字符数
-   return count;
-}
+   // 将数字字符从临时数组反序复制到输出缓冲区
+   for (int i = pos - 1; i >= 0 && count < max_len; i--) {
+      buf[count++] = temp[i];
+   }
 
+   return count;  // 返回已复制到输出缓冲区的字符数
+}
 
 static int print_long_long(char* buf, int max_len, long long value, int width, char pad) {
    char temp[22];  // 缓冲区大小足以容纳长长整型
