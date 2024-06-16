@@ -87,16 +87,44 @@ static int print_int(char* buf, int max_len, int value, int width, char pad) {
 
 // 辅助函数，用于将浮点数转换为字符串并复制到缓冲区
 static int print_float(char* buf, int max_len, double value, int precision) {
-   if (precision > 10 || precision < 0) {
-      precision = 6; // 默认精度
+   if (precision < 0 || precision > 10) precision = 6;  // 限制精度范围
+
+   int count = 0;
+   if (value < 0) {
+      if (count < max_len) {
+         buf[count++] = '-';
+      }
+      value = -value;  // 处理负数
    }
 
-   char temp[64];
-   int count = snprintf(temp, sizeof(temp), "%.*f", precision, value); // 使用 snprintf 格式化浮点数
-   if (count > 0) {
-      return print_chars(buf, max_len, temp, count);
+   // 处理整数部分
+   long long int_part = (long long)value;  // 获取整数部分
+   char int_buf[20];  // 临时缓冲区存储整数部分
+   int int_pos = 0;
+   do {
+      int_buf[int_pos++] = '0' + int_part % 10;  // 取最低位
+      int_part /= 10;
+   } while (int_part > 0 && int_pos < sizeof(int_buf));
+
+   // 整数部分从高位到低位复制到输出缓冲区
+   for (int i = int_pos - 1; i >= 0 && count < max_len; i--) {
+      buf[count++] = int_buf[i];
    }
-   return 0;
+
+   // 处理小数部分
+   if (precision > 0 && count < max_len) {
+      buf[count++] = '.';  // 添加小数点
+   }
+
+   double frac_part = value - (long long)value;  // 获取小数部分
+   for (int i = 0; i < precision && count < max_len; i++) {
+      frac_part *= 10;
+      int digit = (int)frac_part;
+      buf[count++] = '0' + digit;
+      frac_part -= digit;
+   }
+
+   return count;
 }
 
 //添加了一个 print_size_t 辅助函数来处理 size_t 类型的数据
@@ -132,34 +160,45 @@ static int print_unsigned_long(char* buf, int max_len, unsigned long value) {
 }
 
 // 为 long 和 long long 添加辅助函数
+// 辅助函数，用于将 long 类型整数转换为字符串并复制到缓冲区
 static int print_long(char* buf, int max_len, long value, int width, char pad) {
    char temp[22];  // 缓冲区大小足以容纳长整型
-   int pos = 0;
-   bool is_negative = value < 0;
+   int pos = 0;  // 用于临时存储转换结果的位置指针
+   bool is_negative = value < 0;  // 检查数值是否为负
+
    if (is_negative) {
-      value = -value;
+      value = -value;  // 如果是负数，转换为正数处理
    }
+
+   // 将整数部分从个位开始转换为字符，存储到临时数组
    do {
-      temp[pos++] = (char)('0' + value % 10);
-      value /= 10;
+      temp[pos++] = (char)('0' + value % 10);  // 将当前最低位转换为字符
+      value /= 10;  // 移除当前最低位
    } while (value > 0 && pos < sizeof(temp) - 1);
 
+   // 如果原数是负数，添加负号
    if (is_negative) {
       temp[pos++] = '-';
    }
 
-   int needed = width - pos;
-   int count = 0;
-   while (needed > 0 && count < max_len) {
-      buf[count++] = pad;
-      needed--;
-   }
+   int needed = width - pos;  // 需要的填充字符数是指定的宽度减去数字字符数量
+   int count = 0;  // 计数器，记录已复制到主缓冲区的字符数
 
+   // 首先将数字字符从临时数组反序复制到输出缓冲区，因为之前的存储是从个位开始的
    for (int i = pos - 1; i >= 0 && count < max_len; i--) {
       buf[count++] = temp[i];
    }
+
+   // 添加填充字符到输出缓冲区，直到达到指定宽度或填充完所有字符
+   while (needed > 0 && count < max_len) {
+      buf[count++] = pad;  // 将填充字符复制到输出缓冲区
+      needed--;  // 减少所需的填充字符数量
+   }
+
+   // 返回已复制到输出缓冲区的字符数
    return count;
 }
+
 
 static int print_long_long(char* buf, int max_len, long long value, int width, char pad) {
    char temp[22];  // 缓冲区大小足以容纳长长整型
@@ -203,7 +242,7 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
          int width = 0, precision = -1;  // 宽度和精度初始化
          char pad = ' ';  // 填充字符默认为空格
 
-         // 解析填充字符和宽度
+         // 解析填充字符和宽度 
          if (*fmt == '0') {
             pad = '0';
             fmt++;
@@ -211,16 +250,6 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
          while (*fmt >= '0' && *fmt <= '9') {
             width = width * 10 + (*fmt - '0');
             fmt++;
-         }
-
-         // 解析精度
-         if (*fmt == '.') {
-            fmt++;  // 跳过 '.'
-            precision = 0;  // 初始化精度
-            while (*fmt >= '0' && *fmt <= '9') {
-               precision = precision * 10 + (*fmt - '0');
-               fmt++;
-            }
          }
 
          char temp_buf[128];  // 临时缓冲区，用于存储单个转换结果
