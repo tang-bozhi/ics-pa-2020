@@ -92,46 +92,46 @@ static int print_int(char* buf, int max_len, int value, int width, char pad) {
 }
 
 // 辅助函数，用于将浮点数转换为字符串并复制到缓冲区
-static int print_float(char* buf, int max_len, double value, int precision) {
-   if (precision < 0 || precision > 10) precision = 6;  // 限制精度范围
+// static int print_float(char* buf, int max_len, double value, int precision) {
+//    if (precision < 0 || precision > 10) precision = 6;  // 限制精度范围
 
-   int count = 0;
-   if (value < 0) {
-      if (count < max_len) {
-         buf[count++] = '-';
-      }
-      value = -value;  // 处理负数
-   }
+//    int count = 0;
+//    if (value < 0) {
+//       if (count < max_len) {
+//          buf[count++] = '-';
+//       }
+//       value = -value;  // 处理负数
+//    }
 
-   // 处理整数部分
-   long long int_part = (long long)value;  // 获取整数部分
-   char int_buf[20];  // 临时缓冲区存储整数部分
-   int int_pos = 0;
-   do {
-      int_buf[int_pos++] = '0' + int_part % 10;  // 取最低位
-      int_part /= 10;
-   } while (int_part > 0 && int_pos < sizeof(int_buf));
+//    // 处理整数部分
+//    long long int_part = (long long)value;  // 获取整数部分
+//    char int_buf[20];  // 临时缓冲区存储整数部分
+//    int int_pos = 0;
+//    do {
+//       int_buf[int_pos++] = '0' + int_part % 10;  // 取最低位
+//       int_part /= 10;
+//    } while (int_part > 0 && int_pos < sizeof(int_buf));
 
-   // 整数部分从高位到低位复制到输出缓冲区
-   for (int i = int_pos - 1; i >= 0 && count < max_len; i--) {
-      buf[count++] = int_buf[i];
-   }
+//    // 整数部分从高位到低位复制到输出缓冲区
+//    for (int i = int_pos - 1; i >= 0 && count < max_len; i--) {
+//       buf[count++] = int_buf[i];
+//    }
 
-   // 处理小数部分
-   if (precision > 0 && count < max_len) {
-      buf[count++] = '.';  // 添加小数点
-   }
+//    // 处理小数部分
+//    if (precision > 0 && count < max_len) {
+//       buf[count++] = '.';  // 添加小数点
+//    }
 
-   double frac_part = value - (long long)value;  // 获取小数部分
-   for (int i = 0; i < precision && count < max_len; i++) {
-      frac_part *= 10;
-      int digit = (int)frac_part;
-      buf[count++] = '0' + digit;
-      frac_part -= digit;
-   }
+//    double frac_part = value - (long long)value;  // 获取小数部分
+//    for (int i = 0; i < precision && count < max_len; i++) {
+//       frac_part *= 10;
+//       int digit = (int)frac_part;
+//       buf[count++] = '0' + digit;
+//       frac_part -= digit;
+//    }
 
-   return count;
-}
+//    return count;
+// }
 
 //添加了一个 print_size_t 辅助函数来处理 size_t 类型的数据
 static int print_size_t(char* buf, int max_len, size_t value) {
@@ -242,7 +242,7 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
       // 检查是否是格式指示符
       if (*fmt == '%') {
          fmt++;  // 跳过 '%'
-         int width = 0, precision = -1;  // 宽度和精度初始化
+         int width = 0;//, precision = -1;  // 宽度和精度初始化
          char pad = ' ';  // 填充字符默认为空格
 
          // 解析填充字符和宽度 
@@ -264,9 +264,9 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
          case 'i':  // 整数
             sublen = print_int(temp_buf, sizeof(temp_buf), va_arg(ap, int), width, pad);
             break;
-         case 'f':  // 浮点数
-            sublen = print_float(temp_buf, sizeof(temp_buf), va_arg(ap, double), precision);
-            break;
+            // case 'f':  // 浮点数
+            //    sublen = print_float(temp_buf, sizeof(temp_buf), va_arg(ap, double), precision);
+            //    break;
          case 's':  // 字符串
             sublen = print_chars(temp_buf, sizeof(temp_buf), va_arg(ap, char*), INT_MAX);
             break;
