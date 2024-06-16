@@ -49,40 +49,46 @@ int snprintf(char* out, size_t n, const char* fmt, ...) {
 // 辅助函数，用于复制字符串到缓冲区
 static int print_chars(char* buf, int max_len, const char* str, int len) {
    int i;
-   for (i = 0; i < len && i < max_len; i++) {
+   // 循环条件中加入对字符串结束符的检查
+   for (i = 0; i < len && i < max_len && str[i] != '\0'; i++) {
       buf[i] = str[i];
    }
-   return i;
+   // 确保输出字符串正确终止
+   if (i < max_len) {
+      buf[i] = '\0'; // 在不超过最大长度的情况下添加字符串终止符
+   }
+   return i; // 返回复制的字符数量，不包含终止符
 }
+
 
 // 辅助函数，用于将整数转换为字符串并复制到缓冲区
 static int print_int(char* buf, int max_len, int value, int width, char pad) {
    char temp[12]; // 足够存储 INT_MIN 和空字符
-   int pos = 0;
-   bool is_negative = value < 0;
+   int pos = 0; // 临时数组的索引，用于存储生成的字符
+   bool is_negative = value < 0; // 判断整数是否为负数
    if (is_negative) {
-      value = -value; // 转换为正数
+      value = -value; // 如果为负，将整数转换为正数
    }
    do {
-      temp[pos++] = (char)('0' + value % 10);
-      value /= 10;
-   } while (value > 0 && pos < sizeof(temp) - 1);
+      temp[pos++] = (char)('0' + value % 10); // 取整数的最后一位数字，转换为字符后存储
+      value /= 10; // 移除已处理的最后一位数字
+   } while (value > 0 && pos < sizeof(temp) - 1); // 继续处理直至整数部分为0或缓冲区满
 
    if (is_negative) {
-      temp[pos++] = '-';
+      temp[pos++] = '-'; // 如果原整数为负，添加负号
    }
 
-   int needed = width - pos; // 计算需要填充的字符数量
-   int count = 0;
+   int needed = width - pos; // 需要填充的字符数量，由指定的宽度和已用字符数决定
+   int count = 0; // 用于记录已经复制到主缓冲区的字符数
    while (needed > 0 && count < max_len) {
-      buf[count++] = pad;
+      buf[count++] = pad; // 在数字前填充字符，直至达到指定宽度
       needed--;
    }
 
    for (int i = pos - 1; i >= 0 && count < max_len; i--) {
-      buf[count++] = temp[i];
+      buf[count++] = temp[i]; // 将数字字符从临时缓冲区反向复制到主缓冲区，形成正确的顺序
    }
-   return count;
+   return count; // 返回已复制到主缓冲区的字符总数
 }
 
 // 辅助函数，用于将浮点数转换为字符串并复制到缓冲区
@@ -297,11 +303,10 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
             sublen = 2;
             break;
          }
-         fmt++;  // 移动到下一个字符
-
          // 将格式化后的临时缓冲区内容复制到主缓冲区
          sublen = print_chars(buf + count, n - count - 1, temp_buf, sublen);
          count += sublen;  // 更新已写入字符数
+         fmt++;  // 移动到下一个字符
       }
       else {
          // 直接复制非格式化部分的字符
