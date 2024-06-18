@@ -23,7 +23,7 @@ void halt(int code) {//void halt(int code)用于结束程序的运行
 }
 
 void _trm_init() {//void _trm_init()用于进行TRM相关的初始化工作
-  malloc_init();//实现malloc时添加
+  //malloc_init();//实现malloc时添加
   int ret = main(mainargs);//main成功则返回0到ret
   halt(ret);
 }
