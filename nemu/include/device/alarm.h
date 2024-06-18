@@ -3,6 +3,4 @@
 
 void add_alarm_handle(void* h);
 
-uint32_t uptime();//后来添加
-
 #endif
