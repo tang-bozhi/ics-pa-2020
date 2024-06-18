@@ -1,21 +1,15 @@
 #include <am.h>
 #include <nemu.h>
 
-static uint64_t boot_time;
-
-void __am_timer_config(AM_TIMER_CONFIG_T* config) {
-   config->present = config->has_rtc = true;  // 表示时钟设备存在
-}
-
 void __am_timer_init() {
-   // 获取系统启动时间
-   boot_time = inl(RTC_ADDR);
+   outl(RTC_ADDR, 0);
+   outl(RTC_ADDR + 4, 0);
 }
 
 void __am_timer_uptime(AM_TIMER_UPTIME_T* uptime) {
-   uint64_t now = inl(RTC_ADDR);
-   // 假设 RTC_ADDR 返回从系统启动至今的微秒数
-   uptime->us = now - boot_time;
+   uptime->us = inl(RTC_ADDR + 4);
+   uptime->us <<= 32;
+   uptime->us += inl(RTC_ADDR);
 }
 
 void __am_timer_rtc(AM_TIMER_RTC_T* rtc) {
