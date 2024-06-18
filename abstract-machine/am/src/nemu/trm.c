@@ -2,6 +2,7 @@
 #include <nemu.h>
 
 extern char _heap_start;//标记了堆（heap）内存开始的地方
+void malloc_init();
 int main(const char* args);
 
 Area heap = RANGE(&_heap_start, PMEM_END);//Area heap结构用于指示堆区的起始和末尾
@@ -22,6 +23,7 @@ void halt(int code) {//void halt(int code)用于结束程序的运行
 }
 
 void _trm_init() {//void _trm_init()用于进行TRM相关的初始化工作
+  malloc_init();//实现malloc时添加
   int ret = main(mainargs);//main成功则返回0到ret
   halt(ret);
 }

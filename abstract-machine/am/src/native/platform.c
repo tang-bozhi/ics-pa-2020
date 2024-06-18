@@ -55,6 +55,8 @@ static void setup_sigaltstack() {
 
 int main(const char* args);
 
+void malloc_init();
+
 static void init_platform() __attribute__((constructor));
 static void init_platform() {
   // create memory object and set up mapping to simulate the physical memory
@@ -157,6 +159,11 @@ static void init_platform() {
   setbuf(stdout, NULL);
 
   const char* args = getenv("mainargs");
+
+#if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
+  malloc_init();//malloc初始化:后来添加 
+#endif
+
   halt(main(args ? args : "")); // call main here!
 }
 
