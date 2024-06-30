@@ -233,6 +233,30 @@ static int print_long_long(char* buf, int max_len, long long value, int width, c
    return count;
 }
 
+// 辅助函数，用于将整数转换为十六进制字符串并复制到缓冲区
+static int print_hex(char* buf, int max_len, unsigned int value, int width, char pad) {
+   char temp[9]; // 8位十六进制数和空字符
+   int pos = 0; // 临时数组的索引，用于存储生成的字符
+   const char* digits = "0123456789abcdef";
+
+   do {
+      temp[pos++] = digits[value % 16]; // 取整数的最后一位数字，转换为十六进制字符后存储
+      value /= 16; // 移除已处理的最后一位数字
+   } while (value > 0 && pos < sizeof(temp) - 1); // 继续处理直至整数部分为0或缓冲区满
+
+   int needed = width - pos; // 需要填充的字符数量，由指定的宽度和已用字符数决定
+   int count = 0; // 用于记录已经复制到主缓冲区的字符数
+   while (needed > 0 && count < max_len) {
+      buf[count++] = pad; // 在数字前填充字符，直至达到指定宽度
+      needed--;
+   }
+
+   for (int i = pos - 1; i >= 0 && count < max_len; i--) {
+      buf[count++] = temp[i]; // 将数字字符从临时缓冲区反向复制到主缓冲区，形成正确的顺序
+   }
+   return count; // 返回已复制到主缓冲区的字符总数
+}
+
 // 实现 vsnprintf 函数，这是一个可变参数的字符串格式化函数。
 int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
    int count = 0;  // 用于统计已写入的字符数
@@ -296,6 +320,9 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
                sublen = print_size_t(temp_buf, sizeof(temp_buf), va_arg(ap, size_t));
             }
             fmt++;
+            break;
+         case 'x':  // 十六进制整数
+            sublen = print_hex(temp_buf, sizeof(temp_buf), va_arg(ap, unsigned int), width, pad);
             break;
          default:  // 处理未识别的格式
             temp_buf[0] = '%';
