@@ -44,10 +44,15 @@ static inline void update_screen() {
 #endif                                                                         
 }
 
-// 根据VGA同步寄存器的条件调用更新屏幕的函数
+// 根据VGA同步寄存器的条件调用更新屏幕的函数  
 void vga_update_screen() {
-  // TODO: 当同步寄存器非零时调用 `update_screen()`，
-  // 然后将同步寄存器清零
+  // 检查同步寄存器的值（保存在 vgactl_port_base[1] 中）
+  if (vgactl_port_base[1] != 0) {
+    // 当同步寄存器非零时，调用 update_screen() 更新屏幕
+    update_screen();
+    // 更新完毕后，将同步寄存器清零
+    vgactl_port_base[1] = 0;
+  }
 }
 
 // 初始化VGA设备，设置SDL和内存映射
