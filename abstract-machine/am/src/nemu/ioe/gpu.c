@@ -8,7 +8,7 @@
 void __am_gpu_init() {
   int i;
   int w = inl(VGACTL_ADDR) >> 16;  // TODO: 获取正确的宽度
-  int h = inw(VGACTL_ADDR);  // TODO: 获取正确的高度
+  int h = (uint64_t)inw(VGACTL_ADDR);  // TODO: 获取正确的高度
   uint32_t* fb = (uint32_t*)(uintptr_t)FB_ADDR;  // 指向帧缓冲区的指针
   // 初始化帧缓冲区，为每个像素赋予一个唯一的颜色值
   for (i = 0; i < w * h; i++) fb[i] = i;
@@ -19,7 +19,7 @@ void __am_gpu_init() {
 void __am_gpu_config(AM_GPU_CONFIG_T* cfg) {
   *cfg = (AM_GPU_CONFIG_T){
     .present = true, .has_accel = false,
-    .width = inl(VGACTL_ADDR) >> 16, .height = inw(VGACTL_ADDR),
+    .width = inl(VGACTL_ADDR) >> 16, .height = (uint64_t)inw(VGACTL_ADDR),
     .vmemsz = 0  // 视频内存大小，初始设置为0
   };
 }
