@@ -42,7 +42,7 @@ static void* lut[128] = {
 
 static void fail(void* buf) { panic("access nonexist register"); }
 
-bool ioe_init() {//在测试函数mainargs=t时会调用IOE宏来调用这个函数
+bool ioe_init() {//在测试函数执行main时会调用IOE宏来调用这个函数
   for (int i = 0; i < LENGTH(lut); i++)
     if (!lut[i]) lut[i] = fail;
   __am_gpu_init();
