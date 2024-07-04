@@ -7,7 +7,7 @@
 #define RTC_MMIO 0xa1000048
 
 static uint32_t* rtc_port_base = NULL;
-static uint64_t boot_time = 0;
+static uint64_t boot_time = 0;//完全更改了时间记录方式:将rtc_io_handler回报的us由真实时间改为了启动时间
 
 static uint64_t get_time_internal() {
   struct timeval now;
