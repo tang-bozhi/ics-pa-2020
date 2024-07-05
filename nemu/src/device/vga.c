@@ -41,7 +41,7 @@ static inline void update_screen() {
   SDL_RenderClear(renderer);
   SDL_RenderCopy(renderer, texture, NULL, NULL);
   SDL_RenderPresent(renderer);
-#endif                                                                         
+#endif
 }
 
 // 根据VGA同步寄存器的条件调用更新屏幕的函数  
