@@ -21,7 +21,7 @@ struct character {
   char ch;  // 字符
   int x, y;  // 字符位置
   int v;     // 字符速度
-  int t;     // 字符消失时间
+  int t;     // 字符消失剩余显示时间
 } chars[NCHAR];  // 字符数组
 
 // 全局变量定义
@@ -55,30 +55,35 @@ void new_char() {
 
 // 更新游戏逻辑
 void game_logic_update(int frame) {
-  if (frame % (FPS / CPS) == 0) new_char();  // 每隔一定时间生成新字符
+  // 每隔一定帧数生成一个新字符。由于FPS/CPS计算每多少帧产生一个新字符，所以当当前帧数能整除这个值时，调用new_char函数生成一个新的字符。
+  if (frame % (FPS / CPS) == 0) new_char();
+
+  // 遍历所有字符，更新每个字符的状态
   for (int i = 0; i < LENGTH(chars); i++) {
-    struct character* c = &chars[i];
-    if (c->ch) {
-      if (c->t > 0) {
-        if (--c->t == 0) {
-          c->ch = '\0';
+    struct character* c = &chars[i];  // 获取对当前字符的引用
+    if (c->ch) {  // 如果字符存在（ch不为'\0'）
+      if (c->t > 0) {  // 如果字符有剩余显示时间
+        if (--c->t == 0) {  // 每帧减少显示时间，如果时间减到0，则清除字符
+          c->ch = '\0';  // 将字符置为空，相当于从屏幕上移除
         }
       }
-      else {
-        c->y += c->v;
-        if (c->y < 0) {
-          c->ch = '\0';
+      else {  // 如果字符没有剩余显示时间
+        c->y += c->v;  // 更新字符的垂直位置
+        if (c->y < 0) {  // 如果字符位置超出屏幕顶部
+          c->ch = '\0';  // 清除字符
         }
+        // 如果字符位置达到或超过屏幕底部
         if (c->y + CHAR_H >= screen_h) {
-          miss++;
-          c->v = 0;
-          c->y = screen_h - CHAR_H;
-          c->t = FPS;
+          miss++;  // 增加未捕捉到的字符计数
+          c->v = 0;  // 停止字符移动
+          c->y = screen_h - CHAR_H;  // 将字符置于屏幕底部
+          c->t = FPS;  // 重新设置字符的显示时间为一秒（等待一段时间后消失）
         }
       }
     }
   }
 }
+
 
 // 渲染函数
 void render() {
@@ -181,7 +186,7 @@ int main() {
 
   int current = 0, rendered = 0;
   while (1) {
-    int frames = io_read(AM_TIMER_UPTIME).us / (1000000 / FPS);
+    int frames = io_read(AM_TIMER_UPTIME).us / (1000000 / FPS); //这个表达式将自程序启动以来的总微秒数除以每帧的微秒数，结果是自程序开始以来已经过的完整帧数。这个值用于驱动游戏逻辑，确保按预期的帧率更新。
 
     // 更新游戏逻辑
     for (; current < frames; current++) {
