@@ -123,28 +123,36 @@ void check_hit(char ch) {
 }
 
 // 视频初始化
+// 初始化视频系统，设置屏幕尺寸
 void video_init() {
+  // 从硬件配置中读取屏幕宽度和高度
   screen_w = io_read(AM_GPU_CONFIG).width;
   screen_h = io_read(AM_GPU_CONFIG).height;
 
+  // 外部声明的字体数据数组
   extern char font[];
+  // 初始化`blank`数组，这将用于清除屏幕上的字符
   for (int i = 0; i < CHAR_W * CHAR_H; i++)
     blank[i] = COL_PURPLE;
 
+  // 使用`blank`数组中的颜色填充整个屏幕
+  // 这里将屏幕划分为若干个CHAR_W x CHAR_H的块，然后用紫色填充每一个块
   for (int x = 0; x < screen_w; x += CHAR_W)
     for (int y = 0; y < screen_h; y += CHAR_H) {
       io_write(AM_GPU_FBDRAW, x, y, blank, min(CHAR_W, screen_w - x), min(CHAR_H, screen_h - y), false);
     }
 
-  // 初始化字符纹理
+  // 初始化字符纹理数据，用于在屏幕上绘制字符
+  // 这部分循环遍历26个英文大写字母
   for (int ch = 0; ch < 26; ch++) {
-    char* c = &font[CHAR_H * ch];
+    char* c = &font[CHAR_H * ch];  // 指向字体数据中每个字符的起始位置
+    // 对每个字符的每一行进行处理
     for (int i = 0, y = 0; y < CHAR_H; y++)
       for (int x = 0; x < CHAR_W; x++, i++) {
-        int t = (c[y] >> (CHAR_W - x - 1)) & 1;
-        texture[WHITE][ch][i] = t ? COL_WHITE : COL_PURPLE;
-        texture[GREEN][ch][i] = t ? COL_GREEN : COL_PURPLE;
-        texture[RED][ch][i] = t ? COL_RED : COL_PURPLE;
+        int t = (c[y] >> (CHAR_W - x - 1)) & 1;  // 提取字符数据中的位信息，生成字符的图像
+        texture[WHITE][ch][i] = t ? COL_WHITE : COL_PURPLE;  // 根据位的值，设置纹理颜色为白色或紫色背景
+        texture[GREEN][ch][i] = t ? COL_GREEN : COL_PURPLE;  // 设置纹理颜色为绿色或紫色背景
+        texture[RED][ch][i] = t ? COL_RED : COL_PURPLE;      // 设置纹理颜色为红色或紫色背景
       }
   }
 }
