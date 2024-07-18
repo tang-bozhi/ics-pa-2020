@@ -19,7 +19,7 @@ typedef struct {
 } Area;
 
 // Arch-dependent processor context 与架构相关的处理器上下文结构体
-typedef struct Context Context;
+typedef struct Context Context;//将struct Context定义为Context
 
 // An event of type @event, caused by @cause of pointer @ref 事件类型定义
 typedef struct {

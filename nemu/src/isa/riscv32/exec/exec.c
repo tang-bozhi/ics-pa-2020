@@ -112,6 +112,19 @@ static inline def_EHelper(reg) {
    }
 }
 
+static inline def_EHelper(csr) {
+   switch (s->isa.instr.csr.funct3) {
+      EX(0b001, csrrw);
+      EX(0b010, csrrs);
+      EX(0b011, csrrc);
+      EX(0b101, csrrwi);
+      EX(0b110, csrrsi);
+      EX(0b111, csrrci);
+   default:
+      exec_inv(s);
+   }
+}
+
 static inline void fetch_decode_exec(DecodeExecState* s) {
    s->isa.instr.val = instr_fetch(&s->seq_pc, 4); // instructions fetch指令获取:seq_pc（sequential program
    // counter，顺序程序计数器）isa.instr.val（指令集架构中指令的值）
@@ -128,6 +141,7 @@ static inline void fetch_decode_exec(DecodeExecState* s) {
       IDEX(0b11000, B, branch);
       IDEX(0b00100, I, imm);
       IDEX(0b01100, R, reg);
+      IDEX(0b11100, CSR, csr);
    default:
       exec_inv(s);
    }

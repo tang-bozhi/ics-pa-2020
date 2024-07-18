@@ -10,10 +10,17 @@
 // reg
 
 typedef struct {
+   word_t scause;
+   vaddr_t sepc;
+   word_t sstatus;
+   word_t stvec;
+} riscv32_CSRs;
+
+typedef struct {
    struct {
       rtlreg_t _32;
    } gpr[32];
-
+   riscv32_CSRs csr;
    vaddr_t pc;
 } riscv32_CPU_state;
 
@@ -72,9 +79,17 @@ typedef struct {
          uint32_t imm10_1 : 10;
          uint32_t imm20 : 1;   // 跳转偏移量的立即数部分。
       } j;// J-type指令（用于跳转）
+      struct {
+         uint32_t opcode1_0 : 2;
+         uint32_t opcode6_2 : 5;
+         uint32_t rd : 5;
+         uint32_t funct3 : 3;
+         uint32_t rs1 : 5;
+         uint32_t csr : 12;
+      } csr;//csr - Zicsr 标准扩展
       uint32_t val;//这是一个32位无类型字段，可以存储整个指令的值。在解码过程中，可以通过这个字段访问整个指令的原始值，然后根据需要解析为其他格式
    } instr; //原始指令值
-} riscv32_ISADecodeInfo;//注意instr是union
+} riscv32_ISADecodeInfo;//注意instr是union 
 
 #define isa_vaddr_check(vaddr, type, len) (MEM_RET_OK)
 #define riscv32_has_mem_exception() (false)
