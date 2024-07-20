@@ -24,23 +24,3 @@ static inline def_EHelper(st) {
   }
 }
 //已被教案完成 
-
-// static inline def_EHelper(ld) {
-//   rtl_lm(s, *ddest, dsrc1, id_src2->imm, s->width);
-
-//   print_Dop(id_src1->str, OP_STR_SIZE, "%d(%s)", id_src2->imm, reg_name(id_src1->reg));
-
-//   switch (s->isa.instr.i.funct3) {
-//   case 0:print_asm_template2(lb); break;
-//   case 1:print_asm_template2(lh); break;
-//   case 2:print_asm_template2(lw); break;
-//   case 4:print_asm_template2(lbu); break;
-//   case 5:print_asm_template2(lhu); break;
-//   }
-//   //   switch (s->width) {
-//   //   case 4: print_asm_template2(lw); break;
-//   //   case 2: print_asm_template2(lhu); break;
-//   //   case 1: print_asm_template2(lbu); break;
-//   //   default: assert(0);
-//   //   }
-// }

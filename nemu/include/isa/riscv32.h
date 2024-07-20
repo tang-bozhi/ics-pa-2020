@@ -10,10 +10,10 @@
 // reg
 
 typedef struct {
-   word_t scause;
+   vaddr_t scause;
    vaddr_t sepc;
-   word_t sstatus;
-   word_t stvec;
+   vaddr_t sstatus;
+   vaddr_t stvec;
 } riscv32_CSRs;
 
 typedef struct {

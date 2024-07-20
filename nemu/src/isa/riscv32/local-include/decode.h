@@ -81,9 +81,6 @@ static inline def_DHelper(B) {//Branch
 }
 
 static inline def_DHelper(J) {//Jump
-   // 解码目标寄存器 
-   decode_op_r(s, id_dest, s->isa.instr.j.rd, true);
-
    // J-type 指令立即数字段的位组合
    *s0 = (
       (s->isa.instr.j.imm20 << 20) |
@@ -106,19 +103,20 @@ static inline def_DHelper(J) {//Jump
    id_src1->imm = *s0;
    id_src1->type = OP_TYPE_IMM;
    print_Dop(id_src1->str, OP_STR_SIZE, "%d", id_src1->imm);
+   // 解码目标寄存器 
+   decode_op_r(s, id_dest, s->isa.instr.j.rd, true);
 }
 
 static inline def_DHelper(CSR) {
    // 解码源寄存器（rs1）
    decode_op_r(s, id_src1, s->isa.instr.csr.rs1, true); // 从寄存器加载值
 
-   // 解码目标寄存器（rd）
-   decode_op_r(s, id_dest, s->isa.instr.csr.rd, false); // 不需要加载值
-
    // 设置立即数值为 CSR 地址
    id_src2->type = OP_TYPE_IMM; // 设置操作数类型为立即数
    id_src2->imm = s->isa.instr.csr.csr; // 将立即数值设置为指令中的 CSR 字段
-
-   // 可选：打印出 CSR 地址以便调试
+   // 打印出 CSR 地址以便调试
    print_Dop(id_src2->str, OP_STR_SIZE, "0x%x", id_src2->imm);
+
+   // 解码目标寄存器（rd）
+   decode_op_r(s, id_dest, s->isa.instr.csr.rd, false); // 不需要加载值
 }

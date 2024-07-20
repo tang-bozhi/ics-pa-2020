@@ -11,8 +11,11 @@ static inline def_EHelper(jal) {
    // 计算跳转目标地址并更新 PC
    rtl_j(s, s->seq_pc + id_src1->imm);
 
+   // 计算跳转目标地址
+   word_t target_addr = s->seq_pc + id_src1->imm;
+
    // 格式化打印此指令，用于调试
-   print_asm_template2(jal);
+   print_asm("jal %s, 0x%08x", id_dest->str, target_addr);
 }
 
 static inline def_EHelper(jalr) {
