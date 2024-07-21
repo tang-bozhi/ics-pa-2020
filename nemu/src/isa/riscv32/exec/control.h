@@ -8,11 +8,12 @@ static inline def_EHelper(jal) {
    if (ddest != rz) { // 注意这里使用 rz 检查是否为 x0
       rtl_li(s, ddest, s->seq_pc + 4);
    }
-   // 计算跳转目标地址并更新 PC
-   rtl_j(s, s->seq_pc + id_src1->imm);
 
    // 计算跳转目标地址
    word_t target_addr = s->seq_pc + id_src1->imm;
+
+   // 计算跳转目标地址并更新 PC
+   rtl_j(s, target_addr);
 
    // 格式化打印此指令，用于调试
    print_asm("jal %s, 0x%08x", id_dest->str, target_addr);

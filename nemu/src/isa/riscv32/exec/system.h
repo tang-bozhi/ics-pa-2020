@@ -14,8 +14,23 @@ static vaddr_t* csr_register(word_t imm) {
    }
 }
 
-#define ECALL(dnpc) { bool success; dnpc = ((isa_reg_str2val("a7", &success), s->pc)); }
+//#define ECALL(dnpc) { bool success; dnpc = ((isa_reg_str2val("a7", &success), s->pc)); }
 #define CSR(i) *csr_register(i)
+
+static inline def_EHelper(ecall) {
+   // 记录返回地址
+   cpu.csr.sepc = s->seq_pc;
+
+   // 设置陷阱原因
+   cpu.csr.scause = 0x9; // 对于 RV32, 0x9 表示环境调用异常 (ECALL) 从用户模式
+
+   // 设置陷阱处理程序地址
+   s->seq_pc = cpu.csr.stvec;
+
+   // 打印指令执行的结果，用于调试
+   print_asm("ecall");
+}
+
 
 // 原子读写 CSR
 static inline def_EHelper(csrrw) {
