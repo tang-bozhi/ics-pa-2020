@@ -6,10 +6,10 @@
 
 static vaddr_t* csr_register(word_t imm) {
    switch (imm) {
-   case 0x341: return &(cpu.csr.sepc);
-   case 0x342: return &(cpu.csr.scause);
-   case 0x300: return &(cpu.csr.sstatus);
-   case 0x305: return &(cpu.csr.stvec);
+   case 0x142: return &(cpu.csr.scause);   // scause
+   case 0x100: return &(cpu.csr.sstatus);  // sstatus
+   case 0x141: return &(cpu.csr.sepc);     // sepc
+   case 0x105: return &(cpu.csr.stvec);    // stvec
    default: panic("Unknown csr");
    }
 }
