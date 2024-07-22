@@ -112,7 +112,7 @@ static inline def_EHelper(reg) {
    }
 }
 
-static inline def_EHelper(csr) {
+static inline def_EHelper(system) {
    switch (s->isa.instr.csr.funct3) {
       EX(0b001, csrrw);
       EX(0b010, csrrs);
@@ -120,6 +120,7 @@ static inline def_EHelper(csr) {
       EX(0b101, csrrwi);
       EX(0b110, csrrsi);
       EX(0b111, csrrci);
+      EX(0b0, ecall);
    default:
       exec_inv(s);
    }
@@ -141,7 +142,7 @@ static inline void fetch_decode_exec(DecodeExecState* s) {
       IDEX(0b11000, B, branch);
       IDEX(0b00100, I, imm);
       IDEX(0b01100, R, reg);
-      IDEX(0b11100, CSR, csr);
+      IDEX(0b11100, SYST, system);
    default:
       exec_inv(s);
    }

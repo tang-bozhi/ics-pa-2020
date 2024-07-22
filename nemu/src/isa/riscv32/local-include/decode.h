@@ -107,7 +107,7 @@ static inline def_DHelper(J) {//Jump
    decode_op_r(s, id_dest, s->isa.instr.j.rd, true);
 }
 
-static inline def_DHelper(CSR) {
+static inline def_DHelper(SYST) {//从CSR改为sysytem,因为需要实现ecall
    // 解码源寄存器（rs1）
    decode_op_r(s, id_src1, s->isa.instr.csr.rs1, true); // 从寄存器加载值
 
@@ -119,4 +119,8 @@ static inline def_DHelper(CSR) {
 
    // 解码目标寄存器（rd）
    decode_op_r(s, id_dest, s->isa.instr.csr.rd, false); // 不需要加载值
+}
+
+static inline def_DHelper(SYSTEM) {
+   //孔姐ma
 }

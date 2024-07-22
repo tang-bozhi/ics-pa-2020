@@ -15,7 +15,7 @@ static vaddr_t* csr_register(word_t imm) {
 }
 
 //#define ECALL(dnpc) { bool success; dnpc = ((isa_reg_str2val("a7", &success), s->pc)); }
-#define CSR(i) *csr_register(i)
+#define _CSR_(i) *csr_register(i)
 
 static inline def_EHelper(ecall) {
    // 记录返回地址
@@ -37,8 +37,8 @@ static inline def_EHelper(csrrw) {
    //int rs1 = *dsrc1;
    //int csr = id_src2->imm;
    //int rd = *ddest;
-   *ddest = CSR(id_src2->imm);
-   CSR(id_src2->imm) = *dsrc1;
+   *ddest = _CSR_(id_src2->imm);
+   _CSR_(id_src2->imm) = *dsrc1;
 
    // 打印指令执行的结果，用于调试
    print_asm_template3(csrrw);
@@ -50,8 +50,8 @@ static inline def_EHelper(csrrs) {
    //int rs1 = *dsrc1;
    //int csr = id_src2->imm;
    //int rd = *ddest;
-   *ddest = CSR(id_src2->imm);
-   CSR(id_src2->imm) |= *dsrc1;
+   *ddest = _CSR_(id_src2->imm);
+   _CSR_(id_src2->imm) |= *dsrc1;
 
    // 打印指令执行的结果，用于调试
    print_asm_template3(csrrs);
@@ -63,8 +63,8 @@ static inline def_EHelper(csrrc) {
    //int rs1 = *dsrc1;
    //int csr = id_src2->imm;
    //int rd = *ddest;
-   *ddest = CSR(id_src2->imm);
-   CSR(id_src2->imm) = (CSR(id_src2->imm) & ~(*dsrc1));
+   *ddest = _CSR_(id_src2->imm);
+   _CSR_(id_src2->imm) = (_CSR_(id_src2->imm) & ~(*dsrc1));
 
    // 打印指令执行的结果，用于调试
    print_asm_template3(csrrc);
@@ -75,8 +75,8 @@ static inline def_EHelper(csrrwi) {
    //int rs1 = *dsrc1;
    //int csr = id_src2->imm;
    //int rd = *ddest;
-   *ddest = CSR(id_src2->imm);
-   CSR(id_src2->imm) = *dsrc1;
+   *ddest = _CSR_(id_src2->imm);
+   _CSR_(id_src2->imm) = *dsrc1;
 
    // 打印指令执行的结果，用于调试
    print_asm_template3(csrrwi);
@@ -87,8 +87,8 @@ static inline def_EHelper(csrrsi) {
    //int rs1 = *dsrc1;
    //int csr = id_src2->imm;
    //int rd = *ddest;
-   *ddest = CSR(id_src2->imm);
-   CSR(id_src2->imm) |= *dsrc1;
+   *ddest = _CSR_(id_src2->imm);
+   _CSR_(id_src2->imm) |= *dsrc1;
 
    // 打印指令执行的结果，用于调试
    print_asm_template3(csrrsi);
@@ -99,8 +99,8 @@ static inline def_EHelper(csrrci) {
    //int rs1 = *dsrc1;
    //int csr = id_src2->imm;
    //int rd = *ddest;
-   *ddest = CSR(id_src2->imm);
-   CSR(id_src2->imm) = (CSR(id_src2->imm) & ~(*dsrc1));
+   *ddest = _CSR_(id_src2->imm);
+   _CSR_(id_src2->imm) = (_CSR_(id_src2->imm) & ~(*dsrc1));
 
    // 打印指令执行的结果，用于调试
    print_asm_template3(csrrci);

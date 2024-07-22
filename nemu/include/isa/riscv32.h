@@ -87,6 +87,14 @@ typedef struct {
          uint32_t rs1 : 5;
          uint32_t csr : 12;
       } csr;//csr - Zicsr 标准扩展
+      struct {
+         uint32_t opcode1_0 : 2;
+         uint32_t opcode6_2 : 5;
+         uint32_t rd : 5;
+         uint32_t funct3 : 3;
+         uint32_t rs1 : 5;
+         uint32_t funct12 : 12;
+      } system;//csr - Zicsr 标准扩展
       uint32_t val;//这是一个32位无类型字段，可以存储整个指令的值。在解码过程中，可以通过这个字段访问整个指令的原始值，然后根据需要解析为其他格式
    } instr; //原始指令值
 } riscv32_ISADecodeInfo;//注意instr是union 
