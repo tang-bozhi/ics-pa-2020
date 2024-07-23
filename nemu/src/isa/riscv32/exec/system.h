@@ -20,7 +20,7 @@ static vaddr_t* csr_register(word_t imm) {
 void raise_intr(DecodeExecState* s, word_t NO, vaddr_t epc);
 static inline def_EHelper(ecall) {
    // 调用 raise_intr 函数，保存当前PC并设置异常号
-   raise_intr(s, 0x9, s->pc);
+   raise_intr(s, 0x9, s->seq_pc);
 
    // 从 stvec 寄存器中取出异常入口地址
    vaddr_t stvec = cpu.csr.stvec;
