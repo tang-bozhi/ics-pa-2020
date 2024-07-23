@@ -17,15 +17,17 @@ static vaddr_t* csr_register(word_t imm) {
 //#define ECALL(dnpc) { bool success; dnpc = ((isa_reg_str2val("a7", &success), s->pc)); }
 #define _CSR_(i) *csr_register(i)
 
+void raise_intr(DecodeExecState* s, word_t NO, vaddr_t epc);
 static inline def_EHelper(ecall) {
-   // 记录返回地址
-   cpu.csr.sepc = s->seq_pc;
+   // 调用 raise_intr 函数，保存当前PC并设置异常号
+   raise_intr(s, 0x9, s->pc);
 
-   // 设置陷阱原因
-   cpu.csr.scause = 0x9; // 对于 RV32, 0x9 表示环境调用异常 (ECALL) 从用户模式
+   // 从 stvec 寄存器中取出异常入口地址
+   vaddr_t stvec = cpu.csr.stvec;
 
-   // 设置陷阱处理程序地址
-   s->seq_pc = cpu.csr.stvec;
+   // 设置跳转标志和跳转地址
+   s->is_jmp = 1;
+   s->jmp_pc = stvec;
 
    // 打印指令执行的结果，用于调试
    print_asm("ecall");
