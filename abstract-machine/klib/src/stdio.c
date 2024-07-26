@@ -14,7 +14,8 @@
 int printf(const char* fmt, ...) {// fmt 格式化字符串
    va_list args;                  // 定义一个 va_list 类型的变量用于访问可变参数
    va_start(args, fmt);           // 初始化 args 变量，让它指向第一个可变参数
-   char buffer[1024];             // 定义一个字符数组作为输出缓冲区
+   char buffer[2048];             // 定义一个字符数组作为输出缓冲区
+   //这个定义不是很完善,nanos-lite当中影响了较长print的打印(打印logo),vsnprintf中的char temp_buf[2048];也有同样问题.两个2048没有逻辑关系
    int printed = vsnprintf(buffer, sizeof(buffer), fmt, args); // 使用 vsnprintf 函数进行格式化
    va_end(args);                  // 结束可变参数的获取
    for (char* p = buffer; *p; p++) {  // 遍历格式化后的字符串
@@ -279,7 +280,8 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
             fmt++;
          }
 
-         char temp_buf[128];  // 临时缓冲区，用于存储单个转换结果
+         char temp_buf[2048];  // 临时缓冲区，用于存储单个转换结果
+         //这个定义不是很完善,nanos-lite当中影响了较长print的打印(打印logo),printf中的char buffer[2048];也有同样问题.两个2048没有逻辑关系
          int sublen = 0;  // 单个转换结果的长度
 
          // 根据格式说明符进行处理
