@@ -26,6 +26,20 @@ static inline def_EHelper(ecall) {
    print_asm("ecall");
 }
 
+static inline def_EHelper(sret) {
+   // 从控制状态寄存器中恢复程序计数器和其他状态
+   rtl_mv(s, &cpu.pc, &cpu.csr.sepc); // 将 sepc 中保存的地址恢复到 pc 中
+
+   print_asm("sret");
+}
+
+// static inline def_EHelper(mret) {
+//    // 从控制状态寄存器中恢复程序计数器和其他状态
+//    rtl_mv(s, &cpu.pc, &cpu.csr.mepc); // 将 mepc 中保存的地址恢复到 pc 中
+//    rtl_li(s, &cpu.csr.mstatus, cpu.csr.mstatus & ~0x1800); // 清除 MPP 位，表示返回到用户模式
+
+//    print_asm("mret");
+// }
 
 // 原子读写 CSR
 static inline def_EHelper(csrrw) {
