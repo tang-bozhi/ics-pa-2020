@@ -39,7 +39,7 @@ Context* __am_irq_handle(Context* c) {
     ev.msg = "Interrupt or exception"; // 根据需要设置 msg 字段
 
     c = user_handler(ev, c); // 调用用户定义的事件处理函数
-    assert(c != NULL); // 确保返回的上下文不为空
+    assert(c != NULL); // 确保返回的上下文不为空  
   }
   return c;
 }

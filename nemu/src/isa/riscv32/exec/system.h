@@ -20,14 +20,7 @@ static vaddr_t* csr_register(word_t imm) {
 void raise_intr(DecodeExecState* s, word_t NO, vaddr_t epc);
 static inline def_EHelper(ecall) {
    // 调用 raise_intr 函数，保存当前PC并设置异常号
-   raise_intr(s, 0x9, s->seq_pc);//异常号 0x9 的含义:根据 RISC - V 特权架构规范，异常号 0x9 代表的是从用户模式的环境调用。这意味着当执行 ecall 指令时，处理器将会跳转到一个特定的异常处理程序，通常是操作系统或固件用来处理系统调用的地方。
-
-   // 从 stvec 寄存器中取出异常入口地址
-   vaddr_t stvec = cpu.csr.stvec;
-
-   // 设置跳转标志和跳转地址
-   s->is_jmp = 1;
-   s->jmp_pc = stvec;
+   raise_intr(s, 11, s->seq_pc);//异常号 0x9 的含义:根据 RISC - V 特权架构规范，异常号 0x9 代表的是从用户模式的环境调用。这意味着当执行 ecall 指令时，处理器将会跳转到一个特定的异常处理程序，通常是操作系统或固件用来处理系统调用的地方。
 
    // 打印指令执行的结果，用于调试
    print_asm("ecall");

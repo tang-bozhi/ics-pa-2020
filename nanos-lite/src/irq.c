@@ -24,6 +24,7 @@ static Context* do_event(Event e, Context* c) {
     panic("Unhandled event ID = %d", e.event);
     break;
   }
+
   return c;
 }
 

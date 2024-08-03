@@ -7,6 +7,12 @@ void raise_intr(DecodeExecState* s, word_t NO, vaddr_t epc) {
    */
   cpu.csr.scause = NO;
   cpu.csr.sepc = epc;
+  // 从 stvec 寄存器中取出异常入口地址
+  vaddr_t stvec = cpu.csr.stvec;
+
+  // 设置跳转标志和跳转地址
+  s->is_jmp = 1;
+  s->jmp_pc = stvec;
 }
 
 void query_intr(DecodeExecState* s) {
