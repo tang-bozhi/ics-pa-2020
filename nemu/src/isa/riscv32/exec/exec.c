@@ -112,6 +112,14 @@ static inline def_EHelper(reg) {
    }
 }
 
+static inline def_EHelper(ret) {
+   switch (s->isa.instr.r.funct7) {
+      EX(0b0001000, sret);
+   default:
+      exec_inv(s);
+   }
+}
+
 static inline def_EHelper(system) {
    switch (s->isa.instr.csr.funct3) {
       IDEX(0b000, R, ret);
@@ -124,12 +132,6 @@ static inline def_EHelper(system) {
       EX(0b0, ecall);
    default:
       exec_inv(s);
-   }
-}
-
-static inline def_EHelper(ret) {
-   switch (s->isa.instr.r.funct7) {
-      EX(0b0001000, sret);
    }
 }
 
