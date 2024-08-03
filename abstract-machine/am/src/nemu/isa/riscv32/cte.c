@@ -34,10 +34,10 @@ Context* __am_irq_handle(Context* c) {
       ev.event = EVENT_ERROR; // 将所有未识别的中断或异常视为错误
       break;
     }
-    ev.cause = c->cause;
-    ev.ref = 0; // 根据需要设置 ref 字段
-    ev.msg = "Interrupt or exception"; // 根据需要设置 msg 字段
-
+    // ev.cause = c->cause;
+    // ev.ref = 0; // 根据需要设置 ref 字段
+    // ev.msg = "Interrupt or exception"; // 根据需要设置 msg 字段
+    ////上方三行应该放入具体的事件处理而不是事件判断之后
     c = user_handler(ev, c); // 调用用户定义的事件处理函数
     assert(c != NULL); // 确保返回的上下文不为空  
   }
