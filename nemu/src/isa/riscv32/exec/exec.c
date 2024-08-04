@@ -123,9 +123,9 @@ static inline def_EHelper(ret) {
 static inline def_EHelper(system) {
    switch (s->isa.instr.csr.funct3) {
    case 0b000:
-      switch (s->isa.instr.csr.csr) {
-         EX(0x000, ecall);
-         IDEX(0x102, R, ret);
+      switch (s->isa.instr.r.rs2) {//这里使用了union中的.r类型
+         EX(0b00000, ecall);
+         EX(0b00010, ret);
       }break;
       EX(0b001, csrrw);
       EX(0b010, csrrs);
