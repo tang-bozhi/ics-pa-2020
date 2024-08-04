@@ -122,14 +122,17 @@ static inline def_EHelper(ret) {
 
 static inline def_EHelper(system) {
    switch (s->isa.instr.csr.funct3) {
-      IDEX(0b000, R, ret);
+   case 0b000:
+      switch (s->isa.instr.csr.csr) {
+         EX(0x000, ecall);
+         IDEX(0x102, R, ret);
+      }break;
       EX(0b001, csrrw);
       EX(0b010, csrrs);
       EX(0b011, csrrc);
       EX(0b101, csrrwi);
       EX(0b110, csrrsi);
       EX(0b111, csrrci);
-      EX(0b0, ecall);
    default:
       exec_inv(s);
    }
