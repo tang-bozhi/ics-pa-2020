@@ -286,6 +286,10 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
 
          // 根据格式说明符进行处理
          switch (*fmt) {
+         case 'p':  // 指针类型
+            sublen = print_chars(temp_buf, sizeof(temp_buf), "0x", 2);  // 先打印 "0x"
+            sublen += print_hex(temp_buf + sublen, sizeof(temp_buf) - sublen, (uintptr_t)va_arg(ap, void*), width, pad); // 以十六进制形式打印指针
+            break;
          case 'd':  // 整数
          case 'i':  // 整数
             sublen = print_int(temp_buf, sizeof(temp_buf), va_arg(ap, int), width, pad);
