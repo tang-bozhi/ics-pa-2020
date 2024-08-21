@@ -12,6 +12,7 @@ static Context* (*user_handler)(Event, Context*) = NULL;
  * 最终返回新的上下文。
  */
 Context* __am_irq_handle(Context* c) {
+  printf("c->cause = %d\n", c->cause);
   if (user_handler) {
     Event ev = { 0 }; // 初始化事件结构体
     switch (c->cause) {
