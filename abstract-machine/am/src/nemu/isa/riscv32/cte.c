@@ -63,7 +63,6 @@ Context* kcontext(Area kstack, void (*entry)(void*), void* arg) {
  * 这个函数通过系统调用触发进程让出CPU的操作。
  */
 void yield() {
-  printf("yield\n");
   asm volatile("li a7, -1; ecall"); // 将-1加载到a7寄存器，并执行系统调用
 }
 
