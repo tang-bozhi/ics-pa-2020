@@ -1,6 +1,7 @@
 #include <common.h>
 
 static Context* do_event(Event e, Context* c) {
+  printf("tap do_event\n");
   switch (e.event) {
   case EVENT_YIELD:
     printf("Yield event recognized!\n");
