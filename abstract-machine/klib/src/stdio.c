@@ -294,7 +294,7 @@ int vsnprintf(char* buf, size_t n, const char* fmt, va_list ap) {
          case 'i':  // 整数
             sublen = print_int(temp_buf, sizeof(temp_buf), va_arg(ap, int), width, pad);
             break;
-            // case 'f':  // 浮点数
+            // case 'f':  // 浮点数(有问题)
             //    sublen = print_float(temp_buf, sizeof(temp_buf), va_arg(ap, double), precision);
             //    break;
          case 's':  // 字符串
