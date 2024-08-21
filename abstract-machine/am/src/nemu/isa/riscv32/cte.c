@@ -15,20 +15,8 @@ Context* __am_irq_handle(Context* c) {
   if (user_handler) {
     Event ev = { 0 }; // 初始化事件结构体
     switch (c->cause) {
-    case -1: // 11 是 RISC-V 中 ecall 异常的 cause 值，表示自陷异常
+    case -1: //
       ev.event = EVENT_YIELD;
-      break;
-    case 0x80000001: // 定时器中断的 cause 值（高位表示中断，低位表示定时器中断）
-      ev.event = EVENT_IRQ_TIMER;
-      break;
-    case 0x80000009: // IO设备中断的 cause 值（高位表示中断，低位表示IO设备中断）
-      ev.event = EVENT_IRQ_IODEV;
-      break;
-    case 12: // 系统调用异常的 cause 值（此值根据具体实现确定）
-      ev.event = EVENT_SYSCALL;
-      break;
-    case 13: // 页面错误的 cause 值（此值根据具体实现确定）
-      ev.event = EVENT_PAGEFAULT;
       break;
     default:
       ev.event = EVENT_ERROR; // 将所有未识别的中断或异常视为错误
