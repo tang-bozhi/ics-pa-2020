@@ -27,6 +27,7 @@ typedef struct {
    vaddr_t seq_pc;  // sequential program counter，即顺序程序计数器。seq_pc用于追踪当前指令执行后应当执行的下一条指令的地址:在顺序执行（没有分支、跳转等控制流改变的情况下）的上下文中，seq_pc通常会在每次指令获取阶段（instruction fetch phase）结束时更新，以指向下一条静态指令的地址。
    uint32_t is_jmp;
    riscv32_CSRs csr;//csr相关指令支持
+   rtlreg_t gpr[32];
    vaddr_t jmp_pc;//如果is_jmp为真，这个字段存储跳转指令的目标地址
    Operand src1, dest, src2;//src1、dest、src2：这些字段分别代表源操作数1、目的操作数和源操作数2。在不同的指令中，这些操作数可以是输入数据、用于存储结果的寄存器或是立即数等。这些字段的类型是Operand结构体，包含了操作数的类型、值和其他相关信息。
    int width;//width：指示当前指令操作的数据宽度。这对于确定如何处理操作数（如整数的加法、减法等操作）非常重要。

@@ -166,6 +166,9 @@ vaddr_t isa_exec_once() {
    DecodeExecState s;
    s.is_jmp = 0;
    s.seq_pc = cpu.pc;
+   for (int i = 0; i < 32; i++) {
+      s.gpr[i] = cpu.gpr[i]._32;// 复制 CPU 中的寄存器值
+   }
 
    fetch_decode_exec(&s);
    s.seq_pc += 4;//+=长度://instr_fetch函数:(*pc) += len;//危险修改:修改了框架代码,将这一步骤移动到了指令执行完之后
