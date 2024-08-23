@@ -20,7 +20,7 @@ static uintptr_t loader(PCB* pcb, const char* filename) {
   ramdisk_read(phdr, ehdr.e_phoff, sizeof(Elf_Phdr) * ehdr.e_phnum);//读入ramdisk中的程序头表的数据
   for (int i = 0; i < ehdr.e_phnum; i++) {
     if (phdr->p_type == PT_LOAD) {
-      ramdisk_read((void*)phdr[i].p_vaddr, phdr[i].p_offset, phdr[i].p_memsz);//这里ramdisk_read使用了memcpy
+      ramdisk_read((void*)phdr[i].p_vaddr, phdr[i].p_offset, phdr[i].p_memsz);//这里ramdisk_read使用了memcpy,nemu中的store指令应该会对这里的(void*)phdr[i].p_vaddr做储存
       memset((void*)phdr[i].p_vaddr + phdr[i].p_filesz, 0, phdr[i].p_memsz - phdr[i].p_filesz);
     }
   }
