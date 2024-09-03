@@ -15,8 +15,11 @@ Context* __am_irq_handle(Context* c) {
   if (user_handler) {
     Event ev = { 0 }; // 初始化事件结构体
     switch (c->cause) {
-    case -1: //
+    case EVENT_YIELD: //
       ev.event = EVENT_YIELD;
+      break;
+    case EVENT_SYSCALL:
+      ev.event = EVENT_SYSCALL;
       break;
     default:
       ev.event = EVENT_ERROR; // 将所有未识别的中断或异常视为错误

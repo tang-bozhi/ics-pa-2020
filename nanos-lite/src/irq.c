@@ -1,4 +1,5 @@
 #include <common.h>
+void do_syscall(Context* c);
 
 static Context* do_event(Event e, Context* c) {
   switch (e.event) {
@@ -7,6 +8,7 @@ static Context* do_event(Event e, Context* c) {
     break;
   case EVENT_SYSCALL:
     printf("Syscall event recognized!\n");
+    do_syscall(Context * c);
     break;
   case EVENT_PAGEFAULT:
     printf("Pagefault event recognized!\n");
