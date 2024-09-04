@@ -10,18 +10,6 @@ static Context* do_event(Event e, Context* c) {
     printf("Syscall event recognized!\n");
     do_syscall(Context * c);
     break;
-  case EVENT_PAGEFAULT:
-    printf("Pagefault event recognized!\n");
-    break;
-  case EVENT_ERROR:
-    printf("Error event recognized!\n");
-    break;
-  case EVENT_IRQ_TIMER:
-    printf("Timer IRQ event recognized!\n");
-    break;
-  case EVENT_IRQ_IODEV:
-    printf("IO device IRQ event recognized!\n");
-    break;
   default:
     panic("Unhandled event ID = %d", e.event);
     break;
