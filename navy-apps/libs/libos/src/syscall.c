@@ -55,8 +55,8 @@ void _exit(int status) {
   while (1);
 }
 
-void _yield() {
-  yield();
+int _yield() {
+  _syscall_(SYS_yield, 0, 0, 0);
   return 0;
 }
 
