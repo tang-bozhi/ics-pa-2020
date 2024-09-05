@@ -10,7 +10,6 @@ void do_syscall(Context* c) {
   case 1:
     yield();
     break;
-
   default: panic("Unhandled syscall ID = %d", a[0]);
   }
 }
