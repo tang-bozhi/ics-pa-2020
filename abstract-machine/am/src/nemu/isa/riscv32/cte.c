@@ -15,7 +15,7 @@ Context* __am_irq_handle(Context* c) {
   if (user_handler) {
     Event ev = { 0 }; // 初始化事件结构体
     switch (c->cause) {
-    case EVENT_YIELD: //
+    case -1: //
       ev.event = EVENT_YIELD;
       break;
     case EVENT_SYSCALL:
@@ -65,8 +65,8 @@ Context* kcontext(Area kstack, void (*entry)(void*), void* arg) {
  * 这个函数通过系统调用触发进程让出CPU的操作。
  */
 void yield() {
-  asm volatile("li a7, 1; ecall"); // 将-1加载到a7寄存器，并执行系统调用
-}//修改了加载到a7的值为1
+  asm volatile("li a7, -1; ecall"); // 将-1加载到a7寄存器，并执行系统调用
+}
 
 /*
  * 中断使能查询函数
