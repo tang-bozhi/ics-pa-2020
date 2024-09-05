@@ -15,19 +15,35 @@ Context* __am_irq_handle(Context* c) {
   if (user_handler) {
     Event ev = { 0 }; // 初始化事件结构体
     switch (c->cause) {
-    case -1: //
+    case -1:
       ev.event = EVENT_YIELD;
       break;
-    case EVENT_SYSCALL:
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 18:
+    case 19:
       ev.event = EVENT_SYSCALL;
       break;
     default:
       ev.event = EVENT_ERROR; // 将所有未识别的中断或异常视为错误
       break;
     }
-    // ev.ref = 0; // 根据需要设置 ref 字段
-    // ev.msg = "Interrupt or exception"; // 根据需要设置 msg 字段
-    ////上方三行应该放入具体的事件处理而不是事件判断之后
     c = user_handler(ev, c); // 调用用户定义的事件处理函数
     assert(c != NULL); // 确保返回的上下文不为空  
   }
