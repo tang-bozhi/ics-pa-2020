@@ -8,9 +8,11 @@ void do_syscall(Context* c) {
   a[3] = c->gpr[12];//a2
   switch (a[0]) {
   case SYS_exit:  // 处理 exit 系统调用
-    halt(a[0]);
+    printf("tap SYS_exit\n");
+    halt(0);
     break;
   case SYS_yield:  // 处理 yield 系统调用
+    printf("tap SYS_yield\n");
     yield();
     break;
   default: panic("Unhandled syscall ID = %d", a[0]);
