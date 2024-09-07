@@ -21,7 +21,8 @@ void raise_intr(DecodeExecState* s, word_t NO, vaddr_t epc);
 static inline def_EHelper(ecall) {
    // 调用 raise_intr 函数，保存当前PC并设置异常号
 
-   printf("调用ecall\n");
+   // printf("调用ecall\n");
+   // printf("%d\n", cpu.gpr[17]._32);
    raise_intr(s, cpu.gpr[17]._32, s->seq_pc);//s->gpr[17]: a7
 
    // 打印指令执行的结果，用于调试

@@ -4,11 +4,11 @@
 
 static Context* (*user_handler)(Event, Context*) = NULL;
 
-Context* __am_irq_handle(Context *c) {
+Context* __am_irq_handle(Context* c) {
   if (user_handler) {
-    Event ev = {0};
+    Event ev = { 0 };
     switch (c->cause) {
-      default: ev.event = EVENT_ERROR; break;
+    default: ev.event = EVENT_ERROR; break;
     }
 
     c = user_handler(ev, c);
@@ -20,7 +20,7 @@ Context* __am_irq_handle(Context *c) {
 
 extern void __am_asm_trap(void);
 
-bool cte_init(Context*(*handler)(Event, Context*)) {
+bool cte_init(Context* (*handler)(Event, Context*)) {
   // initialize exception entry
   asm volatile("csrw stvec, %0" : : "r"(__am_asm_trap));
 
@@ -30,12 +30,12 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
   return true;
 }
 
-Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
+Context* kcontext(Area kstack, void (*entry)(void*), void* arg) {
   return NULL;
 }
 
 void yield() {
-  asm volatile("li a7, -1; ecall");
+  asm volatile("li a7,-1; ecall");
 }
 
 bool ienabled() {
