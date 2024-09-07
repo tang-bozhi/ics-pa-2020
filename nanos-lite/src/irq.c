@@ -4,8 +4,8 @@ void do_syscall(Context* c);
 static Context* do_event(Event e, Context* c) {
   switch (e.event) {
   case EVENT_YIELD:
-    printf("Yield event recognized!\n");
-    return 0;
+    printf("event ID=%d\n", e.event);
+    break;
   case EVENT_SYSCALL:
     printf("Syscall event recognized!\n");
     do_syscall(c);

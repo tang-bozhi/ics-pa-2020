@@ -31,7 +31,7 @@ static inline def_EHelper(ecall) {
 static inline def_EHelper(sret) {
    // 设置跳转标志和跳转地址
    s->is_jmp = 1;
-   s->jmp_pc = cpu.csr.sepc + 4;
+   s->jmp_pc = cpu.csr.sepc;
    // 从控制状态寄存器中恢复程序计数器和其他状态
    //cpu.pc = cpu.csr.sepc; // 将 sepc 中保存的地址恢复到 pc 中
    print_asm("sret");
