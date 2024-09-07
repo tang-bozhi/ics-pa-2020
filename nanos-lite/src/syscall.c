@@ -9,7 +9,7 @@ void do_syscall(Context* c) {
   switch (a[0]) {
   case SYS_exit:  // 处理 exit 系统调用
     printf("tap SYS_exit\n");
-    halt(0);
+    halt(a[1]);
     break;
   case SYS_yield:  // 处理 yield 系统调用
     printf("tap SYS_yield\n");
