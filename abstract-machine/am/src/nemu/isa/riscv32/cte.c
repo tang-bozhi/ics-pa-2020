@@ -9,9 +9,9 @@ Context* __am_irq_handle(Context* c) {
   if (user_handler) {
     Event ev = { 0 }; // 初始化事件结构体
     switch (c->cause) {
-    case -1:
-      ev.event = EVENT_YIELD;
-      break;
+      // case -1:
+      //   ev.event = EVENT_YIELD;
+      //   break;
     case 0:case 1:case 2:case 3:case 4:case 5:case 6:case 7:case 8:case 9:case 10:case 11:case 12:case 13:case 14:case 15:case 16:case 17:case 18:case 19:
       ev.event = EVENT_SYSCALL;
       break;
@@ -44,7 +44,7 @@ Context* kcontext(Area kstack, void (*entry)(void*), void* arg) {
 }
 
 void yield() {
-  asm volatile("li a7, -1; ecall"); // 将-1加载到a7寄存器，并执行系统调用
+  asm volatile("li a7, 0; ecall"); // 将-1加载到a7寄存器，并执行系统调用
 }
 
 bool ienabled() {
