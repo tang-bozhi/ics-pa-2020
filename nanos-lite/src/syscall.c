@@ -1,5 +1,12 @@
 #include <common.h>
 #include "syscall.h"
+
+void write(intptr_t* buf, size_t count) {
+  for (int i = 0; i < count; i++) {
+    putch(*((char*)buf + i));
+  }
+}
+
 void do_syscall(Context* c) {
   uintptr_t a[4];
   a[0] = c->gpr[17];//type
@@ -15,6 +22,9 @@ void do_syscall(Context* c) {
     printf("tap SYS_yield\n");
     yield();
     break;
+  case SYS_write:
+    printf("tap SYS_write\n");
+    write((intptr_t*)a[2], a[3]);
   default: panic("Unhandled syscall ID = %d", a[0]);
   }
 }
