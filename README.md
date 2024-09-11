@@ -1,19 +1,29 @@
-# ICS2020 Programming Assignment
+# NJU-ICS-PA2020_fall
 
-This project is the programming assignment of the class ICS(Introduction to Computer System)
-in Department of Computer Science and Technology, Nanjing University.
+南京大学计算机系统基础课程大作业
 
-For the guide of this programming assignment,
-refer to https://nju-projectn.github.io/ics-pa-gitbook/ics2020/
+/*理解"程序如何在计算机上运行"的根本途径是从"零"开始实现一个完整的计算机系统. 南京大学计算机科学与技术系计算机系统基础课程的小型项目 (Programming Assignment, PA)将提出x86架构相应的教学版子集, 指导学生实现一个经过简化但功能完备的x86模拟器NEMU(NJU EMUlator), 最终在NEMU上运行游戏"仙剑奇侠传", 来让学生探究"程序在计算机上运行"的基本原理.*/
 
-To initialize, run
-```bash
-bash init.sh subproject-name
-```
-See `init.sh` for more details.
+已完成所有必做部分和选做部分，并通过了各阶段测试。
 
-The following subprojects/components are included. Some of them are not fully implemented.
-* [NEMU](https://github.com/NJU-ProjectN/nemu)
-* [Abstract-Machine](https://github.com/NJU-ProjectN/abstract-machine)
-* [Nanos-lite](https://github.com/NJU-ProjectN/nanos-lite)
-* [Navy-apps](https://github.com/NJU-ProjectN/navy-apps)
+PA 0 搭建并熟悉实验环境
+
+PA 1 数据的表示、存取和运算
+  PA 1-1 数据在计算机内的存储
+  PA 1-2 整数的表示、存储和运算
+  PA 1-3 浮点数的表示和运算
+
+PA 2 程序的执行
+  PA 2-1 指令解码与执行
+  PA 2-2 装载ELF文件
+  PA 2-3 可选任务：完善调试器
+  
+PA 3 存储管理
+  PA 3-1 Cache的模拟
+  PA 3-2 保护模式（分段机制）
+  PA 3-3 分页机制 & 虚拟地址转换
+  
+PA 4 异常、中断与I/O
+  PA 4-1 异常和中断的响应
+  PA 4-2 外设与I/O
+  PA 4-3 可选任务：游戏移植
