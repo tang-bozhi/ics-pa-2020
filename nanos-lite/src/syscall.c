@@ -7,6 +7,10 @@ void write(intptr_t* buf, size_t count) {
   }
 }
 
+void sbrk(intptr_t increment) {
+
+}
+
 void do_syscall(Context* c) {
   uintptr_t a[4];
   a[0] = c->gpr[17];//type
@@ -25,6 +29,12 @@ void do_syscall(Context* c) {
   case SYS_write:
     printf("tap SYS_write\n");
     write((intptr_t*)a[2], a[3]);
+    break;
+  case SYS_brk:
+    printf("tap SYS_brk\n");
+    sbrk(a[1]);
+    c->gpr[10] = 0;
+    break;
   default: panic("Unhandled syscall ID = %d", a[0]);
   }
 }
