@@ -81,7 +81,7 @@ CFLAGS   += -O2 -MMD -Wall -Werror -ggdb $(INCFLAGS) \
             -DISA_H=\"$(ISA).h\" \
             -DARCH_H=\"arch/$(ARCH).h\" \
             -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector \
-            -Wno-main##解释参考相关.md(-D相关注释在mac的你创建的Desktop/md/阅读abstract-machine/Makefile-GPT回答.md中)
+            -Wno-main
 CXXFLAGS +=  $(CFLAGS) -ffreestanding -fno-rtti -fno-exceptions#CXXFLAGS（C++编译器标志）
 ASFLAGS  += -MMD $(INCFLAGS)#Assembler Flags 汇编器标志
 
@@ -95,10 +95,7 @@ ASFLAGS  += -MMD $(INCFLAGS)#Assembler Flags 汇编器标志
 ### Rule (compile): a single `.c` -> `.o` (gcc)
 $(DST_DIR)/%.o: %.c#$(DST_DIR)/%.o: %.c：此行指定了Make中的一个模式规则。它意味着任何匹配模式$(DST_DIR)/%.o（其中%作为通配符）的文件都依赖于当前目录中同名的.c文件。
 	@mkdir -p $(dir $@) && echo + CC $< 
-#@mkdir -p $(dir $@):创建当前对象($(DST_DIR)/%.o)目录,确保目录结构与源代码结构相匹配
-#echo + CC $< :		打印+ CC $< 
 	@$(CC) -std=gnu11 $(CFLAGS) -c -o $@ $(realpath $<)
-##解释参考相关.md (上方这句分析参考GPT生成的同名.md)
 
 ### Rule (compile): a single `.cc` -> `.o` (g++)
 $(DST_DIR)/%.o: %.cc#$< 表示规则中的第一个依赖项	$@ 表示规则的目标文件，也就是规则要生成的文件

@@ -14,21 +14,35 @@ size_t ramdisk_read(void* buf, size_t offset, size_t len);
 size_t ramdisk_write(void* buf, size_t offset, size_t len);
 
 static uintptr_t loader(PCB* pcb, const char* filename) {
-  int fb = fs_open(filename, NULL, NULL);
-  Elf_Ehdr ehdr;//开一个ELF头表
-  fs_read(fb, ehdr, sizeof(Elf_Ehdr));
-  //ramdisk_read(&ehdr, 0, sizeof(Elf_Ehdr));//读入ramdisk中的ELF头表的数据(实际上程序应该放在硬盘中,但就如文档所说当前用ram来模拟,因此放在了内存中的静态存储区)
-  assert(*(uint32_t*)ehdr.e_ident == 0x464c457f);//必须得是0x7F"ELF"    注意这里大端,反的
-  Elf_Phdr phdr[ehdr.e_phnum];//程序头表[程序头表数量]
-  ramdisk_read(phdr, ehdr.e_phoff, sizeof(Elf_Phdr) * ehdr.e_phnum);//读入ramdisk中的程序头表的数据
-  for (int i = 0; i < ehdr.e_phnum; i++) {
-    if (phdr->p_type == PT_LOAD) {
-      ramdisk_read((void*)phdr[i].p_vaddr, phdr[i].p_offset, phdr[i].p_memsz);//这里ramdisk_read使用了memcpy,nemu中的store指令应该会对这里的(void*)phdr[i].p_vaddr做储存
-      memset((void*)phdr[i].p_vaddr + phdr[i].p_filesz, 0, phdr[i].p_memsz - phdr[i].p_filesz);
+  int fd = fs_open(filename, 0, 0);
+  if (fd < 0) {
+    panic("should not reach here");
+  }
+  Elf_Ehdr elf;
+  assert(fs_read(fd, &elf, sizeof(elf)) == sizeof(elf));
+  // 检查魔数
+  assert(*(uint32_t*)elf.e_ident == 0x464c457f);
+  Elf_Phdr phdr;
+  for (int i = 0; i < elf.e_phnum; i++) {
+    uint32_t base = elf.e_phoff + i * elf.e_phentsize;
+    fs_lseek(fd, base, 0);
+    assert(fs_read(fd, &phdr, elf.e_phentsize) == elf.e_phentsize);
+    // 需要装载的段
+    if (phdr.p_type == PT_LOAD) {
+      char* buf_malloc = (char*)malloc(phdr.p_filesz);
+      fs_lseek(fd, phdr.p_offset, 0);
+      assert(fs_read(fd, buf_malloc, phdr.p_filesz) == phdr.p_filesz);
+      memcpy((void*)phdr.p_vaddr, buf_malloc, phdr.p_filesz);
+      memset((void*)phdr.p_vaddr + phdr.p_filesz, 0, phdr.p_memsz - phdr.p_filesz);
+      free(buf_malloc);
     }
   }
-  return ehdr.e_entry;
+
+  assert(fs_close(fd) == 0);
+
+  return elf.e_entry;
 }
+
 
 void naive_uload(PCB* pcb, const char* filename) {
   uintptr_t entry = loader(pcb, filename);

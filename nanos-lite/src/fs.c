@@ -13,7 +13,7 @@ typedef struct {
 } Finfo;
 
 size_t ramdisk_read(void* buf, size_t offset, size_t len);
-size_t ramdisk_write(void* buf, size_t offset, size_t len);
+size_t ramdisk_write(const void* buf, size_t offset, size_t len);
 
 enum { FD_STDIN, FD_STDOUT, FD_STDERR, FD_FB };//文件描述符
 
@@ -29,15 +29,18 @@ size_t invalid_write(const void *buf, size_t offset, size_t len) {
 
 /* This is the information about all files in disk. */
 static Finfo file_table[] __attribute__((used)) = {
-  [FD_STDIN]  = {"stdin", 0, 0, invalid_read, invalid_write},
-  [FD_STDOUT] = {"stdout", 0, 0, invalid_read, invalid_write},
-  [FD_STDERR] = {"stderr", 0, 0, invalid_read, invalid_write},
+  [FD_STDIN] = {"stdin", 0, 0, 0, invalid_read, invalid_write},
+  [FD_STDOUT] = {"stdout", 0, 0, 0, invalid_read, invalid_write},
+  [FD_STDERR] = {"stderr", 0, 0, 0, invalid_read, invalid_write},
 #include "files.h"
 };
 
 void init_fs() {
   // TODO: initialize the size of /dev/fb
 }
+
+
+#define NR_FILES 24
 
 /**
  * @param pathname 输入路径
@@ -48,58 +51,88 @@ void init_fs() {
  * @return fb--file_table结构体数组的下标
  */
 int fs_open(const char* pathname, int flags, int mode) {
-  int Finfo_num = sizeof(file_table) / sizeof(Finfo);
-  for (int i = 0, i++, i < Finfo_num) {
-    if (strcmp(file_table[Finfo_num].name, pathname) == 0) {
+  for (int i = 3; i < NR_FILES; i++) {
+    if (strcmp(file_table[i].name, pathname) == 0) {
+      file_table[i].open_offset = 0;
       return i;
     }
   }
-  // 如果未找到文件，终止程序
-  assert(0 && "Pathname do not exit");//由于简易文件系统中每一个文件都是固定的, 不会产生新文件, 因此"fs_open()没有找到pathname所指示的文件"属于异常情况, 你需要使用assertion终止程序运行.
-  return -1;  // 这是一个不可能到达的代码
+  panic("file %s not found", pathname);
+}
+
+
+int fs_close(int fd) {
+  return 0;
 }
 
 size_t fs_read(int fd, void* buf, size_t len) {
-  Finfo* file = &file_table[fd];
-  if (file->size < len) {
-    len = file->size;  // 只能读取到文件的末尾
+  if (fd <= 2) {
+    Log("ignore read %s", file_table[fd].name);
+    return 0;
   }
-  ramdisk_read(buf, file->disk_offset, len);
-  return len;
+  size_t read_len = len;
+  size_t open_offset = file_table[fd].open_offset;
+  size_t size = file_table[fd].size;
+  size_t disk_offset = file_table[fd].disk_offset;
+  if (open_offset > size) return 0;
+  if (open_offset + len > size) read_len = size - open_offset;
+  ramdisk_read(buf, disk_offset + open_offset, read_len);
+  file_table[fd].open_offset += read_len;
+  return read_len;
+
 }
 
 size_t fs_write(int fd, const void* buf, size_t len) {
-  Finfo* file = &file_table[fd];
-  if (len > file->size) {
-    len = file->size;  // 只能写入文件的大小
+  if (fd == 0) {
+    Log("ignore write %s", file_table[fd].name);
+    return 0;
   }
-  ramdisk_write(buf, file->disk_offset, len);
-  return len;
+
+  if (fd == 1 || fd == 2) {
+    for (size_t i = 0; i < len; ++i)
+      putch(*((char*)buf + i));
+    return len;
+  }
+  size_t write_len = len;
+  size_t open_offset = file_table[fd].open_offset;
+  size_t size = file_table[fd].size;
+  size_t disk_offset = file_table[fd].disk_offset;
+  if (open_offset > size) return 0;
+  if (open_offset + len > size) write_len = size - open_offset;
+  ramdisk_write(buf, disk_offset + open_offset, write_len);
+  file_table[fd].open_offset += write_len;
+  return write_len;
 }
 
 size_t fs_lseek(int fd, size_t offset, int whence) {
-  Finfo* file = &file_table[fd];
-  size_t new_offset = 0;
+  if (fd <= 2) {
+    Log("ignore lseek %s", file_table[fd].name);
+    return 0;
+  }
 
-  if (whence == SEEK_SET) {//从文件的开头开始计算偏移量，偏移量等于offset
+  Finfo* file = &file_table[fd];
+  size_t new_offset;
+  // 根据 whence 参数来计算新的指针位置
+  if (whence == SEEK_SET) {
     new_offset = offset;
   }
-  else if (whence == SEEK_CUR) {//从当前文件指针位置开始计算偏移量，偏移量等于当前偏移量 + offset
+  else if (whence == SEEK_CUR) {
     new_offset = file->open_offset + offset;
   }
-  else if (whence == SEEK_END) {//从文件的末尾开始计算偏移量，偏移量等于文件末尾位置 + offset
+  else if (whence == SEEK_END) {
     new_offset = file->size + offset;
   }
-
-  // 确保新的偏移量在文件大小范围内
-  if (new_offset > file->size) {
-    new_offset = file->size;  // 限制在文件大小范围
+  else {
+    Log("Invalid whence value: %d", whence);
+    return -1;
   }
-  file->open_offset = new_offset; // 更新当前偏移量
-  return new_offset;
-}
+  // 检查新的指针位置是否在文件范围内
+  if (new_offset < 0 || new_offset > file->size) {
+    Log("Seek position out of bounds");
+    return -1;
+  }
+  // 设置新的文件读写指针
+  file->open_offset = new_offset;
 
-int fs_close(int fd) {
-  // 简易文件系统中直接返回 0，表示总是成功
-  return 0;
+  return new_offset;
 }
