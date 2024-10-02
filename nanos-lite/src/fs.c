@@ -39,9 +39,6 @@ void init_fs() {
   // TODO: initialize the size of /dev/fb
 }
 
-
-#define NR_FILES 24
-
 /**
  * @param pathname 输入路径
  * @param flags 不使用--可以指示打开文件的模式
@@ -51,15 +48,15 @@ void init_fs() {
  * @return fb--file_table结构体数组的下标
  */
 int fs_open(const char* pathname, int flags, int mode) {
-  for (int i = 3; i < NR_FILES; i++) {
-    if (strcmp(file_table[i].name, pathname) == 0) {
+  for (int i = 3; i < (sizeof(file_table) / sizeof(Finfo)); i++) {
+    if (strcmp(pathname, file_table[i].name) == 0) {
       file_table[i].open_offset = 0;
+      printf("fs_open: Opened file '%s' with fd=%d\n", pathname, i);
       return i;
     }
   }
   panic("file %s not found", pathname);
 }
-
 
 int fs_close(int fd) {
   return 0;
