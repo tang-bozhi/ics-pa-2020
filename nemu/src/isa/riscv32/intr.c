@@ -5,7 +5,7 @@ void raise_intr(DecodeExecState* s, word_t NO, vaddr_t epc) {
   /* TODO: Trigger an interrupt/exception with ``NO''.
    * That is, use ``NO'' to index the IDT.
    */
-  if (NO == 0 || NO == 4 || NO == 9) {//yield情况
+  if (NO == 0 || NO == 2 || NO == 3 || NO == 4 || NO == 7 || NO == 8 || NO == 9) {//yield情况
     epc += 4;
   }
   cpu.csr.scause = NO;
