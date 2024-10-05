@@ -35,6 +35,8 @@ static Finfo file_table[] __attribute__((used)) = {
 #include "files.h"
 };
 
+#define NR_FILES (sizeof(file_table) / sizeof(file_table[0]))
+
 void init_fs() {
   // TODO: initialize the size of /dev/fb
 }
@@ -48,10 +50,10 @@ void init_fs() {
  * @return fb--file_table结构体数组的下标
  */
 int fs_open(const char* pathname, int flags, int mode) {
-  for (int i = 3; i < (sizeof(file_table) / sizeof(Finfo)); i++) {
+  for (int i = 3; i < NR_FILES; i++) {
     if (strcmp(pathname, file_table[i].name) == 0) {
       file_table[i].open_offset = 0;
-      printf("fs_open: Opened file '%s' with fd=%d\n", pathname, i);
+      //printf("fs_open: Opened file '%s' with fd=%d\n", pathname, i);
       return i;
     }
   }
