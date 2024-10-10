@@ -1,15 +1,23 @@
 #include <common.h>
 #include "syscall.h"
 #include <fs.h>
+#include <sys/time.h>
+#include <am.h>
 
 // void write(intptr_t* buf, size_t count) {
 //   for (int i = 0; i < count; i++) {
 //     putch(*((char*)buf + i));
-//   }
+//   }nanos-lite/src/syscall.c
 // }
 
 void sbrk(intptr_t increment) {
 
+}
+
+void sys_gettimeofday(struct timeval* tv, struct timezone* tz) {
+  uint64_t us = io_read(AM_TIMER_UPTIME).us;
+  tv->tv_sec = us / 1000000;
+  tv->tv_usec = us - us / 1000000 * 1000000;
 }
 
 void do_syscall(Context* c) {
@@ -56,6 +64,9 @@ void do_syscall(Context* c) {
     //c->gpr[10] = sbrk(a[1]);
     sbrk(a[1]);
     c->gpr[10] = 0;
+    break;
+  case SYS_gettimeofday:
+    sys_gettimeofday((struct timeval*)a[1], (struct timezone*)a[2]);//a[1]:a0,a[2]:a1
     break;
   default: panic("Unhandled syscall ID = %d", a[0]);
   }
