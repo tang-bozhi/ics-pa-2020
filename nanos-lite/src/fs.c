@@ -1,10 +1,10 @@
 #include <fs.h>
 
-typedef size_t (*ReadFn) (void *buf, size_t offset, size_t len);
-typedef size_t (*WriteFn) (const void *buf, size_t offset, size_t len);
+typedef size_t(*ReadFn) (void* buf, size_t offset, size_t len);
+typedef size_t(*WriteFn) (const void* buf, size_t offset, size_t len);
 
 typedef struct {
-  char *name;
+  char* name;
   size_t size;
   size_t disk_offset;
   size_t open_offset;
@@ -21,21 +21,24 @@ enum {
   FD_STDERR,
   FD_FB,
   FD_EVENTS,
+  FD_DISPINFO,
   FD_COUNT // 用于标记文件描述符数量的枚举
 };
 
-size_t invalid_read(void *buf, size_t offset, size_t len) {
+size_t invalid_read(void* buf, size_t offset, size_t len) {
   panic("should not reach here");
   return 0;
 }
 
-size_t invalid_write(const void *buf, size_t offset, size_t len) {
+size_t invalid_write(const void* buf, size_t offset, size_t len) {
   panic("should not reach here");
   return 0;
 }
 
 size_t serial_write(const void* buf, size_t offset, size_t len);
 size_t events_read(void* buf, size_t offset, size_t len);
+size_t dispinfo_read(void* buf, size_t offset, size_t len);
+size_t fb_write(const void* buf, size_t offset, size_t len);
 
 /* This is the information about all files in disk. */
 static Finfo file_table[] __attribute__((used)) = {
@@ -43,6 +46,8 @@ static Finfo file_table[] __attribute__((used)) = {
   [FD_STDOUT] = {"stdout", 0, 0, 0, invalid_read, serial_write},
   [FD_STDERR] = {"stderr", 0, 0, 0, invalid_read, serial_write},
   [FD_EVENTS] = {"/dev/events", 0, 0, 0, events_read, invalid_write},
+  [FD_FB] = {"/dev/fb", 0, 0, 0,invalid_read, fb_write},
+  [FD_DISPINFO] = {"/proc/dispinfo", 0, 0, 0, dispinfo_read, invalid_write},
 #include "files.h"
 };
 
@@ -50,6 +55,10 @@ static Finfo file_table[] __attribute__((used)) = {
 
 void init_fs() {
   // TODO: initialize the size of /dev/fb
+  AM_GPU_CONFIG_T ev = io_read(AM_GPU_CONFIG);
+  int width = ev.width;
+  int height = ev.height;
+  file_table[FD_FB].size = width * height * sizeof(uint32_t);
 }
 
 /**
@@ -62,7 +71,7 @@ void init_fs() {
  */
 int fs_open(const char* pathname, int flags, int mode) {
   //printf("fs_open\n");
-  for (int i = FD_COUNT - 1; i < NR_FILES; i++) {
+  for (int i = 3; i < NR_FILES; i++) {
     //printf("%s\n", file_table[i].name);
     if (strcmp(pathname, file_table[i].name) == 0) {
       file_table[i].open_offset = 0;
