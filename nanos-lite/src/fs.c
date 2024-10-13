@@ -15,7 +15,14 @@ typedef struct {
 size_t ramdisk_read(void* buf, size_t offset, size_t len);
 size_t ramdisk_write(const void* buf, size_t offset, size_t len);
 
-enum { FD_STDIN, FD_STDOUT, FD_STDERR, FD_FB };//文件描述符
+enum {
+  FD_STDIN,
+  FD_STDOUT,
+  FD_STDERR,
+  FD_FB,
+  FD_EVENTS,
+  FD_COUNT // 用于标记文件描述符数量的枚举
+};
 
 size_t invalid_read(void *buf, size_t offset, size_t len) {
   panic("should not reach here");
@@ -28,12 +35,14 @@ size_t invalid_write(const void *buf, size_t offset, size_t len) {
 }
 
 size_t serial_write(const void* buf, size_t offset, size_t len);
+size_t events_read(void* buf, size_t offset, size_t len);
 
 /* This is the information about all files in disk. */
 static Finfo file_table[] __attribute__((used)) = {
   [FD_STDIN] = {"stdin", 0, 0, 0, invalid_read, invalid_write},
   [FD_STDOUT] = {"stdout", 0, 0, 0, invalid_read, serial_write},
   [FD_STDERR] = {"stderr", 0, 0, 0, invalid_read, serial_write},
+  [FD_EVENTS] = {"/dev/events", 0, 0, 0, events_read, invalid_write},
 #include "files.h"
 };
 
@@ -52,7 +61,9 @@ void init_fs() {
  * @return fb--file_table结构体数组的下标
  */
 int fs_open(const char* pathname, int flags, int mode) {
-  for (int i = 3; i < NR_FILES; i++) {
+  //printf("fs_open\n");
+  for (int i = FD_COUNT - 1; i < NR_FILES; i++) {
+    //printf("%s\n", file_table[i].name);
     if (strcmp(pathname, file_table[i].name) == 0) {
       file_table[i].open_offset = 0;
       //printf("fs_open: Opened file '%s' with fd=%d\n", pathname, i);
