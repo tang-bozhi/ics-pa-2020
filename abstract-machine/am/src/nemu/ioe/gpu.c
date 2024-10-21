@@ -6,13 +6,13 @@
 
 // 初始化GPU
 void __am_gpu_init() {
-  // int i;
-  // int w = inl(VGACTL_ADDR) >> 16;  // TODO: 获取正确的宽度
-  // int h = (uint64_t)inw(VGACTL_ADDR);  // TODO: 获取正确的高度
-  // uint32_t* fb = (uint32_t*)(uintptr_t)FB_ADDR;  // 指向帧缓冲区的指针
-  // // 初始化帧缓冲区，为每个像素赋予一个唯一的颜色值
-  // for (i = 0; i < w * h; i++) fb[i] = i;
-  // outl(SYNC_ADDR, 1);  // 向同步地址写入1，触发屏幕更新
+  int i;
+  int w = inl(VGACTL_ADDR) >> 16;  // TODO: 获取正确的宽度
+  int h = (uint64_t)inw(VGACTL_ADDR);  // TODO: 获取正确的高度
+  uint32_t* fb = (uint32_t*)(uintptr_t)FB_ADDR;  // 指向帧缓冲区的指针
+  // 初始化帧缓冲区，为每个像素赋予一个唯一的颜色值
+  for (i = 0; i < w * h; i++) fb[i] = i;
+  outl(SYNC_ADDR, 1);  // 向同步地址写入1，触发屏幕更新
 }
 
 // 获取GPU配置
