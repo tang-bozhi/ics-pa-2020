@@ -116,7 +116,11 @@ size_t fs_write(int fd, const void* buf, size_t len) {
 
   WriteFn writefn = file_table[fd].write;
   if (writefn != NULL) {
-    return writefn(buf, 0, len);
+    // 传递正确的偏移量给写入函数
+    size_t write_len = writefn(buf, file_table[fd].open_offset, len);
+    // 更新文件的偏移量
+    file_table[fd].open_offset += write_len;
+    return write_len;
   }
 
   size_t write_len = len;

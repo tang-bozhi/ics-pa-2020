@@ -67,28 +67,13 @@ size_t fb_write(const void* buf, size_t offset, size_t len) {
   AM_GPU_CONFIG_T ev = io_read(AM_GPU_CONFIG);
   int width = ev.width;
 
-  offset /= 4; // 将字节偏移量转换为像素偏移量（假设每像素4字节）。
-  len /= 4;    // 将字节长度转换为像素长度。
+  offset /= 4;
+  len /= 4;
 
-  int y = offset / width; // 根据像素偏移量计算行号。
-  int x = offset - y * width; // 根据行号和总宽度计算列号。
+  int y = offset / width;
+  int x = offset - y * width;
 
-  // 循环写入帧缓冲区，假设每次写入一行（宽度为 len）。
-  int h = 1; // 每次写入的高度，可以根据实际需求调整
-  while (len > 0) {
-    int w = len < width - x ? len : width - x; // 计算当前行能绘制的宽度
-
-    // 在指定位置将像素数据写入帧缓冲区。
-    io_write(AM_GPU_FBDRAW, x, y, (void*)buf, w, h, true);
-
-    // 更新剩余长度和缓冲区指针
-    len -= w;
-    buf = (const char*)buf + w * 4; // 每个像素假设4字节
-
-    // 移动到下一行
-    x = 0;
-    y += 1;
-  }
+  io_write(AM_GPU_FBDRAW, x, y, (void*)buf, len, 1, true);
 
   return len;
 }
